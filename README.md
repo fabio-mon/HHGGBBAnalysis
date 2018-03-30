@@ -8,8 +8,9 @@ Code for the analysis of HHBBGG
 ## Setup
    ```
    git clone git@github.com:fabio-mon/HHGGBBAnalysis.gitx
-   cd TTHAnalysis
+   cd HHGGBBAnalysis
    git submodule update --init --recursive
+   mkdir bin obj 
    make
    make exe
    ```
