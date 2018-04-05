@@ -96,53 +96,41 @@ int main(int argc, char* argv[])
   // get trees
   
   std::map<std::string,TChain*> trees;
-
+  std::vector<std::string> onlytreename_str;
   for(unsigned int ntree = 0; ntree < treename.size(); ++ntree)
   {
-    trees[treename.at(ntree)] = new TChain(Form("tree_%i",ntree),"");
+    TString onlytreename(treename.at(ntree));//treename could be "ntuple/only_treename" but the method InitRawTreeVars wants only only_treename
+    onlytreename.Remove(0,onlytreename.Last('/')+1);
+    onlytreename_str.push_back(onlytreename.Data());
+    trees[onlytreename_str.at(ntree)] = new TChain(onlytreename_str.at(ntree).c_str(),"");
     for(unsigned int nfile = 0; nfile < filename.size(); ++nfile)
     {
-      std::cout << ">>> Adding trees " << filename.at(nfile)+"/"+treename.at(ntree) << " to chain " << Form("tree_%i",ntree) << std::endl;
-      trees[treename.at(ntree)] -> Add((filename.at(nfile)+"/"+treename.at(ntree)).c_str());
+      std::cout << ">>> Adding trees " << filename.at(nfile)+"/"+treename.at(ntree) << " to chain " << onlytreename_str.at(ntree) << std::endl;
+      trees[onlytreename_str.at(ntree)] -> Add((filename.at(nfile)+"/"+treename.at(ntree)).c_str());
     }
   }
 
-  //----------
-  // add tree_i as friends to tree_0
-  for(unsigned int ntree = 1; ntree < treename.size(); ++ntree)
-  {
-    std::cout << ">>> Adding chain " << Form("tree_%i",ntree) << " to chain tree_0" << std::endl;
-    trees[treename.at(0)]->AddFriend(Form("tree_%i",ntree),"");
-  }
 
-  /*
-  TCanvas cTEST;
-  trees[treename.at(0)]->Draw("Lumi");
-  cTEST.Print("plots/test_Lumi.pdf");
-
-  trees[treename.at(0)]->Draw("PhotonTight_size");
-  cTEST.Print("plots/test_nPh.pdf");
-
-  trees[treename.at(0)]->Draw("PT");
-  cTEST.Print("plots/genericPT.pdf");
-
-  trees[treename.at(0)]->Draw("PhotonTight.PT");
-  cTEST.Print("plots/PhPT.pdf");
-  */
-
-
- 
   //---------------
   // tree variables
   RawTreeVars treeVars;
   
   //------------------
-  // branch tree
-  InitTreeVars(treees[treename.at(0)],treeVars);
+  // branch tree: the only functioning way consists in branching separately the trees and, only after, adding them as friends
+  InitRawTreeVars(trees,treeVars);
+  TChain *tree = trees[onlytreename_str.at(0)];
+
+
+  //----------
+  // add tree_i as friends to tree_0
+  for(unsigned int ntree = 1; ntree < onlytreename_str.size(); ++ntree)
+  {
+    std::cout << ">>> Adding chain " << onlytreename_str.at(ntree) << " to chain " << onlytreename_str.at(0) << std::endl;
+    tree->AddFriend(onlytreename_str.at(ntree).c_str(),"");
+  }
   
   //------------------
   // loop over samples
-
   /*    
   //output trees for plots
   std::string outputPlotFolder = opts.GetOpt<std::string>("Output.outputPlotFolder");
@@ -151,13 +139,22 @@ int main(int argc, char* argv[])
   outFile -> cd();
   TTree* outTree_2jets = new TTree("plotTree_2jets","plotTree_2jets");
   InitOutTreeVars(outTree_2jets,treeVars);
-    
+  */  
   int nEntries = tree->GetEntries();
+  int fCurrent = -1;
+  std::cout << "Total entries = " << nEntries << std::endl;
   for(int i=0; i<nEntries; i++)
   {
+
     tree -> GetEntry(i);
-    if( i%1000==0 ) std::cout << "Processing tag " << label << ", event " << i << " out of " << nEntries << "\r" << std::flush;
-      
+    if (tree->GetTreeNumber() != fCurrent)
+      fCurrent = tree->GetTreeNumber();
+    if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
+    if(treeVars.N_TightPh>0)
+      std::cout<<treeVars.TightPh_pt[0]<<std::endl;
+  }
+  std::cout << std::endl;
+    /*      
     // common cuts
     if( treeVars.dipho_mass < 100 || treeVars.dipho_mass > 180 ) continue;
     if( type == -1 && treeVars.dipho_mass > 115 && treeVars.dipho_mass < 135 ) continue;
