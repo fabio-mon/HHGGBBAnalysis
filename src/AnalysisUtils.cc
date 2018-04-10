@@ -483,7 +483,52 @@ void MakePlot2(std::map<std::string,TH1F*>& histos, TString title)
   return;
 }
 
+void MakePlot3(std::map<std::string,TH1F*> &h)
+{
+  TCanvas* c = new TCanvas();
+  c -> cd();
 
+  for(std::map<std::string,TH1F*>::iterator it=h.begin(); it!=h.end(); ++it)
+  {
+    it->second -> SetMarkerStyle(20);	       
+    it->second -> SetMarkerSize(1);
+    it->second -> SetMarkerColor(kBlack);
+    it->second -> SetFillStyle(0);
+    it->second -> Draw();
+
+    if(it->first == "dipho_mass")
+      it->second -> GetXaxis() -> SetTitle("diphoton mass (GeV/c^{2})");
+    if(it->first == "dipho_sumpt")
+      it->second -> GetXaxis() -> SetTitle("diphoton P_{T} sum (GeV/c)");
+    if(it->first == "dipho_deltaeta")
+      it->second -> GetXaxis() -> SetTitle("diphoton #Delta#eta");
+    if(it->first == "dipho_deltaphi")
+      it->second -> GetXaxis() -> SetTitle("diphoton #Delta#Phi");
+    if(it->first == "dipho_leadPt")
+      it->second -> GetXaxis() -> SetTitle("lead phot P_{T} (GeV/c)");
+    if(it->first == "dipho_leadEta")
+      it->second -> GetXaxis() -> SetTitle("lead phot #eta");
+    if(it->first == "dipho_leadPhi")
+      it->second -> GetXaxis() -> SetTitle("lead phot #Phi");
+    if(it->first == "dipho_leadptoM")
+      it->second -> GetXaxis() -> SetTitle("lead phot P_{T} / diphoton_mass (c)");
+    if(it->first == "dipho_subleadPt")
+      it->second -> GetXaxis() -> SetTitle("sublead phot P_{T} (GeV/c)");
+    if(it->first == "dipho_subleadEta")
+      it->second -> GetXaxis() -> SetTitle("sublead phot #eta");
+    if(it->first == "dipho_subleadPhi")
+      it->second -> GetXaxis() -> SetTitle("sublead phot #Phi");
+    if(it->first == "dipho_subleadptoM")
+      it->second -> GetXaxis() -> SetTitle("sublead phot P_{T} / diphoton_mass (c)");
+    if(it->first == "nJets")
+      it->second -> GetXaxis() -> SetTitle("# Jets");
+    CMS_lumi(c, 0, 0);
+    c -> SaveAs(("c_" +it->first + ".png").c_str());
+    c -> SaveAs(("c_" +it->first + ".pdf").c_str());
+
+  }
+
+}
 
 bool OneCategorySelection(const TreeVars& treeVars, const int& type)
 {
@@ -937,11 +982,11 @@ bool SingleLeptonSelection(const TreeVars& treeVars, const int& type)
 
 
 bool CutBasedSelection(const TreeVars& treeVars,
-                       const float& min_lead_ptoM, const float& min_sublead_ptoM,
+                       const float& min_leadptoM, const float& min_subleadptoM,
                        const float& min_leadIDMVA, const float& min_subleadIDMVA,
                        const float& max_deltaphi, const float& max_deltaeta)
 {
-  if( treeVars.dipho_lead_ptoM < min_lead_ptoM || treeVars.dipho_sublead_ptoM < min_sublead_ptoM ) return false;
+  if( treeVars.dipho_leadptoM < min_leadptoM || treeVars.dipho_subleadptoM < min_subleadptoM ) return false;
   if( treeVars.dipho_leadIDMVA < min_leadIDMVA || treeVars.dipho_subleadIDMVA < min_subleadIDMVA ) return false;
   if( treeVars.dipho_deltaphi > max_deltaphi ) return false;
   if( fabs( treeVars.dipho_leadEta - treeVars.dipho_subleadEta ) > max_deltaeta ) return false;

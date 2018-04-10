@@ -14,12 +14,12 @@ struct TreeVars
 {
   int nvtx;
   float weight;
-  
   float dipho_sumpt;
   float dipho_mass;
   float dipho_vtxProb;
   float dipho_sigmaRV;
   float dipho_sigmaWV;
+  float dipho_deltaeta;
   float dipho_deltaphi;
   float dipho_cosDeltaphi;
   float dipho_leadPt;
@@ -27,17 +27,19 @@ struct TreeVars
   float dipho_leadPhi;
   float dipho_leadEnergy;
   float dipho_leadR9;
-  float dipho_lead_ptoM;
+  float dipho_leadptoM;
   float dipho_lead_sigmaEoE;
   float dipho_leadIDMVA;
+  float dipho_leadisovarrhocorr;
   float dipho_subleadPt;
   float dipho_subleadEta;
   float dipho_subleadPhi;
   float dipho_subleadEnergy;
   float dipho_subleadR9;
-  float dipho_sublead_ptoM;
+  float dipho_subleadptoM;
   float dipho_sublead_sigmaEoE;
   float dipho_subleadIDMVA;
+  float dipho_subleadisovarrhocorr;
   float dipho_mva;
   
   float MetPt;
@@ -102,9 +104,9 @@ struct RawTreeVars
    float Weight[maxweights];
 
    int   N_GenPart;
-   float GenPart_pid[maxpart];
-   float GenPart_ch[maxpart];
-   float GenPart_st[maxpart];
+   int   GenPart_pid[maxpart];
+   int   GenPart_ch[maxpart];
+   int   GenPart_st[maxpart];
    float GenPart_p[maxpart];
    float GenPart_px[maxpart];
    float GenPart_py[maxpart];
@@ -123,7 +125,7 @@ struct RawTreeVars
    float GenJet_mass[maxjets];
 
    int   N_GenPh;
-   float GenPh_st[maxpart];
+   int   GenPh_st[maxpart];
    float GenPh_p[maxpart];
    float GenPh_px[maxpart];
    float GenPh_py[maxpart];
@@ -139,8 +141,8 @@ struct RawTreeVars
    float Vtx_pt2[maxjets];
 
    int   N_LooseEl;
-   float LooseEl_ch[maxpart];
-   float LooseEl_g[maxpart];
+   int   LooseEl_ch[maxpart];
+   int   LooseEl_g[maxpart];
    float LooseEl_pt[maxpart];
    float LooseEl_eta[maxpart];
    float LooseEl_phi[maxpart];
@@ -149,8 +151,8 @@ struct RawTreeVars
    float LooseEl_sf[maxpart];
 
    int   N_TightEl;
-   float TightEl_ch[maxpart];
-   float TightEl_g[maxpart];
+   int   TightEl_ch[maxpart];
+   int   TightEl_g[maxpart];
    float TightEl_pt[maxpart];
    float TightEl_eta[maxpart];
    float TightEl_phi[maxpart];
@@ -159,8 +161,8 @@ struct RawTreeVars
    float TightEl_sf[maxpart];
   
    int   N_MedEl;
-   float MedEl_ch[maxpart];
-   float MedEl_g[maxpart];
+   int   MedEl_ch[maxpart];
+   int   MedEl_g[maxpart];
    float MedEl_pt[maxpart];
    float MedEl_eta[maxpart];
    float MedEl_phi[maxpart];
@@ -169,8 +171,8 @@ struct RawTreeVars
    float MedEl_sf[maxpart];
 
    int   N_LooseMu;
-   float LooseMu_ch[maxpart];
-   float LooseMu_g[maxpart];
+   int   LooseMu_ch[maxpart];
+   int   LooseMu_g[maxpart];
    float LooseMu_pt[maxpart];
    float LooseMu_eta[maxpart];
    float LooseMu_phi[maxpart];
@@ -179,8 +181,8 @@ struct RawTreeVars
    float LooseMu_sf[maxpart];
 
    int   N_TightMu;
-   float TightMu_ch[maxpart];
-   float TightMu_g[maxpart];
+   int   TightMu_ch[maxpart];
+   int   TightMu_g[maxpart];
    float TightMu_pt[maxpart];
    float TightMu_eta[maxpart];
    float TightMu_phi[maxpart];
@@ -189,8 +191,8 @@ struct RawTreeVars
    float TightMu_sf[maxpart];
 
    int   N_Tau;
-   float Tau_ch[maxpart];
-   float Tau_g[maxpart];
+   int   Tau_ch[maxpart];
+   int   Tau_g[maxpart];
    float Tau_pt[maxpart];
    float Tau_eta[maxpart];
    float Tau_phi[maxpart];
@@ -200,8 +202,8 @@ struct RawTreeVars
    float Tau_sf[maxpart];
 
    int   N_Jet;
-   float Jet_id[maxjets];
-   float Jet_g[maxjets];
+   int   Jet_id[maxjets];
+   int   Jet_g[maxjets];
    float Jet_pt[maxjets];
    float Jet_eta[maxjets];
    float Jet_phi[maxjets];
@@ -220,8 +222,8 @@ struct RawTreeVars
    float Met_sf[maxpart];
 
    int   N_LoosePh;
-   float LoosePh_g[maxpart];
-   float LoosePh_isEB[maxpart];
+   int   LoosePh_g[maxpart];
+   int   LoosePh_isEB[maxpart];
    float LoosePh_pt[maxpart];
    float LoosePh_eta[maxpart];
    float LoosePh_phi[maxpart];
@@ -233,8 +235,8 @@ struct RawTreeVars
    float LoosePh_sf[maxpart];
 
    int   N_TightPh;
-   float TightPh_g[maxpart];
-   float TightPh_isEB[maxpart];
+   int   TightPh_g[maxpart];
+   int   TightPh_isEB[maxpart];
    float TightPh_pt[maxpart];
    float TightPh_eta[maxpart];
    float TightPh_phi[maxpart];
@@ -243,6 +245,7 @@ struct RawTreeVars
    float TightPh_eta_multi[maxpart];
    float TightPh_phi_multi[maxpart];
    float TightPh_E_multi[maxpart];
+   float TightPh_iso_rhocorr[maxpart];
    float TightPh_sf[maxpart];
 
 };

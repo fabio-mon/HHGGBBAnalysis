@@ -51,4 +51,6 @@ void MakePlot(TH1F**, TString title);
 
 void MakePlot2(std::map<std::string,TH1F*>& histos, TString title);
 
+void MakePlot3(std::map<std::string,TH1F*> &h);
+
 #endif
