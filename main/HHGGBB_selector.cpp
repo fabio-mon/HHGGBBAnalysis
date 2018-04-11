@@ -186,6 +186,14 @@ int main(int argc, char* argv[])
     if(!PhoGenMatch(pho_sublead,treeVars))//default DeltaRmax=0.03
        continue;
 
+    //Cuts on photons
+    if(!DiPhotonSelection(pho_lead,pho_sublead))
+       continue;
+
+    //Jets selections
+    if(!JetSelection(treeVars))
+      continue;
+
     //Fill outtree and histos
     outtreeVars.weight = 1.;
     outtreeVars.dipho_mass = (pho_lead+pho_sublead).M();

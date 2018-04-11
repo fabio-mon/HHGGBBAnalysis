@@ -494,7 +494,7 @@ void MakePlot3(std::map<std::string,TH1F*> &h)
     it->second -> SetMarkerSize(1);
     it->second -> SetMarkerColor(kBlack);
     it->second -> SetFillStyle(0);
-    it->second -> Draw();
+    it->second -> Draw("E1");
 
     if(it->first == "dipho_mass")
       it->second -> GetXaxis() -> SetTitle("diphoton mass (GeV/c^{2})");
@@ -991,6 +991,19 @@ bool CutBasedSelection(const TreeVars& treeVars,
   if( treeVars.dipho_deltaphi > max_deltaphi ) return false;
   if( fabs( treeVars.dipho_leadEta - treeVars.dipho_subleadEta ) > max_deltaeta ) return false;
   
+  return true;
+}
+
+bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead)
+{
+  if(pho_lead.Pt()<10 || pho_sublead.Pt()<10) return false;
+  if(fabs(pho_lead.Eta())>2.5 || fabs(pho_sublead.Eta())>2.5) return false;
+  return true;
+}
+
+bool JetSelection(const RawTreeVars &treeVars)
+{
+  if(treeVars.N_Jet<=2) return false;
   return true;
 }
 
