@@ -48,7 +48,6 @@ int jetThreshold = 2;
 int bjetThreshold = 1;
 float jetPtThreshold = 0.;
 
-void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i);
 
 int main(int argc, char* argv[])
 {
@@ -102,6 +101,8 @@ int main(int argc, char* argv[])
   h["dipho_subleadPhi"] = new TH1F("dipho_subleadPhi","dipho_subleadPhi",100,-3.14,3.14);
   h["dipho_subleadptoM"] = new TH1F("dipho_subleadptoM","dipho_subleadptoM",100,0,3.5);
   h["nJets"] = new TH1F("nJets","nJets",11,-0.5,10.5);
+  h["dipho_leaddeltaR_GenReco"] = new TH1F("dipho_leaddeltaR_GenReco","dipho_leaddeltaR_GenReco",300,0.,0.1);
+  h["dipho_subleaddeltaR_GenReco"] = new TH1F("dipho_subleaddeltaR_GenReco","dipho_subleaddeltaR_GenReco",300,0.,0.1);
 
    
   //----------
@@ -160,14 +161,17 @@ int main(int argc, char* argv[])
 
     tree -> GetEntry(i);
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
-    //if(treeVars.N_TightPh>0)
-    //  std::cout<<treeVars.TightPh_pt[0]<<std::endl;
-    //std::cout<<"\n"<<treeVars.N_GenPart;
+    //    std::cout<<"\n\nEVENT "<<i<<"\n #GEN="<<treeVars.N_GenPart;
+    //std::cout<<""<<treeVars.N_GenPart;
     //for(int i=0;i<treeVars.N_GenPart;i++)
     //  std::cout<<"\t"<<treeVars.GenPart_pid[i]<<","<<treeVars.GenPart_st[i]<<","<<treeVars.GenPart_pt[i]<<","<<treeVars.GenPart_mass[i];
+    //std::cout<<"\n #GENPH="<<treeVars.N_GenPh;
+    //for(int i=0;i<treeVars.N_GenPh;i++)
+    //  std::cout<<"\t"<<treeVars.GenPh_st[i]<<","<<treeVars.GenPh_pt[i];
     
     if(treeVars.N_TightPh<2) continue;
 
+    //find lead & sublead reco photons
     int pho_lead_i;
     int pho_sublead_i;
     FindLeadSublead_pho(treeVars,pho_lead_i,pho_sublead_i);
@@ -176,6 +180,13 @@ int main(int argc, char* argv[])
     pho_lead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_lead_i],treeVars.TightPh_eta[pho_lead_i],treeVars.TightPh_phi[pho_lead_i],treeVars.TightPh_E[pho_lead_i]);
     pho_sublead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_sublead_i],treeVars.TightPh_eta[pho_sublead_i],treeVars.TightPh_phi[pho_sublead_i],treeVars.TightPh_E[pho_sublead_i]);
 
+    //Gen-matching
+    if(!PhoGenMatch(pho_lead,treeVars))//default DeltaRmax=0.03
+       continue;
+    if(!PhoGenMatch(pho_sublead,treeVars))//default DeltaRmax=0.03
+       continue;
+
+    //Fill outtree and histos
     outtreeVars.weight = 1.;
     outtreeVars.dipho_mass = (pho_lead+pho_sublead).M();
     outtreeVars.dipho_sumpt = (pho_lead+pho_sublead).Pt();
@@ -204,6 +215,8 @@ int main(int argc, char* argv[])
     h["dipho_subleadPhi"] -> Fill(outtreeVars.dipho_subleadPhi);
     h["dipho_subleadptoM"] -> Fill(outtreeVars.dipho_subleadptoM);
     h["nJets"] -> Fill(outtreeVars.nJets);
+    h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaRmin(pho_lead,treeVars) );
+    h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaRmin(pho_sublead,treeVars) );
     outTree->Fill();
 
   }
@@ -252,38 +265,3 @@ int main(int argc, char* argv[])
 }
 
 
-void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i)
-{
-  if(treeVars.N_TightPh<2) return;
-  float ptmax1, ptmax2;
-  if(treeVars.TightPh_pt[0]>treeVars.TightPh_pt[1])
-  {
-    pho_lead_i=0;
-    ptmax1=treeVars.TightPh_pt[0];
-    pho_sublead_i=1;
-    ptmax2=treeVars.TightPh_pt[1];
-  }
-  else
-  {
-    pho_lead_i=1;
-    ptmax1=treeVars.TightPh_pt[1];
-    pho_sublead_i=0;
-    ptmax2=treeVars.TightPh_pt[0];
-  }
-  for(int i=2;i<treeVars.N_TightPh;i++)
-  {
-    if(treeVars.TightPh_pt[i]>ptmax1)
-    {
-      ptmax2=ptmax1;
-      pho_sublead_i=pho_lead_i;
-      ptmax1=treeVars.TightPh_pt[i];
-      pho_lead_i=i;
-    }
-    else
-      if(treeVars.TightPh_pt[i]>ptmax2)
-      {
-        ptmax2=treeVars.TightPh_E[i];
-        pho_sublead_i=i;
-      }
-  }
-}

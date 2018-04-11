@@ -993,3 +993,81 @@ bool CutBasedSelection(const TreeVars& treeVars,
   
   return true;
 }
+
+void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i)
+{
+  if(treeVars.N_TightPh<2) return;
+  float ptmax1, ptmax2;
+  if(treeVars.TightPh_pt[0]>treeVars.TightPh_pt[1])
+  {
+    pho_lead_i=0;
+    ptmax1=treeVars.TightPh_pt[0];
+    pho_sublead_i=1;
+    ptmax2=treeVars.TightPh_pt[1];
+  }
+  else
+  {
+    pho_lead_i=1;
+    ptmax1=treeVars.TightPh_pt[1];
+    pho_sublead_i=0;
+    ptmax2=treeVars.TightPh_pt[0];
+  }
+  for(int i=2;i<treeVars.N_TightPh;i++)
+  {
+    if(treeVars.TightPh_pt[i]>ptmax1)
+    {
+      ptmax2=ptmax1;
+      pho_sublead_i=pho_lead_i;
+      ptmax1=treeVars.TightPh_pt[i];
+      pho_lead_i=i;
+    }
+    else
+      if(treeVars.TightPh_pt[i]>ptmax2)
+      {
+        ptmax2=treeVars.TightPh_E[i];
+        pho_sublead_i=i;
+      }
+  }
+}
+
+bool PhoGenMatch(const TLorentzVector &reco_pho , const RawTreeVars& treeVars , float DeltaRmax)
+{
+
+  float reco_pho_eta = reco_pho.Eta();
+  float reco_pho_phi = reco_pho.Phi();
+  float gen_pho_eta;
+  float gen_pho_phi;
+
+  for(int i=0;i<treeVars.N_GenPh;++i)
+  {
+    gen_pho_eta=treeVars.GenPh_eta[i];
+    gen_pho_phi=treeVars.GenPh_phi[i];
+    if( DeltaR(reco_pho_eta,reco_pho_phi,gen_pho_eta,gen_pho_phi) < DeltaRmax )
+      return true;
+  }
+
+  return false;
+}
+
+float DeltaRmin(const TLorentzVector &reco_pho , const RawTreeVars& treeVars)
+{
+  float reco_pho_eta = reco_pho.Eta();
+  float reco_pho_phi = reco_pho.Phi();
+  float gen_pho_eta;
+  float gen_pho_phi;
+  float deltaR;
+  float deltaRmin=-1;
+
+  for(int i=0;i<treeVars.N_GenPh;++i)
+  {
+    gen_pho_eta=treeVars.GenPh_eta[i];
+    gen_pho_phi=treeVars.GenPh_phi[i];
+    deltaR = DeltaR(reco_pho_eta,reco_pho_phi,gen_pho_eta,gen_pho_phi);
+    if(deltaRmin==-1)
+      deltaRmin=deltaR;
+    else
+      if(deltaR<deltaRmin)
+	deltaRmin=deltaR;
+  }
+  return deltaRmin;
+}
