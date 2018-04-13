@@ -126,6 +126,7 @@ struct RawTreeVars
 
    int   N_GenPh;
    int   GenPh_st[maxpart];
+   bool  GenPh_isHdaug[maxpart];
    float GenPh_p[maxpart];
    float GenPh_px[maxpart];
    float GenPh_py[maxpart];
