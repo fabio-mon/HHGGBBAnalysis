@@ -171,21 +171,21 @@ int main(int argc, char* argv[])
     
     if(treeVars.N_TightPh<2) continue;
 
+    //find higgs daugher gen-photons and flag their .isHdaug
+    if( ! FindGenPh_Hdaug(treeVars) ) continue;
+
     //find lead & sublead reco photons
     int pho_lead_i;
     int pho_sublead_i;
     FindLeadSublead_pho(treeVars,pho_lead_i,pho_sublead_i);
-    
     TLorentzVector pho_lead,pho_sublead;
     pho_lead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_lead_i],treeVars.TightPh_eta[pho_lead_i],treeVars.TightPh_phi[pho_lead_i],treeVars.TightPh_E[pho_lead_i]);
     pho_sublead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_sublead_i],treeVars.TightPh_eta[pho_sublead_i],treeVars.TightPh_phi[pho_sublead_i],treeVars.TightPh_E[pho_sublead_i]);
 
     //Gen-matching
-    if(!PhoGenMatch(pho_lead,treeVars))//default DeltaRmax=0.03
+    if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,0.05))//default DeltaRmax=0.03
        continue;
-    if(!PhoGenMatch(pho_sublead,treeVars))//default DeltaRmax=0.03
-       continue;
-
+    
     //Cuts on photons
     if(!DiPhotonSelection(pho_lead,pho_sublead))
        continue;

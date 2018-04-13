@@ -54,9 +54,10 @@ void MakePlot2(std::map<std::string,TH1F*>& histos, TString title);
 void MakePlot3(std::map<std::string,TH1F*> &h);
 
 bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead);
+bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr=10.);
 bool JetSelection(const RawTreeVars &treeVars);
 void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i);
-bool PhoGenMatch(const TLorentzVector &reco_pho , const RawTreeVars& treeVars , float DeltaRmax=0.03);
+bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_sublead , const RawTreeVars& treeVars , float DeltaRmax=0.03);
 float DeltaRmin(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);
 
 #endif

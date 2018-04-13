@@ -167,7 +167,8 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   chain["GenPhoton"]->SetBranchAddress("PT",              treeVars.GenPh_pt);
   chain["GenPhoton"]->SetBranchAddress("Eta",             treeVars.GenPh_eta);
   chain["GenPhoton"]->SetBranchAddress("Phi",             treeVars.GenPh_phi);
-   
+  //chain["GenPhoton"]->SetBranchAddress("isHdaug",         treeVars.GenPh_isHdaug); 
+
   //reco level event
   chain["Vertex"]->SetBranchAddress("Vertex_size",    &treeVars.N_Vtx);
   chain["Vertex"]->SetBranchAddress("SumPT2",         &treeVars.Vtx_pt2);
