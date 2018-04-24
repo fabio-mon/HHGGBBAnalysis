@@ -26,6 +26,7 @@ struct TreeVars
   float dipho_leadEta;
   float dipho_leadPhi;
   float dipho_leadEnergy;
+  float dipho_leadEnergy_gen;
   float dipho_leadR9;
   float dipho_leadptoM;
   float dipho_lead_sigmaEoE;
@@ -35,6 +36,7 @@ struct TreeVars
   float dipho_subleadEta;
   float dipho_subleadPhi;
   float dipho_subleadEnergy;
+  float dipho_subleadEnergy_gen;
   float dipho_subleadR9;
   float dipho_subleadptoM;
   float dipho_sublead_sigmaEoE;
