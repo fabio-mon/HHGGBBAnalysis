@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
     pho_sublead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_sublead_i],treeVars.TightPh_eta[pho_sublead_i],treeVars.TightPh_phi[pho_sublead_i],treeVars.TightPh_E[pho_sublead_i]);
 
     //Gen-matching
-    if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,0.05))//default DeltaRmax=0.03
+    if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.05))//default DeltaRmax=0.03
        continue;
     
     //Cuts on photons
@@ -204,6 +204,7 @@ int main(int argc, char* argv[])
     outtreeVars.dipho_leadEta = pho_lead.Eta();
     outtreeVars.dipho_leadPhi = pho_lead.Phi();
     outtreeVars.dipho_leadptoM = pho_lead.Pt() / (pho_lead+pho_sublead).M();
+    outtreeVars.dipho_leadEnergy = treeVars.TightPh_E[pho_lead_i];
     outtreeVars.dipho_subleadPt = pho_sublead.Pt();
     outtreeVars.dipho_subleadEta = pho_sublead.Eta();
     outtreeVars.dipho_subleadPhi = pho_sublead.Phi();

@@ -71,13 +71,13 @@ void MakePlot3(std::map<std::string,TH1F*> &h)
 bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead)
 {
   if(pho_lead.Pt()<10 || pho_sublead.Pt()<10) return false;
-  if(fabs(pho_lead.Eta())>2.5 || fabs(pho_sublead.Eta())>2.5) return false;
+  if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
   return true;
 }
 
 bool JetSelection(const RawTreeVars &treeVars)
 {
-  if(treeVars.N_Jet<=2) return false;
+  if(treeVars.N_Jet<2) return false;
   return true;
 }
 
@@ -166,7 +166,7 @@ void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho
   cout<<"i_LEAD="<<pho_lead_i<<"\ti_SUBLEAD="<<pho_sublead_i<<endl;
 }
 
-bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_sublead , const RawTreeVars& treeVars , float DeltaRmax)
+bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_sublead , const RawTreeVars& treeVars , TreeVars &outtreeVars, float DeltaRmax)
 //gen-matching with photons that are higgs daughter
 {
 
@@ -183,6 +183,8 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
 
   //find genphotons flagged as higgs daughter
   int i=0;
+  int i_pho_gen1;
+  int i_pho_gen2;
   while(pho_gen1_phi==-999 && i<treeVars.N_GenPh)
   {
     cout<<i<<" GEN (ETA,PHI)="<<treeVars.GenPh_eta[i]<<","<<treeVars.GenPh_phi[i]<<")"<<endl;
@@ -190,6 +192,7 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
     {
       pho_gen1_eta=treeVars.GenPh_eta[i];
       pho_gen1_phi=treeVars.GenPh_phi[i];
+      i_pho_gen1=i;
     }
     ++i;
   }
@@ -203,6 +206,7 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
       {
 	pho_gen2_eta=treeVars.GenPh_eta[i];
 	pho_gen2_phi=treeVars.GenPh_phi[i];
+	i_pho_gen2=i;
       }
     ++i;
   }
@@ -213,12 +217,24 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
   cout<<"DeltaR1lead = \t"<<DeltaR(pho_gen1_eta,pho_gen1_phi,   pho_lead_eta,   pho_lead_phi)<<endl;
   cout<<"DeltaR2sublead = \t"<<DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<<endl;
   if( DeltaR(pho_gen1_eta,pho_gen1_phi,   pho_lead_eta,   pho_lead_phi)<DeltaRmax && 
-      DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax) {cout<<"match1"<<endl;return true;}
+      DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax) 
+  {
+    cout<<"match1"<<endl;
+    outtreeVars.dipho_leadEnergy_gen = treeVars.GenPh_E[i_pho_gen1];
+    outtreeVars.dipho_subleadEnergy_gen = treeVars.GenPh_E[i_pho_gen2];
+    return true;
+  }
 
   cout<<"DeltaR2lead = \t"<<DeltaR(pho_gen2_eta,pho_gen2_phi,   pho_lead_eta,   pho_lead_phi)<<endl;
   cout<<"DeltaR1sublead = \t"<<DeltaR(pho_gen1_eta,pho_gen1_phi,pho_sublead_eta,pho_sublead_phi)<<endl;
   if( DeltaR(pho_gen2_eta,pho_gen2_phi,   pho_lead_eta,   pho_lead_phi)<DeltaRmax && 
-      DeltaR(pho_gen1_eta,pho_gen1_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax) {cout<<"match2"<<endl;return true;}
+      DeltaR(pho_gen1_eta,pho_gen1_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax) 
+  {
+    cout<<"match2"<<endl;
+    outtreeVars.dipho_leadEnergy_gen = treeVars.GenPh_E[i_pho_gen2];
+    outtreeVars.dipho_subleadEnergy_gen = treeVars.GenPh_E[i_pho_gen1];
+    return true;
+  }
 
   return false;
 
