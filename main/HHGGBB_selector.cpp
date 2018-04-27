@@ -191,9 +191,10 @@ int main(int argc, char* argv[])
        continue;
 
     //Jets selections
-    if(!JetSelection(treeVars))
+    if(!JetSelection(treeVars,outtreeVars))//require njetmin with above a minimum pt value, fill also outtreeVars.nJets with the number of hard jets
       continue;
-
+    //cout<<"-----------"<<endl;
+    //cout<<treeVars.N_Vtx<<endl;
     //Fill outtree and histos
     outtreeVars.weight = 1.;
     outtreeVars.dipho_mass = (pho_lead+pho_sublead).M();
@@ -209,7 +210,8 @@ int main(int argc, char* argv[])
     outtreeVars.dipho_subleadEta = pho_sublead.Eta();
     outtreeVars.dipho_subleadPhi = pho_sublead.Phi();
     outtreeVars.dipho_subleadptoM = pho_sublead.Pt() / (pho_lead+pho_sublead).M();
-    outtreeVars.nJets = treeVars.N_Jet;
+    outtreeVars.dipho_subleadEnergy = treeVars.TightPh_E[pho_sublead_i];
+    outtreeVars.nvtx = treeVars.N_Vtx;
 
     h["dipho_mass"] -> Fill(outtreeVars.dipho_mass);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);

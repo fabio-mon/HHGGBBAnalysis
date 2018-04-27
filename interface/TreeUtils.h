@@ -16,6 +16,7 @@ struct TreeVars
   float weight;
   float dipho_sumpt;
   float dipho_mass;
+  float dipho_mass_gen;
   float dipho_vtxProb;
   float dipho_sigmaRV;
   float dipho_sigmaWV;
@@ -24,7 +25,9 @@ struct TreeVars
   float dipho_cosDeltaphi;
   float dipho_leadPt;
   float dipho_leadEta;
+  float dipho_leadEta_gen;
   float dipho_leadPhi;
+  float dipho_leadPhi_gen;
   float dipho_leadEnergy;
   float dipho_leadEnergy_gen;
   float dipho_leadR9;
@@ -34,7 +37,9 @@ struct TreeVars
   float dipho_leadisovarrhocorr;
   float dipho_subleadPt;
   float dipho_subleadEta;
+  float dipho_subleadEta_gen;
   float dipho_subleadPhi;
+  float dipho_subleadPhi_gen;
   float dipho_subleadEnergy;
   float dipho_subleadEnergy_gen;
   float dipho_subleadR9;
