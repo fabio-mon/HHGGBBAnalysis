@@ -34,7 +34,10 @@ struct TreeVars
   float dipho_leadptoM;
   float dipho_lead_sigmaEoE;
   float dipho_leadIDMVA;
-  float dipho_leadisovarrhocorr;
+  float dipho_leadIso;
+  float dipho_leadDeltaRgenreco;
+  float dipho_leadDeltaEtagenreco;
+  float dipho_leadDeltaPhigenreco;
   float dipho_subleadPt;
   float dipho_subleadEta;
   float dipho_subleadEta_gen;
@@ -46,8 +49,12 @@ struct TreeVars
   float dipho_subleadptoM;
   float dipho_sublead_sigmaEoE;
   float dipho_subleadIDMVA;
-  float dipho_subleadisovarrhocorr;
+  float dipho_subleadIso;
   float dipho_mva;
+  float dipho_subleadDeltaRgenreco;
+  float dipho_subleadDeltaEtagenreco;
+  float dipho_subleadDeltaPhigenreco;
+
   
   float MetPt;
   float MetPhi;
@@ -253,7 +260,7 @@ struct RawTreeVars
    float TightPh_eta_multi[maxpart];
    float TightPh_phi_multi[maxpart];
    float TightPh_E_multi[maxpart];
-   float TightPh_iso_rhocorr[maxpart];
+   float TightPh_iso[maxpart];
    float TightPh_sf[maxpart];
 
 };

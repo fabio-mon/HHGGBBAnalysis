@@ -69,7 +69,7 @@ void MakePlot3(std::map<std::string,TH1F*> &h)
 
 bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead)
 {
-  if(pho_lead.Pt()<20 || pho_sublead.Pt()<20) return false;
+  if(pho_lead.Pt()<30 || pho_sublead.Pt()<30) return false;
   if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
   return true;
 }
@@ -170,6 +170,54 @@ void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho
   //cout<<"i_LEAD="<<pho_lead_i<<"\ti_SUBLEAD="<<pho_sublead_i<<endl;
 }
 
+bool RecoJetGenericMatch (const TLorentzVector &reco_pho , const RawTreeVars& treeVars , TLorentzVector& reco_jet_match, float DeltaRmax)
+{
+
+  float reco_pho_eta = reco_pho.Eta();
+  float reco_pho_phi = reco_pho.Phi();
+  float reco_jet_eta;
+  float reco_jet_phi;
+
+  for(int i=0;i<treeVars.N_Jet;++i)
+  {
+    reco_jet_eta=treeVars.Jet_eta[i];
+    reco_jet_phi=treeVars.Jet_phi[i];
+    if( DeltaR(reco_pho_eta,reco_pho_phi,reco_jet_eta,reco_jet_phi) < DeltaRmax )
+    {
+      reco_jet_match.SetPtEtaPhiM(treeVars.Jet_pt[i],reco_jet_eta,reco_jet_phi,treeVars.Jet_mass[i]);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+bool PhoGenericGenMatch (const TLorentzVector &reco_pho , const RawTreeVars& treeVars ,  TLorentzVector& gen_pho_match, float DeltaRmax)
+{
+
+  float reco_pho_eta = reco_pho.Eta();
+  float reco_pho_phi = reco_pho.Phi();
+  float gen_pho_eta;
+  float gen_pho_phi;
+
+  for(int i=0;i<treeVars.N_GenPh;++i)
+    {
+      gen_pho_eta=treeVars.GenPh_eta[i];
+      gen_pho_phi=treeVars.GenPh_phi[i];
+      if(fabs(treeVars.GenPh_E[i]-reco_pho.E()) > 5) continue;
+      if( DeltaR(reco_pho_eta,reco_pho_phi,gen_pho_eta,gen_pho_phi) < DeltaRmax )
+      {
+	gen_pho_match.SetPtEtaPhiE(treeVars.GenPh_pt[i],gen_pho_eta,gen_pho_phi,treeVars.GenPh_E[i]);
+	cout<<"PtGEN-PtRECO="<<treeVars.GenPh_pt[i]-reco_pho.Pt()<<endl;
+	return true;
+      }
+    }
+
+  return false;
+}
+
+
 bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_sublead , const RawTreeVars& treeVars , TreeVars &outtreeVars, float DeltaRmax)
 //gen-matching with photons that are higgs daughter
 {
@@ -184,6 +232,14 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
   float pho_gen1_phi=-999;
   float pho_gen2_eta;
   float pho_gen2_phi=-999;
+
+  outtreeVars.dipho_leadEnergy_gen = 0;
+  outtreeVars.dipho_leadEta_gen = 0;
+  outtreeVars.dipho_leadPhi_gen = -999;
+    
+  outtreeVars.dipho_subleadEnergy_gen = 0;
+  outtreeVars.dipho_subleadEta_gen = 0;
+  outtreeVars.dipho_subleadPhi_gen = -999;
 
   //find genphotons flagged as higgs daughter
   int i=0;
@@ -220,34 +276,53 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
   //eta-phi gen-matching
   //cout<<"DeltaR1lead = \t"<<DeltaR(pho_gen1_eta,pho_gen1_phi,   pho_lead_eta,   pho_lead_phi)<<endl;
   //cout<<"DeltaR2sublead = \t"<<DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<<endl;
-  if( DeltaR(pho_gen1_eta,pho_gen1_phi,   pho_lead_eta,   pho_lead_phi)<DeltaRmax && 
-      DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax) 
+  TLorentzVector phlead_gen;
+  TLorentzVector phsublead_gen;
+  
+  if(DeltaR(pho_gen1_eta,pho_gen1_phi,pho_lead_eta,pho_lead_phi)<DeltaRmax)
   {
-    //cout<<"match1"<<endl;
     outtreeVars.dipho_leadEnergy_gen = treeVars.GenPh_E[i_pho_gen1];
     outtreeVars.dipho_leadEta_gen = treeVars.GenPh_eta[i_pho_gen1];
     outtreeVars.dipho_leadPhi_gen = treeVars.GenPh_phi[i_pho_gen1];
-    TLorentzVector phlead_gen;
     phlead_gen.SetPtEtaPhiE(treeVars.GenPh_pt[i_pho_gen1],outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen,outtreeVars.dipho_leadEnergy_gen);
+  }
 
+  if(DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax)
+  {
     outtreeVars.dipho_subleadEnergy_gen = treeVars.GenPh_E[i_pho_gen2];
     outtreeVars.dipho_subleadEta_gen = treeVars.GenPh_eta[i_pho_gen2];
     outtreeVars.dipho_subleadPhi_gen = treeVars.GenPh_phi[i_pho_gen2];
-    TLorentzVector phsublead_gen;
     phsublead_gen.SetPtEtaPhiE(treeVars.GenPh_pt[i_pho_gen2],outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen,outtreeVars.dipho_subleadEnergy_gen);
+  }
+  
+  if(DeltaR(pho_gen1_eta,pho_gen1_phi,   pho_lead_eta,   pho_lead_phi)<DeltaRmax &&
+     DeltaR(pho_gen2_eta,pho_gen2_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax)
+  {
     outtreeVars.dipho_mass_gen = (phlead_gen+phsublead_gen).M();
-
     return true;
   }
 
-  //cout<<"DeltaR2lead = \t"<<DeltaR(pho_gen2_eta,pho_gen2_phi,   pho_lead_eta,   pho_lead_phi)<<endl;
-  //cout<<"DeltaR1sublead = \t"<<DeltaR(pho_gen1_eta,pho_gen1_phi,pho_sublead_eta,pho_sublead_phi)<<endl;
+
+  if( DeltaR(pho_gen2_eta,pho_gen2_phi, pho_lead_eta, pho_lead_phi)<DeltaRmax)
+  {
+    outtreeVars.dipho_leadEnergy_gen = treeVars.GenPh_E[i_pho_gen2];
+    outtreeVars.dipho_leadEta_gen = treeVars.GenPh_eta[i_pho_gen2];
+    outtreeVars.dipho_leadPhi_gen = treeVars.GenPh_phi[i_pho_gen2];
+    phlead_gen.SetPtEtaPhiE(treeVars.GenPh_pt[i_pho_gen2],outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen,outtreeVars.dipho_leadEnergy_gen);
+  }
+
+  if( DeltaR(pho_gen1_eta,pho_gen1_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax )
+  {
+    outtreeVars.dipho_subleadEnergy_gen = treeVars.GenPh_E[i_pho_gen1];
+    outtreeVars.dipho_subleadEta_gen = treeVars.GenPh_eta[i_pho_gen1];
+    outtreeVars.dipho_subleadPhi_gen = treeVars.GenPh_phi[i_pho_gen1];
+    phsublead_gen.SetPtEtaPhiE(treeVars.GenPh_pt[i_pho_gen1],outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen,outtreeVars.dipho_subleadEnergy_gen);
+  }
+
   if( DeltaR(pho_gen2_eta,pho_gen2_phi,   pho_lead_eta,   pho_lead_phi)<DeltaRmax && 
       DeltaR(pho_gen1_eta,pho_gen1_phi,pho_sublead_eta,pho_sublead_phi)<DeltaRmax) 
   {
-    //cout<<"match2"<<endl;
-    outtreeVars.dipho_leadEnergy_gen = treeVars.GenPh_E[i_pho_gen2];
-    outtreeVars.dipho_subleadEnergy_gen = treeVars.GenPh_E[i_pho_gen1];
+    outtreeVars.dipho_mass_gen = (phlead_gen+phsublead_gen).M();
     return true;
   }
 
@@ -255,7 +330,7 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
 
 }
 
-float DeltaRmin(const TLorentzVector &reco_pho , const RawTreeVars& treeVars)
+float DeltaRmin_phoRECO_phoGEN(const TLorentzVector &reco_pho , const RawTreeVars& treeVars)
 {
   float reco_pho_eta = reco_pho.Eta();
   float reco_pho_phi = reco_pho.Phi();
@@ -268,6 +343,7 @@ float DeltaRmin(const TLorentzVector &reco_pho , const RawTreeVars& treeVars)
   {
     gen_pho_eta=treeVars.GenPh_eta[i];
     gen_pho_phi=treeVars.GenPh_phi[i];
+    if(fabs(reco_pho.E()-treeVars.GenPh_E[i])>5) continue;
     deltaR = DeltaR(reco_pho_eta,reco_pho_phi,gen_pho_eta,gen_pho_phi);
     if(deltaRmin==-1)
       deltaRmin=deltaR;
@@ -276,4 +352,44 @@ float DeltaRmin(const TLorentzVector &reco_pho , const RawTreeVars& treeVars)
 	deltaRmin=deltaR;
   }
   return deltaRmin;
+}
+
+float DeltaRmin_phoRECO_jetRECO(const TLorentzVector &reco_pho , const RawTreeVars& treeVars)
+{
+  float reco_pho_eta = reco_pho.Eta();
+  float reco_pho_phi = reco_pho.Phi();
+  float reco_jet_eta;
+  float reco_jet_phi;
+  float deltaR;
+  float deltaRmin=-1;
+
+  for(int i=0;i<treeVars.N_Jet;++i)
+  {
+    reco_jet_eta=treeVars.Jet_eta[i];
+    reco_jet_phi=treeVars.Jet_phi[i];
+    deltaR = DeltaR(reco_pho_eta,reco_pho_phi,reco_jet_eta,reco_jet_phi);
+    if(deltaRmin==-1)
+      deltaRmin=deltaR;
+    else
+      if(deltaR<deltaRmin)
+	deltaRmin=deltaR;
+  }
+  return deltaRmin;
+}
+
+
+void PrintRecoPhoton(const RawTreeVars& treeVars)
+{
+  cout<<"Event "<<treeVars.event<<"\tRECO Tight photon collection -> "<<treeVars.N_TightPh<<" entries"<<endl;
+  for(int i=0;i<treeVars.N_TightPh;i++)
+    cout<<i<<"\tEta="<<treeVars.TightPh_eta[i]<< "\tPhi="<<treeVars.TightPh_phi[i]<< "\tPt="<<treeVars.TightPh_pt[i]<<endl;
+  cout<<endl;
+}
+
+void PrintRecoJet(const RawTreeVars& treeVars)
+{
+  cout<<"Event "<<treeVars.event<<"\tRECO PUPPI jet collection -> "<<treeVars.N_Jet<<" entries"<<endl;
+  for(int i=0;i<treeVars.N_Jet;i++)
+    cout<<i<<"\tEta="<<treeVars.Jet_eta[i]<< "\tPhi="<<treeVars.Jet_phi[i]<< "\tPt="<<treeVars.Jet_pt[i]<<endl;
+  cout<<endl;
 }

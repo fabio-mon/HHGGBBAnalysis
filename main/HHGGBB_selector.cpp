@@ -103,8 +103,13 @@ int main(int argc, char* argv[])
   h["nJets"] = new TH1F("nJets","nJets",11,-0.5,10.5);
   h["dipho_leaddeltaR_GenReco"] = new TH1F("dipho_leaddeltaR_GenReco","dipho_leaddeltaR_GenReco",300,0.,0.1);
   h["dipho_subleaddeltaR_GenReco"] = new TH1F("dipho_subleaddeltaR_GenReco","dipho_subleaddeltaR_GenReco",300,0.,0.1);
+  h["dipho_leadIso_o_E"] = new TH1F("dipho_leadIso_o_E","dipho_leadIso_o_E",300,0.,0.25);
+  h["dipho_subleadIso_o_E"] = new TH1F("dipho_subleadIso_o_E","dipho_subleadIso_o_E",300,0.,0.25);
+  h["dipho_leaddeltaEta_GenReco"] = new TH1F("dipho_leaddeltaEta_GenReco","dipho_leaddeltaEta_GenReco",300,0.,0.2);
+  h["dipho_subleaddeltaEta_GenReco"] = new TH1F("dipho_subleaddeltaEta_GenReco","dipho_subleaddeltaEta_GenReco",300,0.,0.2);
+  h["dipho_leaddeltaPhi_GenReco"] = new TH1F("dipho_leaddeltaPhi_GenReco","dipho_leaddeltaPhi_GenReco",300,0.,0.2);
+  h["dipho_subleaddeltaPhi_GenReco"] = new TH1F("dipho_subleaddeltaPhi_GenReco","dipho_subleaddeltaPhi_GenReco",300,0.,0.2);
 
-   
   //----------
   // get trees
   
@@ -183,7 +188,7 @@ int main(int argc, char* argv[])
     pho_sublead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_sublead_i],treeVars.TightPh_eta[pho_sublead_i],treeVars.TightPh_phi[pho_sublead_i],treeVars.TightPh_E[pho_sublead_i]);
 
     //Gen-matching
-    if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.05))//default DeltaRmax=0.03
+    if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.1))//default DeltaRmax=0.03
        continue;
     
     //Cuts on photons
@@ -201,17 +206,29 @@ int main(int argc, char* argv[])
     outtreeVars.dipho_sumpt = (pho_lead+pho_sublead).Pt();
     outtreeVars.dipho_deltaeta = DeltaEta( pho_lead.Eta() , pho_sublead.Eta() );
     outtreeVars.dipho_deltaphi = DeltaPhi( pho_lead.Phi() , pho_sublead.Phi() );
+
     outtreeVars.dipho_leadPt = pho_lead.Pt();
     outtreeVars.dipho_leadEta = pho_lead.Eta();
     outtreeVars.dipho_leadPhi = pho_lead.Phi();
     outtreeVars.dipho_leadptoM = pho_lead.Pt() / (pho_lead+pho_sublead).M();
     outtreeVars.dipho_leadEnergy = treeVars.TightPh_E[pho_lead_i];
+    outtreeVars.dipho_leadIso = treeVars.TightPh_iso[pho_lead_i];
+    outtreeVars.dipho_leadDeltaRgenreco = DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen);
+    outtreeVars.dipho_leadDeltaEtagenreco = DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen);
+    outtreeVars.dipho_leadDeltaPhigenreco = DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen);
+
     outtreeVars.dipho_subleadPt = pho_sublead.Pt();
     outtreeVars.dipho_subleadEta = pho_sublead.Eta();
     outtreeVars.dipho_subleadPhi = pho_sublead.Phi();
     outtreeVars.dipho_subleadptoM = pho_sublead.Pt() / (pho_lead+pho_sublead).M();
     outtreeVars.dipho_subleadEnergy = treeVars.TightPh_E[pho_sublead_i];
+    outtreeVars.dipho_subleadIso = treeVars.TightPh_iso[pho_sublead_i];
+    outtreeVars.dipho_subleadDeltaRgenreco = DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen);
+    outtreeVars.dipho_subleadDeltaEtagenreco = DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen);
+    outtreeVars.dipho_subleadDeltaPhigenreco = DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen);
+
     outtreeVars.nvtx = treeVars.N_Vtx;
+    outtreeVars.nJets = treeVars.N_Jet;
 
     h["dipho_mass"] -> Fill(outtreeVars.dipho_mass);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);
@@ -221,13 +238,20 @@ int main(int argc, char* argv[])
     h["dipho_leadEta"] -> Fill(outtreeVars.dipho_leadEta);
     h["dipho_leadPhi"] -> Fill(outtreeVars.dipho_leadPhi);
     h["dipho_leadptoM"] -> Fill(outtreeVars.dipho_leadptoM);
+    h["dipho_leadIso_o_E"] -> Fill(outtreeVars.dipho_leadIso/outtreeVars.dipho_leadEnergy);
     h["dipho_subleadPt"] -> Fill(outtreeVars.dipho_subleadPt);
     h["dipho_subleadEta"] -> Fill(outtreeVars.dipho_subleadEta);
     h["dipho_subleadPhi"] -> Fill(outtreeVars.dipho_subleadPhi);
     h["dipho_subleadptoM"] -> Fill(outtreeVars.dipho_subleadptoM);
+    h["dipho_subleadIso_o_E"] -> Fill(outtreeVars.dipho_subleadIso/outtreeVars.dipho_subleadEnergy);
     h["nJets"] -> Fill(outtreeVars.nJets);
-    h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaRmin(pho_lead,treeVars) );
-    h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaRmin(pho_sublead,treeVars) );
+    h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen) );
+    h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen) );
+    h["dipho_leaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen) );
+    h["dipho_subleaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen) );
+    h["dipho_leaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen) );
+    h["dipho_subleaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen) );
+
     outTree->Fill();
 
   }
