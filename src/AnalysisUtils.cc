@@ -209,7 +209,7 @@ bool PhoGenericGenMatch (const TLorentzVector &reco_pho , const RawTreeVars& tre
       if( DeltaR(reco_pho_eta,reco_pho_phi,gen_pho_eta,gen_pho_phi) < DeltaRmax )
       {
 	gen_pho_match.SetPtEtaPhiE(treeVars.GenPh_pt[i],gen_pho_eta,gen_pho_phi,treeVars.GenPh_E[i]);
-	cout<<"PtGEN-PtRECO="<<treeVars.GenPh_pt[i]-reco_pho.Pt()<<endl;
+	//cout<<"PtGEN-PtRECO="<<treeVars.GenPh_pt[i]-reco_pho.Pt()<<endl;
 	return true;
       }
     }

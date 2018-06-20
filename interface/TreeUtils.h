@@ -269,6 +269,6 @@ struct RawTreeVars
 void InitTreeVars(TChain* chain, TreeVars& treeVars);
 void InitOutTreeVars(TTree* tree, TreeVars& treeVars);
 
-void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars &treeVars);
+void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars &treeVars, std::string Loose_Tight_Photon="PhotonTight");
 
 #endif

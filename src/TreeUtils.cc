@@ -95,9 +95,10 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
 }
 
 
-void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars)
+void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars, std::string Loose_Tight_Photon)
 {
-
+  // can be "PhotonLoose" or "PhotonTight"
+  
   //chain->SetMakeClass(1);
   //for(std::map<std::string,TChain*>::iterator it=chain.begin(); it!=chain.end(); ++it)
   //   it->second->SetBranchStatus("*", 0);
@@ -229,6 +230,25 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   chain["PuppiMissingET"]->SetBranchAddress("Eta",                 treeVars.Met_eta);
   chain["PuppiMissingET"]->SetBranchAddress("SF",                  treeVars.Met_sf);
 
+  chain[Loose_Tight_Photon.c_str()]->SetBranchStatus((Loose_Tight_Photon+"_size").c_str(), 1);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress((Loose_Tight_Photon+"_size").c_str(),       &treeVars.N_TightPh);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchStatus("Particle", 1);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Particle",               treeVars.TightPh_g);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("IsEB",                   treeVars.TightPh_isEB);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchStatus("PT", 1);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("PT",                     treeVars.TightPh_pt);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Eta",                    treeVars.TightPh_eta);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Phi",                    treeVars.TightPh_phi);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("E",                      treeVars.TightPh_E);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("PT_multi",               treeVars.TightPh_pt_multi);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Eta_multi",              treeVars.TightPh_eta_multi);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Phi_multi",              treeVars.TightPh_phi_multi);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("E_multi",                treeVars.TightPh_E_multi);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("IsolationVarRhoCorr",    treeVars.TightPh_iso);
+  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("SF",                     treeVars.TightPh_sf);
+
+
+  /*
   chain["PhotonLoose"]->SetBranchAddress("PhotonLoose_size",       &treeVars.N_LoosePh);
   chain["PhotonLoose"]->SetBranchAddress("Particle",               treeVars.LoosePh_g);
   chain["PhotonLoose"]->SetBranchAddress("IsEB",                   treeVars.LoosePh_isEB);
@@ -258,5 +278,5 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   chain["PhotonTight"]->SetBranchAddress("E_multi",                treeVars.TightPh_E_multi);
   chain["PhotonTight"]->SetBranchAddress("IsolationVarRhoCorr",    treeVars.TightPh_iso);
   chain["PhotonTight"]->SetBranchAddress("SF",                     treeVars.TightPh_sf);
-
+  */
 }

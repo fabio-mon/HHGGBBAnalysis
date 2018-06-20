@@ -83,7 +83,11 @@ int main(int argc, char* argv[])
   std::vector<std::string> treename = opts.GetOpt<std::vector<std::string> >("Input.treename");
   std::string label =  opts.GetOpt<std::string> ("Input.label");
   std::string type =  opts.GetOpt<std::string> ("Input.type");
-
+  std::string Loose_Tight_Photon = "PhotonTight";
+  if(opts.OptExist("Input.Loose_Tight_Photon"))
+    Loose_Tight_Photon = opts.GetOpt<std::string> ("Input.Loose_Tight_Photon");
+  else
+    cout<<"Option <Input.Loose_Tight_Photon> not found --> Analysis by default on "<<Loose_Tight_Photon<<endl;
 
   //------------------
   // define histograms
@@ -135,7 +139,7 @@ int main(int argc, char* argv[])
   
   //------------------
   // branch tree: the only functioning way consists in branching separately the trees and, only after, adding them as friends
-  InitRawTreeVars(trees,treeVars);
+  InitRawTreeVars(trees,treeVars,Loose_Tight_Photon);
   TChain *tree = trees[onlytreename_str.at(0)];
 
 

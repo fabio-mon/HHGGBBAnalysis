@@ -83,7 +83,11 @@ int main(int argc, char* argv[])
   std::vector<std::string> treename = opts.GetOpt<std::vector<std::string> >("Input.treename");
   std::string label =  opts.GetOpt<std::string> ("Input.label");
   std::string type =  opts.GetOpt<std::string> ("Input.type");
-
+  std::string Loose_Tight_Photon="PhotonTight";
+  if(opts.OptExist("Input.Loose_Tight_Photon"))
+    Loose_Tight_Photon = opts.GetOpt<std::string> ("Input.Loose_Tight_Photon");
+  else
+    cout<<"Option <Input.Loose_Tight_Photon> not found --> Analysis by default on "<<Loose_Tight_Photon<<endl;
 
   //------------------
   // define histograms
@@ -144,7 +148,7 @@ int main(int argc, char* argv[])
   
   //------------------
   // branch tree: the only functioning way consists in branching separately the trees and, only after, adding them as friends
-  InitRawTreeVars(trees,treeVars);
+  InitRawTreeVars(trees,treeVars,Loose_Tight_Photon);
   TChain *tree = trees[onlytreename_str.at(0)];
 
 
@@ -364,26 +368,54 @@ int main(int argc, char* argv[])
   std::cout << "AT LEAST 2 RECO PHOTONS\t" << nEv_2RecoPhotons << std::endl;
   std::cout << "H DAUGHTER FOUND       \t" << nEv_2GenHdaug  << std::endl;
   std::cout << "DIPHO SELECTION        \t" << nDiphoSelect << std::endl;
-  std::cout << "JET SELECTION          \t" << nJetSelect << std::endl;
-  std::cout << "NO H-DAUG GEN-MATCH    \t" << nEvNOGenMatch << std::endl;
+  std::cout << "JET SELECTION          \t" << nJetSelect 
+	    << "\t"<<1.*nJetSelect/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "NO H-DAUG GEN-MATCH    \t" << nEvNOGenMatch 
+	    << "\t"<<1.*nEvNOGenMatch/nJetSelect*100<<"%"<< std::endl;
 
-  std::cout << "\tNO H-DAUG GEN-MATCH BOTH        \t" << nEvNOGenMatchBoth << std::endl;
-  std::cout << "\t\tGENERIC LEAD GEN-MATCH        \t" << nEvNOGenMatchBoth_genericphomatch_lead << std::endl;
-  std::cout << "\t\tGENERIC SUBLEAD GEN-MATCH     \t" << nEvNOGenMatchBoth_genericphomatch_sublead << std::endl;
-  std::cout << "\t\tGENERIC LEAD RECOJET-MATCH    \t" << nEvNOGenMatchBoth_genericjetmatch_lead << std::endl;
-  std::cout << "\t\tGENERIC SUBLEAD RECOJET-MATCH \t" << nEvNOGenMatchBoth_genericjetmatch_sublead << std::endl;
+  std::cout << "\tNO H-DAUG GEN-MATCH BOTH                          \t\t" << nEvNOGenMatchBoth 
+	    << "\t"<<1.*nEvNOGenMatchBoth/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tGENERIC LEAD GEN-MATCH                            \t" << nEvNOGenMatchBoth_genericphomatch_lead 
+	    << "\t"<<1.*nEvNOGenMatchBoth_genericphomatch_lead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tGENERIC SUBLEAD GEN-MATCH                         \t" << nEvNOGenMatchBoth_genericphomatch_sublead 
+	    << "\t"<<1.*nEvNOGenMatchBoth_genericphomatch_sublead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tGENERIC LEAD RECOJET-MATCH                        \t" << nEvNOGenMatchBoth_genericjetmatch_lead 
+	    << "\t"<<1.*nEvNOGenMatchBoth_genericjetmatch_lead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tGENERIC SUBLEAD RECOJET-MATCH                     \t" << nEvNOGenMatchBoth_genericjetmatch_sublead 
+	    << "\t"<<1.*nEvNOGenMatchBoth_genericjetmatch_sublead/nJetSelect*100<<"%"<< std::endl;
 
-  std::cout << "\tNO H-DAUG GEN-MATCH LEAD ONLY   \t" << nEvNOGenMatchlead << std::endl;
-  std::cout << "\t\tGENERIC LEAD GEN-MATCH && LEAD RECOJET-MATCH      \t" << nEvNOGenMatchlead_genericjetmatch_and_genericphomatch_lead << std::endl;
-  std::cout << "\t\tONLY GENERIC LEAD GEN-MATCH                       \t" << nEvNOGenMatchlead_genericphomatch_lead << std::endl;
-  std::cout << "\t\tONLY GENERIC LEAD RECOJET-MATCH                   \t" << nEvNOGenMatchlead_genericjetmatch_lead << std::endl;
+  std::cout << "\tNO H-DAUG GEN-MATCH LEAD ONLY                     \t\t" << nEvNOGenMatchlead 
+	    << "\t"<<1.*nEvNOGenMatchlead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tGENERIC LEAD GEN-MATCH && LEAD RECOJET-MATCH      \t" 
+	    << nEvNOGenMatchlead_genericjetmatch_and_genericphomatch_lead 
+	    << "\t"<<1.*nEvNOGenMatchlead_genericjetmatch_and_genericphomatch_lead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tONLY GENERIC LEAD GEN-MATCH                       \t" << nEvNOGenMatchlead_genericphomatch_lead 
+	    << "\t"<<1.*nEvNOGenMatchlead_genericphomatch_lead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tONLY GENERIC LEAD RECOJET-MATCH                   \t" << nEvNOGenMatchlead_genericjetmatch_lead 
+	    << "\t"<<1.*nEvNOGenMatchlead_genericjetmatch_lead/nJetSelect*100<<"%"<< std::endl;
 
-  std::cout << "\tNO H-DAUG GEN-MATCH SUBLEAD ONLY\t" << nEvNOGenMatchsublead << std::endl;
-  std::cout << "\t\tGENERIC SUBLEAD GEN-MATCH && SUBLEAD RECOJET-MATCH\t" << nEvNOGenMatchsublead_genericjetmatch_and_genericphomatch_sublead << std::endl;
-  std::cout << "\t\tONLY ONLY GENERIC SUBLEAD GEN-MATCH               \t" << nEvNOGenMatchsublead_genericphomatch_sublead << std::endl;
-  std::cout << "\t\tONLY ONLY GENERIC SUBLEAD RECOJET-MATCH           \t" << nEvNOGenMatchsublead_genericjetmatch_sublead << std::endl;
+  std::cout << "\tNO H-DAUG GEN-MATCH SUBLEAD ONLY                    \t\t" << nEvNOGenMatchsublead 
+	    << "\t"<<1.*nEvNOGenMatchsublead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tGENERIC SUBLEAD GEN-MATCH && SUBLEAD RECOJET-MATCH\t" 
+	    << nEvNOGenMatchsublead_genericjetmatch_and_genericphomatch_sublead 
+	    << "\t"<<1.*nEvNOGenMatchsublead_genericjetmatch_and_genericphomatch_sublead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tONLY ONLY GENERIC SUBLEAD GEN-MATCH               \t" << nEvNOGenMatchsublead_genericphomatch_sublead
+	    << "\t"<<1.*nEvNOGenMatchsublead_genericphomatch_sublead/nJetSelect*100<<"%"<< std::endl;
+  std::cout << "\t\tONLY ONLY GENERIC SUBLEAD RECOJET-MATCH           \t" << nEvNOGenMatchsublead_genericjetmatch_sublead
+	    << "\t"<<1.*nEvNOGenMatchsublead_genericjetmatch_sublead/nJetSelect*100<<"%"<< std::endl;
   outTree -> AutoSave();
   outFile -> Close();
+
+  //force deltaRmin histo to contain overflow in the last bin
+  int Nbin;
+  Nbin=h["deltaRmin_phoRECO_phoGEN_lead"]->GetNbinsX();
+  h["deltaRmin_phoRECO_phoGEN_lead"] ->AddBinContent(Nbin,h["deltaRmin_phoRECO_phoGEN_lead"]->GetBinContent(Nbin+1));
+  Nbin=h["deltaRmin_phoRECO_phoGEN_sublead"]->GetNbinsX();
+  h["deltaRmin_phoRECO_phoGEN_sublead"] ->AddBinContent(Nbin,h["deltaRmin_phoRECO_phoGEN_sublead"]->GetBinContent(Nbin+1));
+  Nbin=h["deltaRmin_phoRECO_jetRECO_lead"]->GetNbinsX();
+  h["deltaRmin_phoRECO_jetRECO_lead"] ->AddBinContent(Nbin,h["deltaRmin_phoRECO_jetRECO_lead"]->GetBinContent(Nbin+1));
+  Nbin=h["deltaRmin_phoRECO_jetRECO_sublead"]->GetNbinsX();
+  h["deltaRmin_phoRECO_jetRECO_sublead"] ->AddBinContent(Nbin,h["deltaRmin_phoRECO_jetRECO_sublead"]->GetBinContent(Nbin+1));
 
   MakePlot3(h);
 
