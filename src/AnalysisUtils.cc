@@ -69,21 +69,134 @@ void MakePlot3(std::map<std::string,TH1F*> &h)
 
 bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead)
 {
-  if(pho_lead.Pt()<30 || pho_sublead.Pt()<30) return false;
+  double lead_pt=pho_lead.Pt();
+  double sublead_pt=pho_sublead.Pt();
+  if(lead_pt<20 || sublead_pt<20) return false;
   if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
+  double dipho_mass=(pho_lead+pho_sublead).M();
+  if(dipho_mass<100. || dipho_mass>180.) return false;
+  if(lead_pt/dipho_mass<0.33) return false;
+  if(sublead_pt/dipho_mass<0.25) return false;
+  
   return true;
 }
 
-bool JetSelection(const RawTreeVars &treeVars, TreeVars &outtreeVars)
+bool JetSelection(const RawTreeVars &treeVars, TreeVars &outtreeVars)//const TLorentzVector &bjet_lead, const TLorentzVector &bjet_sublead, const TLorentzVector &pho_lead, const TLorentzVector &pho_sublead)
 {
-  int N_hardJet=0;
-  for(int i=0;i<treeVars.N_Jet;i++)
-    if(treeVars.Jet_pt[i]>30)
-      N_hardJet++;
-  outtreeVars.nJets=N_hardJet;
-  if(N_hardJet<2) return false;
+  //check that selected jets are far from any reco photons
+  //int N_hardJet=0;
+  //for(int i=0;i<treeVars.N_TightPh;i++)
+  //{
+  //  if(treeVars.Jet_pt[i]<25) continue;
+  //  if( DeltaRmin_phoRECO_jetRECO(pho_lead,treeVars)<0.4 ) continue;
+  //  if( DeltaRmin_phoRECO_jetRECO(pho_sublead,treeVars)<0.4 ) continue;
+  //  if(treeVars.Jet_mvav2[i]>0)
+  //    N_hardJet++;
+  //}      
+  
+  //if(N_hardJet<2) return false;
   return true;
 }
+
+bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD)
+{
+  int BTagOffset;
+  if(useMTD == false)
+    BTagOffset=0;
+  else
+    BTagOffset=3;
+
+  //find jet with higher btag score
+  int ijet1=0;
+  int btag1=outtreeVars.jet_BTagLevel[0];
+  float pt1 = outtreeVars.jet_pt[0];
+  //---------------------------------------------------------------
+  cout<<"0\tbtag"<<btag1<<"\tpt1"<<pt1<<endl;
+  //---------------------------------------------------------------
+  for(int i=1; i<outtreeVars.nJets; i++)
+  {
+    //---------------------------------------------------------------
+    cout<<i<<"\tbtag"<<outtreeVars.jet_BTagLevel[i]<<"\tpt1"<<outtreeVars.jet_pt[i]<<endl;
+    //---------------------------------------------------------------
+    //If(BTag>BTagOffset && BTag<4+BTagOffset) <-- already required to fill outtreeVars
+    if(outtreeVars.jet_BTagLevel[i] > btag1)
+    {
+      ijet1=i;
+      btag1=outtreeVars.jet_BTagLevel[i];
+      pt1 = outtreeVars.jet_pt[i];
+    }
+    else
+      if(outtreeVars.jet_BTagLevel[i] == btag1)
+	if(outtreeVars.jet_pt[i] > pt1)
+	{
+	  ijet1=i;
+	  btag1=outtreeVars.jet_BTagLevel[i];
+	  pt1 = outtreeVars.jet_pt[i];
+	}
+  }
+
+  //find second jet with higher btag score
+  int ijet2=-1;
+  int btag2=-1;
+  float pt2=-1;
+  for(int i=0; i<outtreeVars.nJets; i++)
+  {
+    if(i==ijet1) continue;
+    if(ijet2==-1)
+    {
+      ijet2=i;
+      btag2=outtreeVars.jet_BTagLevel[i];
+      pt2 = outtreeVars.jet_pt[i];
+    }
+    else
+      if(outtreeVars.jet_BTagLevel[i] > btag2)
+      {
+	ijet2=i;
+	btag2=outtreeVars.jet_BTagLevel[i];
+	pt2 = outtreeVars.jet_pt[i];
+      }
+      else
+	if(outtreeVars.jet_BTagLevel[i] == btag2)
+	  if(outtreeVars.jet_pt[i] > pt2)
+	  {
+	    ijet2=i;
+	    btag2=outtreeVars.jet_BTagLevel[i];
+	    pt2 = outtreeVars.jet_pt[i];
+	  }
+  }
+
+  //---------------------------------------------------------------
+  cout<<"best score i "<<ijet1<<" "<<ijet2<<endl;
+  //---------------------------------------------------------------
+  if(ijet2==-1)
+    return false;
+
+  if(pt1>pt2)
+  {
+    bjet_lead_i = ijet1;
+    bjet_sublead_i = ijet2;
+  }
+  else
+  {
+    bjet_lead_i = ijet2;
+    bjet_sublead_i = ijet1;
+  }
+
+  return true;
+}
+
+
+int GetBTagLevel(int BTag)
+{
+  if(BTag & 0b100000) return 6;
+  if(BTag & 0b010000) return 5;
+  if(BTag & 0b001000) return 4;
+  if(BTag & 0b000100) return 3;
+  if(BTag & 0b000010) return 2;
+  if(BTag & 0b000001) return 1;
+  return 0;
+}
+
 
 bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr)
 //function that find the pair of photons that minimize M_diphogen - M_higgs
@@ -169,6 +282,62 @@ void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho
   }
   //cout<<"i_LEAD="<<pho_lead_i<<"\ti_SUBLEAD="<<pho_sublead_i<<endl;
 }
+
+
+bool  FindLeadSublead_bjet(const RawTreeVars &treeVars, int &bjet_lead_i, int &bjet_sublead_i)
+{  
+  if(treeVars.N_Jet<2) return false;
+
+  bjet_lead_i=-1;
+  bjet_sublead_i=-1;
+  float ptmax1, ptmax2;
+  for(int i=0;i<treeVars.N_Jet;i++)
+  {
+    if(treeVars.Jet_mvav2[i]==0) continue;//NOT a bjet
+    cout<<i<<" "<<treeVars.Jet_pt[i]<<endl;
+
+    if(bjet_lead_i==-1)
+    {
+      bjet_lead_i=i;
+      ptmax1=treeVars.Jet_pt[i];
+    }
+    else
+      if(bjet_sublead_i==-1)
+      {
+	if(treeVars.Jet_pt[i]>ptmax1)
+	{
+	  bjet_sublead_i=bjet_lead_i;
+	  ptmax2=ptmax1;
+	  bjet_lead_i=i;
+	  ptmax1=treeVars.Jet_pt[i];
+	}
+	else
+	{
+	  bjet_sublead_i=i;
+	  ptmax2=treeVars.Jet_pt[i];
+	}
+      }
+      else
+	if(treeVars.Jet_pt[i]>ptmax1)
+        {
+	  ptmax2=ptmax1;
+	  bjet_sublead_i=bjet_lead_i;
+	  ptmax1=treeVars.Jet_pt[i];
+	  bjet_lead_i=i;
+	}
+	else
+	  if(treeVars.Jet_pt[i]>ptmax2)
+	  {
+	    ptmax2=treeVars.Jet_pt[i];
+	    bjet_sublead_i=i;
+	  }
+  }
+  cout<<"i_LEAD="<<bjet_lead_i<<"\ti_SUBLEAD="<<bjet_sublead_i<<endl;
+  if(bjet_sublead_i==-1)
+    return false;
+  return true;
+}
+
 
 bool RecoJetGenericMatch (const TLorentzVector &reco_pho , const RawTreeVars& treeVars , TLorentzVector& reco_jet_match, float DeltaRmax)
 {

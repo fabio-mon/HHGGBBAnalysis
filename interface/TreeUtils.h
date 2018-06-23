@@ -7,11 +7,10 @@
 #include <string>
 #include "TChain.h"
 
-
-
 /*** tree variables ***/
 struct TreeVars
 {
+
   int nvtx;
   float weight;
   float dipho_sumpt;
@@ -60,16 +59,39 @@ struct TreeVars
   float MetPhi;
   float ttHMVA;
   
-  float nJets;
-  float nJets_bTagLoose;
-  float nJets_bTagMedium;
-  float nJets_bTagTight;
+  int nJets;
+  int nJets_bTagLoose;
+  int nJets_bTagMedium;
+  int nJets_bTagTight;
   
-  float jet_pt[9];
-  float jet_eta[9];
-  float jet_phi[9];
-  float jet_bdiscriminant[9];
-  
+  float jet_pt[20];
+  float jet_eta[20];
+  float jet_phi[20];
+  int   jet_bdiscriminant[20];
+  int   jet_BTagLevel[20];
+  float jet_mass[20];
+
+
+  float dibjet_mass;
+  float dibjet_sumpt;
+  float dibjet_deltaeta;
+  float dibjet_deltaphi;
+
+  float dibjet_leadPt;
+  float dibjet_leadEta;
+  float dibjet_leadPhi;
+  float dibjet_leadptoM;
+  float dibjet_leadEnergy;
+  int   dibjet_leadbtagscore;
+
+  float dibjet_subleadPt;
+  float dibjet_subleadEta;
+  float dibjet_subleadPhi;
+  float dibjet_subleadptoM;
+  float dibjet_subleadEnergy;
+  int   dibjet_subleadbtagscore;
+
+
   float mu_pt[2];
   float mu_eta[2];
   float mu_phi[2];
@@ -107,9 +129,9 @@ struct TreeVars
 
 struct RawTreeVars
 {
-   static constexpr int maxpart=50;
-   static constexpr int maxjets=200;
-   static constexpr int maxweights=500;
+  static constexpr int maxpart=50;
+  static constexpr int maxjets=200;
+  static constexpr int maxweights=500;
 
    Int_t run,event,lumi;
 
@@ -223,8 +245,8 @@ struct RawTreeVars
    float Jet_eta[maxjets];
    float Jet_phi[maxjets];
    float Jet_mass[maxjets];
-   float Jet_mvav2[maxjets];
-   float Jet_deepcsv[maxjets];
+   int   Jet_mvav2[maxjets];
+   int   Jet_deepcsv[maxjets];
    float Jet_flav[maxjets];
    float Jet_hadflav[maxjets];
    float Jet_pid[maxjets];

@@ -3,6 +3,7 @@
 void InitTreeVars(TChain* chain, TreeVars& treeVars)
 {
   chain -> SetBranchAddress("weight",&treeVars.weight);
+  chain -> SetBranchAddress("nvtx",            &treeVars.nvtx);
   
   chain -> SetBranchAddress("dipho_sumpt",   &treeVars.dipho_sumpt);
   chain -> SetBranchAddress("dipho_mass",    &treeVars.dipho_mass);
@@ -14,36 +15,59 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   chain -> SetBranchAddress("dipho_leadPt",                  &treeVars.dipho_leadPt);
   chain -> SetBranchAddress("dipho_leadEta",                 &treeVars.dipho_leadEta);
   chain -> SetBranchAddress("dipho_leadPhi",                 &treeVars.dipho_leadPhi);  
-  chain -> SetBranchAddress("dipho_leadEta_gen",                 &treeVars.dipho_leadEta_gen);
-  chain -> SetBranchAddress("dipho_leadPhi_gen",                 &treeVars.dipho_leadPhi_gen);
+  //chain -> SetBranchAddress("dipho_leadEta_gen",                 &treeVars.dipho_leadEta_gen);
+  //chain -> SetBranchAddress("dipho_leadPhi_gen",                 &treeVars.dipho_leadPhi_gen);
   chain -> SetBranchAddress("dipho_leadptoM",                &treeVars.dipho_leadptoM);
   chain -> SetBranchAddress("dipho_leadEnergy",              &treeVars.dipho_leadEnergy);
-  chain -> SetBranchAddress("dipho_leadEnergy_gen",          &treeVars.dipho_leadEnergy_gen);
-  chain -> SetBranchAddress("dipho_leadIsoVarRhoCorr",      &treeVars.dipho_leadIso);
-  chain -> SetBranchAddress("dipho_leadDeltaRgenreco",      &treeVars.dipho_leadDeltaRgenreco);
-  chain -> SetBranchAddress("dipho_leadDeltaEtagenreco",      &treeVars.dipho_leadDeltaEtagenreco);
-  chain -> SetBranchAddress("dipho_leadDeltaPhigenreco",      &treeVars.dipho_leadDeltaPhigenreco);
+  //chain -> SetBranchAddress("dipho_leadEnergy_gen",          &treeVars.dipho_leadEnergy_gen);
+  //chain -> SetBranchAddress("dipho_leadIsoVarRhoCorr",      &treeVars.dipho_leadIso);
+  //chain -> SetBranchAddress("dipho_leadDeltaRgenreco",      &treeVars.dipho_leadDeltaRgenreco);
+  //chain -> SetBranchAddress("dipho_leadDeltaEtagenreco",      &treeVars.dipho_leadDeltaEtagenreco);
+  //chain -> SetBranchAddress("dipho_leadDeltaPhigenreco",      &treeVars.dipho_leadDeltaPhigenreco);
   //  chain -> SetBranchAddress("dipho_lead_sigmaEoE",&treeVars.dipho_lead_sigmaEoE);
   
   chain -> SetBranchAddress("dipho_subleadPt",               &treeVars.dipho_subleadPt);
   chain -> SetBranchAddress("dipho_subleadEta",              &treeVars.dipho_subleadEta);
   chain -> SetBranchAddress("dipho_subleadPhi",              &treeVars.dipho_subleadPhi);
-  chain -> SetBranchAddress("dipho_subleadEta_gen",              &treeVars.dipho_subleadEta_gen);
-  chain -> SetBranchAddress("dipho_subleadPhi_gen",              &treeVars.dipho_subleadPhi_gen);
+  //chain -> SetBranchAddress("dipho_subleadEta_gen",              &treeVars.dipho_subleadEta_gen);
+  //chain -> SetBranchAddress("dipho_subleadPhi_gen",              &treeVars.dipho_subleadPhi_gen);
   chain -> SetBranchAddress("dipho_subleadptoM",             &treeVars.dipho_subleadptoM);
   chain -> SetBranchAddress("dipho_subleadEnergy",           &treeVars.dipho_subleadEnergy);
-  chain -> SetBranchAddress("dipho_subleadEnergy_gen",       &treeVars.dipho_subleadEnergy_gen);
-  chain -> SetBranchAddress("dipho_subleadIsoVarRhoCorr",      &treeVars.dipho_subleadIso);
-  chain -> SetBranchAddress("dipho_subleadDeltaRgenreco",      &treeVars.dipho_subleadDeltaRgenreco);
-  chain -> SetBranchAddress("dipho_subleadDeltaEtagenreco",      &treeVars.dipho_subleadDeltaEtagenreco);
-  chain -> SetBranchAddress("dipho_subleadDeltaPhigenreco",      &treeVars.dipho_subleadDeltaPhigenreco);
+  //chain -> SetBranchAddress("dipho_subleadEnergy_gen",       &treeVars.dipho_subleadEnergy_gen);
+  //chain -> SetBranchAddress("dipho_subleadIsoVarRhoCorr",      &treeVars.dipho_subleadIso);
+  //chain -> SetBranchAddress("dipho_subleadDeltaRgenreco",      &treeVars.dipho_subleadDeltaRgenreco);
+  //chain -> SetBranchAddress("dipho_subleadDeltaEtagenreco",      &treeVars.dipho_subleadDeltaEtagenreco);
+  //chain -> SetBranchAddress("dipho_subleadDeltaPhigenreco",      &treeVars.dipho_subleadDeltaPhigenreco);
   //  chain -> SetBranchAddress("dipho_sublead_sigmaEoE",&treeVars.dipho_sublead_sigmaEoE);
   
-  chain -> SetBranchAddress("nJets",           &treeVars.nJets);
-  chain -> SetBranchAddress("nvtx",            &treeVars.nvtx);
-  //chain -> SetBranchAddress("nJets_bTagLoose", &treeVars.nJets_bTagLoose);
-  //chain -> SetBranchAddress("nJets_bTagMedium",&treeVars.nJets_bTagMedium);
-  //chain -> SetBranchAddress("nJets_bTagTight", &treeVars.nJets_bTagTight);
+  chain -> SetBranchAddress("nJets",                               &treeVars.nJets);
+  chain -> SetBranchAddress("nJets_bTagLoose",			&treeVars.nJets_bTagLoose);
+  chain -> SetBranchAddress("nJets_bTagMedium",			&treeVars.nJets_bTagMedium);
+  chain -> SetBranchAddress("nJets_bTagTight",			&treeVars.nJets_bTagTight);
+  chain -> SetBranchAddress("jet_pt",			        treeVars.jet_pt);
+  chain -> SetBranchAddress("jet_eta",			        treeVars.jet_eta);
+  chain -> SetBranchAddress("jet_phi",			        treeVars.jet_phi);
+  chain -> SetBranchAddress("jet_BTagLevel",			treeVars.jet_BTagLevel);
+
+  chain -> SetBranchAddress("dibjet_mass",                      &treeVars.dibjet_mass);
+  chain -> SetBranchAddress("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
+  chain -> SetBranchAddress("dibjet_deltaeta",                  &treeVars.dibjet_deltaeta);
+  chain -> SetBranchAddress("dibjet_deltaphi",                  &treeVars.dibjet_deltaphi);
+  
+  chain -> SetBranchAddress("dibjet_leadPt",                    &treeVars.dibjet_leadPt);
+  chain -> SetBranchAddress("dibjet_leadEta",                   &treeVars.dibjet_leadEta);
+  chain -> SetBranchAddress("dibjet_leadPhi",                   &treeVars.dibjet_leadPhi);
+  chain -> SetBranchAddress("dibjet_leadptoM",                  &treeVars.dibjet_leadptoM);
+  chain -> SetBranchAddress("dibjet_leadEnergy",                &treeVars.dibjet_leadEnergy);
+  chain -> SetBranchAddress("dibjet_leadbtagscore",             &treeVars.dibjet_leadbtagscore);
+  
+  chain -> SetBranchAddress("dibjet_subleadPt",                 &treeVars.dibjet_subleadPt);
+  chain -> SetBranchAddress("dibjet_subleadEta",                &treeVars.dibjet_subleadEta);
+  chain -> SetBranchAddress("dibjet_subleadPhi",                &treeVars.dibjet_subleadPhi);
+  chain -> SetBranchAddress("dibjet_subleadptoM",               &treeVars.dibjet_subleadptoM);
+  chain -> SetBranchAddress("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
+  chain -> SetBranchAddress("dibjet_subleadbtagscore",          &treeVars.dibjet_subleadbtagscore);
+
 }
 
 
@@ -51,47 +75,69 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
 void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
 {
   tree -> Branch("weight",&treeVars.weight);
+  tree -> Branch("nvtx",            &treeVars.nvtx);
   
   tree -> Branch("dipho_sumpt",   &treeVars.dipho_sumpt);
   tree -> Branch("dipho_mass",    &treeVars.dipho_mass);
   tree -> Branch("dipho_mass_gen",    &treeVars.dipho_mass_gen);
-  //  tree -> Branch("dipho_sigmaRV", &treeVars.dipho_sigmaRV);
   tree -> Branch("dipho_deltaeta",&treeVars.dipho_deltaeta);
   tree -> Branch("dipho_deltaphi",&treeVars.dipho_deltaphi);
   
   tree -> Branch("dipho_leadPt",                  &treeVars.dipho_leadPt);
   tree -> Branch("dipho_leadEta",                 &treeVars.dipho_leadEta);
   tree -> Branch("dipho_leadPhi",                 &treeVars.dipho_leadPhi);
-  tree -> Branch("dipho_leadEta_gen",             &treeVars.dipho_leadEta_gen);
-  tree -> Branch("dipho_leadPhi_gen",             &treeVars.dipho_leadPhi_gen);
+  //tree -> Branch("dipho_leadEta_gen",             &treeVars.dipho_leadEta_gen);
+  //tree -> Branch("dipho_leadPhi_gen",             &treeVars.dipho_leadPhi_gen);
   tree -> Branch("dipho_leadptoM",                &treeVars.dipho_leadptoM);
   tree -> Branch("dipho_leadEnergy",              &treeVars.dipho_leadEnergy);
-  tree -> Branch("dipho_leadEnergy_gen",          &treeVars.dipho_leadEnergy_gen);
-  tree -> Branch("dipho_leadIsoVarRhoCorr",      &treeVars.dipho_leadIso);
-  tree -> Branch("dipho_leadDeltaRgenreco",      &treeVars.dipho_leadDeltaRgenreco);
-  tree -> Branch("dipho_leadDeltaEtagenreco",      &treeVars.dipho_leadDeltaEtagenreco);
-  tree -> Branch("dipho_leadDeltaPhigenreco",      &treeVars.dipho_leadDeltaPhigenreco);
+  //tree -> Branch("dipho_leadEnergy_gen",          &treeVars.dipho_leadEnergy_gen);
+  //tree -> Branch("dipho_leadIsoVarRhoCorr",      &treeVars.dipho_leadIso);
+  //tree -> Branch("dipho_leadDeltaRgenreco",      &treeVars.dipho_leadDeltaRgenreco);
+  //tree -> Branch("dipho_leadDeltaEtagenreco",      &treeVars.dipho_leadDeltaEtagenreco);
+  //tree -> Branch("dipho_leadDeltaPhigenreco",      &treeVars.dipho_leadDeltaPhigenreco);
   //  tree -> Branch("dipho_lead_sigmaEoE",&treeVars.dipho_lead_sigmaEoE);
   
   tree -> Branch("dipho_subleadPt",               &treeVars.dipho_subleadPt);
   tree -> Branch("dipho_subleadEta",              &treeVars.dipho_subleadEta);
   tree -> Branch("dipho_subleadPhi",              &treeVars.dipho_subleadPhi);
-  tree -> Branch("dipho_subleadEta_gen",             &treeVars.dipho_subleadEta_gen);
-  tree -> Branch("dipho_subleadPhi_gen",             &treeVars.dipho_subleadPhi_gen);
+  //tree -> Branch("dipho_subleadEta_gen",             &treeVars.dipho_subleadEta_gen);
+  //tree -> Branch("dipho_subleadPhi_gen",             &treeVars.dipho_subleadPhi_gen);
   tree -> Branch("dipho_subleadptoM",             &treeVars.dipho_subleadptoM);
   tree -> Branch("dipho_subleadEnergy",           &treeVars.dipho_subleadEnergy);
-  tree -> Branch("dipho_subleadEnergy_gen",       &treeVars.dipho_subleadEnergy_gen);
-  tree -> Branch("dipho_subleadIsoVarRhoCorr",      &treeVars.dipho_subleadIso);
-  tree -> Branch("dipho_subleadDeltaRgenreco",      &treeVars.dipho_subleadDeltaRgenreco);
-  tree -> Branch("dipho_subleadDeltaEtagenreco",      &treeVars.dipho_subleadDeltaEtagenreco);
-  tree -> Branch("dipho_subleadDeltaPhigenreco",      &treeVars.dipho_subleadDeltaPhigenreco);
+  //tree -> Branch("dipho_subleadEnergy_gen",       &treeVars.dipho_subleadEnergy_gen);
+  //tree -> Branch("dipho_subleadIsoVarRhoCorr",      &treeVars.dipho_subleadIso);
+  //tree -> Branch("dipho_subleadDeltaRgenreco",      &treeVars.dipho_subleadDeltaRgenreco);
+  //tree -> Branch("dipho_subleadDeltaEtagenreco",      &treeVars.dipho_subleadDeltaEtagenreco);
+  //tree -> Branch("dipho_subleadDeltaPhigenreco",      &treeVars.dipho_subleadDeltaPhigenreco);
   //  tree -> Branch("dipho_sublead_sigmaEoE",&treeVars.dipho_sublead_sigmaEoE);
   
-  tree -> Branch("nJets",           &treeVars.nJets);
-  tree -> Branch("nvtx",            &treeVars.nvtx);
-  //tree -> Branch("nJets_bTagLoose", &treeVars.nJets_bTagLoose);
-  //tree -> Branch("nJets_bTagMedium",&treeVars.nJets_bTagMedium);
-  //tree -> Branch("nJets_bTagTight", &treeVars.nJets_bTagTight);
+  tree -> Branch("nJets",                               &treeVars.nJets);
+  tree -> Branch("nJets_bTagLoose",			&treeVars.nJets_bTagLoose);
+  tree -> Branch("nJets_bTagMedium",			&treeVars.nJets_bTagMedium);
+  tree -> Branch("nJets_bTagTight",			&treeVars.nJets_bTagTight);
+  tree -> Branch("jet_pt",			        treeVars.jet_pt);
+  tree -> Branch("jet_eta",			        treeVars.jet_eta);
+  tree -> Branch("jet_phi",			        treeVars.jet_phi);
+  tree -> Branch("jet_BTagLevel",			treeVars.jet_BTagLevel);
+
+  tree -> Branch("dibjet_mass",                      &treeVars.dibjet_mass);
+  tree -> Branch("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
+  tree -> Branch("dibjet_deltaeta",                  &treeVars.dibjet_deltaeta);
+  tree -> Branch("dibjet_deltaphi",                  &treeVars.dibjet_deltaphi);
+  
+  tree -> Branch("dibjet_leadPt",                    &treeVars.dibjet_leadPt);
+  tree -> Branch("dibjet_leadEta",                   &treeVars.dibjet_leadEta);
+  tree -> Branch("dibjet_leadPhi",                   &treeVars.dibjet_leadPhi);
+  tree -> Branch("dibjet_leadptoM",                  &treeVars.dibjet_leadptoM);
+  tree -> Branch("dibjet_leadEnergy",                &treeVars.dibjet_leadEnergy);
+  tree -> Branch("dibjet_leadbtagscore",             &treeVars.dibjet_leadbtagscore);
+  
+  tree -> Branch("dibjet_subleadPt",                 &treeVars.dibjet_subleadPt);
+  tree -> Branch("dibjet_subleadEta",                &treeVars.dibjet_subleadEta);
+  tree -> Branch("dibjet_subleadPhi",                &treeVars.dibjet_subleadPhi);
+  tree -> Branch("dibjet_subleadptoM",               &treeVars.dibjet_subleadptoM);
+  tree -> Branch("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
+  tree -> Branch("dibjet_subleadbtagscore",          &treeVars.dibjet_subleadbtagscore);
 }
 
 

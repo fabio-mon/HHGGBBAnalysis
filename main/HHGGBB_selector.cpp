@@ -104,15 +104,36 @@ int main(int argc, char* argv[])
   h["dipho_subleadEta"] = new TH1F("dipho_subleadEta","dipho_subleadEta",100,-3.5,3.5);
   h["dipho_subleadPhi"] = new TH1F("dipho_subleadPhi","dipho_subleadPhi",100,-3.14,3.14);
   h["dipho_subleadptoM"] = new TH1F("dipho_subleadptoM","dipho_subleadptoM",100,0,3.5);
-  h["nJets"] = new TH1F("nJets","nJets",11,-0.5,10.5);
   h["dipho_leaddeltaR_GenReco"] = new TH1F("dipho_leaddeltaR_GenReco","dipho_leaddeltaR_GenReco",300,0.,0.1);
   h["dipho_subleaddeltaR_GenReco"] = new TH1F("dipho_subleaddeltaR_GenReco","dipho_subleaddeltaR_GenReco",300,0.,0.1);
-  h["dipho_leadIso_o_E"] = new TH1F("dipho_leadIso_o_E","dipho_leadIso_o_E",300,0.,0.25);
-  h["dipho_subleadIso_o_E"] = new TH1F("dipho_subleadIso_o_E","dipho_subleadIso_o_E",300,0.,0.25);
-  h["dipho_leaddeltaEta_GenReco"] = new TH1F("dipho_leaddeltaEta_GenReco","dipho_leaddeltaEta_GenReco",300,0.,0.2);
-  h["dipho_subleaddeltaEta_GenReco"] = new TH1F("dipho_subleaddeltaEta_GenReco","dipho_subleaddeltaEta_GenReco",300,0.,0.2);
-  h["dipho_leaddeltaPhi_GenReco"] = new TH1F("dipho_leaddeltaPhi_GenReco","dipho_leaddeltaPhi_GenReco",300,0.,0.2);
-  h["dipho_subleaddeltaPhi_GenReco"] = new TH1F("dipho_subleaddeltaPhi_GenReco","dipho_subleaddeltaPhi_GenReco",300,0.,0.2);
+
+  h["nJets"] = new TH1F("nJets","nJets",11,-0.5,10.5);
+  h["nJets_bTagLoose"] = new TH1F("nJets_bTagLoose","nJets_bTagLoose",11,-0.5,10.5);
+  h["nJets_bTagMedium"] = new TH1F("nJets_bTagMedium","nJets_bTagMedium",11,-0.5,10.5);
+  h["nJets_bTagTight"] = new TH1F("nJets_bTagTight","nJets_bTagTight",11,-0.5,10.5);
+  h["dibjet_mass"] = new TH1F("dibjet_mass","dibjet_mass",100,60,200);
+  h["dibjet_sumpt"] = new TH1F("dibjet_sumpt","dibjet_sumpt",100,0,300);
+  h["dibjet_deltaeta"] = new TH1F("dibjet_deltaeta","dibjet_deltaeta",100,0,8);
+  h["dibjet_deltaphi"] = new TH1F("dibjet_deltaphi","dibjet_deltaphi",100,0,3.14);
+  h["dibjet_leadPt"] = new TH1F("dibjet_leadPt","dibjet_leadPt",100,0,200);
+  h["dibjet_leadEta"] = new TH1F("dibjet_leadEta","dibjet_leadEta",100,-3.5,3.5);
+  h["dibjet_leadPhi"] = new TH1F("dibjet_leadPhi","dibjet_leadPhi",100,-3.14,3.14);
+  h["dibjet_leadptoM"] = new TH1F("dibjet_leadptoM","dibjet_leadptoM",100,0,3.5);
+  h["dibjet_leadEnergy"] = new TH1F("dibjet_leadEnergy","dibjet_leadEnergy",100,0,300);
+  h["dibjet_leadbtagscore"] = new TH1F("dibjet_leadbtagscore","dibjet_leadbtagscore",9,-1.5,7.5);
+  h["dibjet_subleadPt"] = new TH1F("dibjet_subleadPt","dibjet_subleadPt",100,0,200);
+  h["dibjet_subleadEta"] = new TH1F("dibjet_subleadEta","dibjet_subleadEta",100,-3.5,3.5);
+  h["dibjet_subleadPhi"] = new TH1F("dibjet_subleadPhi","dibjet_subleadPhi",100,-3.14,3.14);
+  h["dibjet_subleadptoM"] = new TH1F("dibjet_subleadptoM","dibjet_subleadptoM",100,0,3.5);
+  h["dibjet_subleadEnergy"] = new TH1F("dibjet_subleadEnergy","dibjet_subleadEnergy",100,0,300);
+  h["dibjet_subleadbtagscore"] = new TH1F("dibjet_subleadbtagscore","dibjet_subleadbtagscore",9,-1.5,7.5);
+  
+  //h["dipho_leadIso_o_E"] = new TH1F("dipho_leadIso_o_E","dipho_leadIso_o_E",300,0.,0.25);
+  //h["dipho_subleadIso_o_E"] = new TH1F("dipho_subleadIso_o_E","dipho_subleadIso_o_E",300,0.,0.25);
+  //h["dipho_leaddeltaEta_GenReco"] = new TH1F("dipho_leaddeltaEta_GenReco","dipho_leaddeltaEta_GenReco",300,0.,0.2);
+  //h["dipho_subleaddeltaEta_GenReco"] = new TH1F("dipho_subleaddeltaEta_GenReco","dipho_subleaddeltaEta_GenReco",300,0.,0.2);
+  //h["dipho_leaddeltaPhi_GenReco"] = new TH1F("dipho_leaddeltaPhi_GenReco","dipho_leaddeltaPhi_GenReco",300,0.,0.2);
+  //h["dipho_subleaddeltaPhi_GenReco"] = new TH1F("dipho_subleaddeltaPhi_GenReco","dipho_subleaddeltaPhi_GenReco",300,0.,0.2);
 
   //----------
   // get trees
@@ -181,31 +202,130 @@ int main(int argc, char* argv[])
     if(treeVars.N_TightPh<2) continue;
 
     //find higgs daugher gen-photons and flag their .isHdaug
-    if( ! FindGenPh_Hdaug(treeVars) ) continue;
+    //if( ! FindGenPh_Hdaug(treeVars) ) continue;
 
     //find lead & sublead reco photons
+    //---------------------------------------------------------------
+    PrintRecoPhoton(treeVars);
+    //---------------------------------------------------------------
     int pho_lead_i;
     int pho_sublead_i;
     FindLeadSublead_pho(treeVars,pho_lead_i,pho_sublead_i);
+    //---------------------------------------------------------------
+    cout<<"lead="<<pho_lead_i<<"\t\tsublead="<<pho_sublead_i<<endl;
+    //---------------------------------------------------------------
     TLorentzVector pho_lead,pho_sublead;
     pho_lead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_lead_i],treeVars.TightPh_eta[pho_lead_i],treeVars.TightPh_phi[pho_lead_i],treeVars.TightPh_E[pho_lead_i]);
     pho_sublead.SetPtEtaPhiE(treeVars.TightPh_pt[pho_sublead_i],treeVars.TightPh_eta[pho_sublead_i],treeVars.TightPh_phi[pho_sublead_i],treeVars.TightPh_E[pho_sublead_i]);
-
+    
     //Gen-matching
-    if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.1))//default DeltaRmax=0.03
-       continue;
+    //if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.1))//default DeltaRmax=0.03
+    //   continue;
     
     //Cuts on photons
     if(!DiPhotonSelection(pho_lead,pho_sublead))
        continue;
+    //---------------------------------------------------------------
+    cout<<"photonselection_passed"<<endl;
+
+    //Clean jet collection (to do? maybe required for bkg study...)
+    //Tag good jets with a bool, requirements are:
+    // 1. Not matching with any reco photon or any reco electron
+    // 2. ratio Echarge / Eneutral  
+    //TagGoodJets(treeVars);
+
+    //Get lead and sublead b-tagged jets
+    //int bjet_lead_i;
+    //int bjet_sublead_i;
+    //if(!FindLeadSublead_bjet(treeVars,bjet_lead_i,bjet_sublead_i))
+    //  continue;
+    //TLorentzVector bjet_lead,bjet_sublead;
+    //bjet_lead.SetPtEtaPhiE(treeVars.Jet_pt[bjet_lead_i],treeVars.Jet_eta[bjet_lead_i],treeVars.Jet_phi[bjet_lead_i],treeVars.Jet_E[bjet_lead_i]);
+    //bjet_sublead.SetPtEtaPhiE(treeVars.Jet_pt[bjet_sublead_i],treeVars.Jet_eta[bjet_sublead_i],treeVars.Jet_phi[bjet_sublead_i],treeVars.Jet_E[bjet_sublead_i]);
 
     //Jets selections
-    if(!JetSelection(treeVars,outtreeVars))//require njetmin with above a minimum pt value, fill also outtreeVars.nJets with the number of hard jets
-      continue;
+    //if(!JetSelection(treeVars,bjet_lead,bjet_sublead))
+    //  continue;
+
+    bool useMTD=false;
+    int BTagOffset;
+    //BTag level:
+    // 0 no BTag
+    // 1 BTag loose
+    // 2 BTag medium
+    // 3 BTag tight
+    // 4 BTag loose with MTD
+    // 5 BTag medium with MTD
+    // 6 BTag tight with MTD
+    if(useMTD == false)
+      BTagOffset=0;
+    else
+      BTagOffset=3;
+
+    //---------------------------------------------------------------
+    PrintRecoJet(treeVars);
+    //---------------------------------------------------------------
+    outtreeVars.nJets=0;
+    //select in output only jets with a certain minimum pt and b-tagged
+    for(int i=0;i<treeVars.N_Jet;i++)
+    {
+      if(treeVars.Jet_pt[i]<25) continue;
+      if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
+      int BTag = GetBTagLevel(treeVars.Jet_mvav2[i]);
+      //---------------------------------------------------------------
+      cout<<i<<"\tbtagvalue="<<treeVars.Jet_mvav2[i]<<"\tbtaglevel="<<BTag<<endl;
+      //---------------------------------------------------------------
+      if(BTag>BTagOffset && BTag<4+BTagOffset)
+      {
+	outtreeVars.nJets++;
+	outtreeVars.jet_pt[outtreeVars.nJets-1] = treeVars.Jet_pt[i];
+	outtreeVars.jet_eta[outtreeVars.nJets-1] = treeVars.Jet_eta[i];                    
+	outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
+	outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
+	outtreeVars.jet_BTagLevel[outtreeVars.nJets-1] = BTag;
+	if(BTag-BTagOffset==1)
+	  outtreeVars.nJets_bTagLoose++;
+	else
+	  if(BTag-BTagOffset==2)
+	    outtreeVars.nJets_bTagMedium++;
+	  else
+	    if(BTag-BTagOffset==3)
+	      outtreeVars.nJets_bTagTight++;
+      }
+    }
+
+    if(outtreeVars.nJets<2) continue;
+    //---------------------------------------------------------------
+    cout<<"pass jet selection"<<endl;
+    //---------------------------------------------------------------
+
+    //Select the two jets with the higher BTag level, if they have the same value select the harder one
+    int bjet_lead_i;
+    int bjet_sublead_i;
+    //---------------------------------------------------------------
+    cout<<"select best score bjets:"<<endl;
+    //---------------------------------------------------------------
+    SelectBestScoreBJets(outtreeVars,bjet_lead_i,bjet_sublead_i,useMTD);
+    TLorentzVector bjet_lead,bjet_sublead;
+    bjet_lead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_lead_i],outtreeVars.jet_eta[bjet_lead_i],outtreeVars.jet_phi[bjet_lead_i],outtreeVars.jet_mass[bjet_lead_i]);
+    bjet_sublead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_sublead_i],outtreeVars.jet_eta[bjet_sublead_i],outtreeVars.jet_phi[bjet_sublead_i],outtreeVars.jet_mass[bjet_sublead_i]);
+
+    double dibjet_mass = (bjet_lead+bjet_sublead).M();
+    if(dibjet_mass<70 || dibjet_mass>180) continue;
+    //---------------------------------------------------------------
+    cout<<"pass jets invariant mass selection"<<endl;
+    //---------------------------------------------------------------
+
+    //---------------------------------------------------------------
+    cout<<"\n\n\n\n\n\n"<<endl;
+    //---------------------------------------------------------------
+
+
     //cout<<"-----------"<<endl;
-    //cout<<treeVars.N_Vtx<<endl;
     //Fill outtree and histos
     outtreeVars.weight = 1.;
+    outtreeVars.nvtx = treeVars.N_Vtx;
     outtreeVars.dipho_mass = (pho_lead+pho_sublead).M();
     outtreeVars.dipho_sumpt = (pho_lead+pho_sublead).Pt();
     outtreeVars.dipho_deltaeta = DeltaEta( pho_lead.Eta() , pho_sublead.Eta() );
@@ -215,24 +335,41 @@ int main(int argc, char* argv[])
     outtreeVars.dipho_leadEta = pho_lead.Eta();
     outtreeVars.dipho_leadPhi = pho_lead.Phi();
     outtreeVars.dipho_leadptoM = pho_lead.Pt() / (pho_lead+pho_sublead).M();
-    outtreeVars.dipho_leadEnergy = treeVars.TightPh_E[pho_lead_i];
-    outtreeVars.dipho_leadIso = treeVars.TightPh_iso[pho_lead_i];
-    outtreeVars.dipho_leadDeltaRgenreco = DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen);
-    outtreeVars.dipho_leadDeltaEtagenreco = DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen);
-    outtreeVars.dipho_leadDeltaPhigenreco = DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen);
+    outtreeVars.dipho_leadEnergy = pho_lead.E();
+    //outtreeVars.dipho_leadIso = treeVars.TightPh_iso[pho_lead_i];
+    //outtreeVars.dipho_leadDeltaRgenreco = DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen);
+    //outtreeVars.dipho_leadDeltaEtagenreco = DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen);
+    //outtreeVars.dipho_leadDeltaPhigenreco = DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen);
 
     outtreeVars.dipho_subleadPt = pho_sublead.Pt();
     outtreeVars.dipho_subleadEta = pho_sublead.Eta();
     outtreeVars.dipho_subleadPhi = pho_sublead.Phi();
     outtreeVars.dipho_subleadptoM = pho_sublead.Pt() / (pho_lead+pho_sublead).M();
-    outtreeVars.dipho_subleadEnergy = treeVars.TightPh_E[pho_sublead_i];
-    outtreeVars.dipho_subleadIso = treeVars.TightPh_iso[pho_sublead_i];
-    outtreeVars.dipho_subleadDeltaRgenreco = DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen);
-    outtreeVars.dipho_subleadDeltaEtagenreco = DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen);
-    outtreeVars.dipho_subleadDeltaPhigenreco = DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen);
+    outtreeVars.dipho_subleadEnergy = pho_sublead.E();
+    //outtreeVars.dipho_subleadIso = treeVars.TightPh_iso[pho_sublead_i];
+    //outtreeVars.dipho_subleadDeltaRgenreco = DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen);
+    //outtreeVars.dipho_subleadDeltaEtagenreco = DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen);
+    //outtreeVars.dipho_subleadDeltaPhigenreco = DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen);
 
-    outtreeVars.nvtx = treeVars.N_Vtx;
-    outtreeVars.nJets = treeVars.N_Jet;
+    outtreeVars.dibjet_mass = (bjet_lead+bjet_sublead).M();
+    outtreeVars.dibjet_sumpt = (bjet_lead+bjet_sublead).Pt();
+    outtreeVars.dibjet_deltaeta = DeltaEta( bjet_lead.Eta() , bjet_sublead.Eta() );
+    outtreeVars.dibjet_deltaphi = DeltaPhi( bjet_lead.Phi() , bjet_sublead.Phi() );
+
+    outtreeVars.dibjet_leadPt = bjet_lead.Pt();
+    outtreeVars.dibjet_leadEta = bjet_lead.Eta();
+    outtreeVars.dibjet_leadPhi = bjet_lead.Phi();
+    outtreeVars.dibjet_leadptoM = bjet_lead.Pt() / (bjet_lead+bjet_sublead).M();
+    outtreeVars.dibjet_leadEnergy = bjet_lead.E();
+    outtreeVars.dibjet_leadbtagscore = outtreeVars.jet_BTagLevel[bjet_lead_i];
+
+    outtreeVars.dibjet_subleadPt = bjet_sublead.Pt();
+    outtreeVars.dibjet_subleadEta = bjet_sublead.Eta();
+    outtreeVars.dibjet_subleadPhi = bjet_sublead.Phi();
+    outtreeVars.dibjet_subleadptoM = bjet_sublead.Pt() / (bjet_lead+bjet_sublead).M();
+    outtreeVars.dibjet_subleadEnergy = bjet_sublead.E();
+    outtreeVars.dibjet_subleadbtagscore = outtreeVars.jet_BTagLevel[bjet_sublead_i];
+
 
     h["dipho_mass"] -> Fill(outtreeVars.dipho_mass);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);
@@ -242,19 +379,40 @@ int main(int argc, char* argv[])
     h["dipho_leadEta"] -> Fill(outtreeVars.dipho_leadEta);
     h["dipho_leadPhi"] -> Fill(outtreeVars.dipho_leadPhi);
     h["dipho_leadptoM"] -> Fill(outtreeVars.dipho_leadptoM);
-    h["dipho_leadIso_o_E"] -> Fill(outtreeVars.dipho_leadIso/outtreeVars.dipho_leadEnergy);
     h["dipho_subleadPt"] -> Fill(outtreeVars.dipho_subleadPt);
     h["dipho_subleadEta"] -> Fill(outtreeVars.dipho_subleadEta);
     h["dipho_subleadPhi"] -> Fill(outtreeVars.dipho_subleadPhi);
     h["dipho_subleadptoM"] -> Fill(outtreeVars.dipho_subleadptoM);
-    h["dipho_subleadIso_o_E"] -> Fill(outtreeVars.dipho_subleadIso/outtreeVars.dipho_subleadEnergy);
+    
     h["nJets"] -> Fill(outtreeVars.nJets);
-    h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen) );
-    h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen) );
-    h["dipho_leaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen) );
-    h["dipho_subleaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen) );
-    h["dipho_leaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen) );
-    h["dipho_subleaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen) );
+    h["nJets_bTagLoose"] -> Fill(outtreeVars.nJets_bTagLoose);
+    h["nJets_bTagMedium"] -> Fill(outtreeVars.nJets_bTagMedium);
+    h["nJets_bTagTight"] -> Fill(outtreeVars.nJets_bTagTight);
+    h["dibjet_mass"] -> Fill(outtreeVars.dibjet_mass);
+    h["dibjet_sumpt"] -> Fill(outtreeVars.dibjet_sumpt);
+    h["dibjet_deltaeta"] -> Fill(outtreeVars.dibjet_deltaeta);
+    h["dibjet_deltaphi"] -> Fill(outtreeVars.dibjet_deltaphi);
+
+    h["dibjet_leadPt"] -> Fill(outtreeVars.dibjet_leadPt);
+    h["dibjet_leadEta"] -> Fill(outtreeVars.dibjet_leadEta);
+    h["dibjet_leadPhi"] -> Fill(outtreeVars.dibjet_leadPhi);
+    h["dibjet_leadptoM"] -> Fill(outtreeVars.dibjet_leadptoM);
+    h["dibjet_leadEnergy"] -> Fill(outtreeVars.dibjet_leadEnergy);
+    h["dibjet_leadbtagscore"] -> Fill(outtreeVars.dibjet_leadbtagscore);
+
+    h["dibjet_subleadPt"] -> Fill(outtreeVars.dibjet_subleadPt);
+    h["dibjet_subleadEta"] -> Fill(outtreeVars.dibjet_subleadEta);
+    h["dibjet_subleadPhi"] -> Fill(outtreeVars.dibjet_subleadPhi);
+    h["dibjet_subleadptoM"] -> Fill(outtreeVars.dibjet_subleadptoM);
+    h["dibjet_subleadEnergy"] -> Fill(outtreeVars.dibjet_subleadEnergy);
+    h["dibjet_subleadbtagscore"] -> Fill(outtreeVars.dibjet_subleadbtagscore);
+    
+    //h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen) );
+    //h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen) );
+    //h["dipho_leaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen) );
+    //h["dipho_subleaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen) );
+    //h["dipho_leaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen) );
+    //h["dipho_subleaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen) );
 
     outTree->Fill();
 
@@ -268,39 +426,7 @@ int main(int argc, char* argv[])
   system(Form("mv *.png %s",outputPlotFolder.c_str()));
   system(Form("mv *.pdf %s",outputPlotFolder.c_str()));  
 
-    /*      
-    // common cuts
-    if( treeVars.dipho_mass < 100 || treeVars.dipho_mass > 180 ) continue;
-    if( type == -1 && treeVars.dipho_mass > 115 && treeVars.dipho_mass < 135 ) continue;
-    bool passCutBased = CutBasedSelection(treeVars,0.4,0.3,0.,-0.5,2.5,2.);
-      
-    if( treeVars.nJets < 2 ) continue;
-      
-    outTree_2jets -> Fill();
-      
-    // fill event counters - cut based
-    if( type == 1 )
-        nEvents_cutBased["bkg"][0.] += treeVars.weight;
-    if( type == 2 && label == "ttH" )
-        nEvents_cutBased["sig"][0.] += treeVars.weight;
-    if( passCutBased )
-    {
-      if( type == 1 )
-        nEvents_cutBased["bkg"][1.] += treeVars.weight;
-      if( type == 2 && label == "ttH" )
-        nEvents_cutBased["sig"][1.] += treeVars.weight;
-    }
-    if( cutBased && !passCutBased ) continue;
-
-    outTree_2jets -> AutoSave();
-    outFile -> Close();
- 
-    std::cout << "Processed tag " << label << ", " << nEntries << " events out of " << nEntries << std::endl;
-  }
-  
-  
-  */   
-    return 0;
+  return 0;
 }
 
 
