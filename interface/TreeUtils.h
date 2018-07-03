@@ -13,6 +13,7 @@ struct TreeVars
 
   int nvtx;
   float weight;
+  float cross_sec;
   float dipho_sumpt;
   float dipho_mass;
   float dipho_mass_gen;
@@ -282,8 +283,20 @@ struct RawTreeVars
    float TightPh_eta_multi[maxpart];
    float TightPh_phi_multi[maxpart];
    float TightPh_E_multi[maxpart];
-   float TightPh_iso[maxpart];
    float TightPh_sf[maxpart];
+
+   int   N_SelectedPh;
+   int   SelectedPh_g[maxpart];
+   int   SelectedPh_isEB[maxpart];
+   float SelectedPh_pt[maxpart];
+   float SelectedPh_eta[maxpart];
+   float SelectedPh_phi[maxpart];
+   float SelectedPh_E[maxpart];
+   float SelectedPh_pt_multi[maxpart];
+   float SelectedPh_eta_multi[maxpart];
+   float SelectedPh_phi_multi[maxpart];
+   float SelectedPh_E_multi[maxpart];
+   float SelectedPh_sf[maxpart];
 
 };
 

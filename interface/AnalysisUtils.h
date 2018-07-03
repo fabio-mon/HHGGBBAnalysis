@@ -27,7 +27,7 @@ float DeltaR(const float& eta1, const float& phi1,
 
 void MakePlot3(std::map<std::string,TH1F*> &h);
 
-int GetBTagLevel(int BTag);
+int GetBTagLevel(const int &BTag, const bool &useMTD);
 bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead);
 bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr=10.);
 bool JetSelection(const RawTreeVars &treeVars, TreeVars &outtreeVars);//const TLorentzVector &bjet_lead, const TLorentzVector &bjet_sublead, const TLorentzVector &pho_lead, const TLorentzVector &pho_sublead)

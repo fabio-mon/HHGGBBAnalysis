@@ -4,6 +4,7 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
 {
   chain -> SetBranchAddress("weight",&treeVars.weight);
   chain -> SetBranchAddress("nvtx",            &treeVars.nvtx);
+  chain -> SetBranchAddress("cross_sec",            &treeVars.cross_sec);
   
   chain -> SetBranchAddress("dipho_sumpt",   &treeVars.dipho_sumpt);
   chain -> SetBranchAddress("dipho_mass",    &treeVars.dipho_mass);
@@ -76,7 +77,8 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
 {
   tree -> Branch("weight",&treeVars.weight);
   tree -> Branch("nvtx",            &treeVars.nvtx);
-  
+  tree -> Branch("cross_sec",            &treeVars.cross_sec);
+
   tree -> Branch("dipho_sumpt",   &treeVars.dipho_sumpt);
   tree -> Branch("dipho_mass",    &treeVars.dipho_mass);
   tree -> Branch("dipho_mass_gen",    &treeVars.dipho_mass_gen);
@@ -276,9 +278,66 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   chain["PuppiMissingET"]->SetBranchAddress("Eta",                 treeVars.Met_eta);
   chain["PuppiMissingET"]->SetBranchAddress("SF",                  treeVars.Met_sf);
 
-  chain[Loose_Tight_Photon.c_str()]->SetBranchStatus((Loose_Tight_Photon+"_size").c_str(), 1);
+  if(Loose_Tight_Photon == "PhotonTight")
+  {
+    chain["PhotonLoose"]->SetBranchAddress("PhotonLoose_size",       &treeVars.N_LoosePh);
+    chain["PhotonLoose"]->SetBranchAddress("Particle",               treeVars.LoosePh_g);
+    chain["PhotonLoose"]->SetBranchAddress("IsEB",                   treeVars.LoosePh_isEB);
+    chain["PhotonLoose"]->SetBranchAddress("PT",                     treeVars.LoosePh_pt);
+    chain["PhotonLoose"]->SetBranchAddress("Eta",                    treeVars.LoosePh_eta);
+    chain["PhotonLoose"]->SetBranchAddress("Phi",                    treeVars.LoosePh_phi);
+    chain["PhotonLoose"]->SetBranchAddress("E",                      treeVars.LoosePh_E);
+    chain["PhotonLoose"]->SetBranchAddress("PT_multi",               treeVars.LoosePh_pt_multi);
+    chain["PhotonLoose"]->SetBranchAddress("Eta_multi",              treeVars.LoosePh_eta_multi);
+    chain["PhotonLoose"]->SetBranchAddress("Phi_multi",              treeVars.LoosePh_phi_multi);
+    chain["PhotonLoose"]->SetBranchAddress("E_multi",                treeVars.LoosePh_E_multi);
+    chain["PhotonLoose"]->SetBranchAddress("SF",                     treeVars.LoosePh_sf);
+    
+    chain["PhotonTight"]->SetBranchAddress("PhotonTight_size",       &treeVars.N_SelectedPh);
+    chain["PhotonTight"]->SetBranchAddress("Particle",               treeVars.SelectedPh_g);
+    chain["PhotonTight"]->SetBranchAddress("IsEB",                   treeVars.SelectedPh_isEB);
+    chain["PhotonTight"]->SetBranchAddress("PT",                     treeVars.SelectedPh_pt);
+    chain["PhotonTight"]->SetBranchAddress("Eta",                    treeVars.SelectedPh_eta);
+    chain["PhotonTight"]->SetBranchAddress("Phi",                    treeVars.SelectedPh_phi);
+    chain["PhotonTight"]->SetBranchAddress("E",                      treeVars.SelectedPh_E);
+    chain["PhotonTight"]->SetBranchAddress("PT_multi",               treeVars.SelectedPh_pt_multi);
+    chain["PhotonTight"]->SetBranchAddress("Eta_multi",              treeVars.SelectedPh_eta_multi);
+    chain["PhotonTight"]->SetBranchAddress("Phi_multi",              treeVars.SelectedPh_phi_multi);
+    chain["PhotonTight"]->SetBranchAddress("E_multi",                treeVars.SelectedPh_E_multi);
+    chain["PhotonTight"]->SetBranchAddress("SF",                     treeVars.SelectedPh_sf);    
+  }
+
+  else
+  {
+    chain["PhotonLoose"]->SetBranchAddress("PhotonLoose_size",       &treeVars.N_SelectedPh);
+    chain["PhotonLoose"]->SetBranchAddress("Particle",               treeVars.SelectedPh_g);
+    chain["PhotonLoose"]->SetBranchAddress("IsEB",                   treeVars.SelectedPh_isEB);
+    chain["PhotonLoose"]->SetBranchAddress("PT",                     treeVars.SelectedPh_pt);
+    chain["PhotonLoose"]->SetBranchAddress("Eta",                    treeVars.SelectedPh_eta);
+    chain["PhotonLoose"]->SetBranchAddress("Phi",                    treeVars.SelectedPh_phi);
+    chain["PhotonLoose"]->SetBranchAddress("E",                      treeVars.SelectedPh_E);
+    chain["PhotonLoose"]->SetBranchAddress("PT_multi",               treeVars.SelectedPh_pt_multi);
+    chain["PhotonLoose"]->SetBranchAddress("Eta_multi",              treeVars.SelectedPh_eta_multi);
+    chain["PhotonLoose"]->SetBranchAddress("Phi_multi",              treeVars.SelectedPh_phi_multi);
+    chain["PhotonLoose"]->SetBranchAddress("E_multi",                treeVars.SelectedPh_E_multi);
+    chain["PhotonLoose"]->SetBranchAddress("SF",                     treeVars.SelectedPh_sf);
+    
+    chain["PhotonTight"]->SetBranchAddress("PhotonTight_size",       &treeVars.N_TightPh);
+    chain["PhotonTight"]->SetBranchAddress("Particle",               treeVars.TightPh_g);
+    chain["PhotonTight"]->SetBranchAddress("IsEB",                   treeVars.TightPh_isEB);
+    chain["PhotonTight"]->SetBranchAddress("PT",                     treeVars.TightPh_pt);
+    chain["PhotonTight"]->SetBranchAddress("Eta",                    treeVars.TightPh_eta);
+    chain["PhotonTight"]->SetBranchAddress("Phi",                    treeVars.TightPh_phi);
+    chain["PhotonTight"]->SetBranchAddress("E",                      treeVars.TightPh_E);
+    chain["PhotonTight"]->SetBranchAddress("PT_multi",               treeVars.TightPh_pt_multi);
+    chain["PhotonTight"]->SetBranchAddress("Eta_multi",              treeVars.TightPh_eta_multi);
+    chain["PhotonTight"]->SetBranchAddress("Phi_multi",              treeVars.TightPh_phi_multi);
+    chain["PhotonTight"]->SetBranchAddress("E_multi",                treeVars.TightPh_E_multi);
+    chain["PhotonTight"]->SetBranchAddress("SF",                     treeVars.TightPh_sf);    
+  }
+
+  /*
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress((Loose_Tight_Photon+"_size").c_str(),       &treeVars.N_TightPh);
-  chain[Loose_Tight_Photon.c_str()]->SetBranchStatus("Particle", 1);
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Particle",               treeVars.TightPh_g);
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("IsEB",                   treeVars.TightPh_isEB);
   chain[Loose_Tight_Photon.c_str()]->SetBranchStatus("PT", 1);
@@ -290,39 +349,7 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Eta_multi",              treeVars.TightPh_eta_multi);
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("Phi_multi",              treeVars.TightPh_phi_multi);
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("E_multi",                treeVars.TightPh_E_multi);
-  chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("IsolationVarRhoCorr",    treeVars.TightPh_iso);
   chain[Loose_Tight_Photon.c_str()]->SetBranchAddress("SF",                     treeVars.TightPh_sf);
-
-
-  /*
-  chain["PhotonLoose"]->SetBranchAddress("PhotonLoose_size",       &treeVars.N_LoosePh);
-  chain["PhotonLoose"]->SetBranchAddress("Particle",               treeVars.LoosePh_g);
-  chain["PhotonLoose"]->SetBranchAddress("IsEB",                   treeVars.LoosePh_isEB);
-  chain["PhotonLoose"]->SetBranchAddress("PT",                     treeVars.LoosePh_pt);
-  chain["PhotonLoose"]->SetBranchAddress("Eta",                    treeVars.LoosePh_eta);
-  chain["PhotonLoose"]->SetBranchAddress("Phi",                    treeVars.LoosePh_phi);
-  chain["PhotonLoose"]->SetBranchAddress("E",                      treeVars.LoosePh_E);
-  chain["PhotonLoose"]->SetBranchAddress("PT_multi",               treeVars.LoosePh_pt_multi);
-  chain["PhotonLoose"]->SetBranchAddress("Eta_multi",              treeVars.LoosePh_eta_multi);
-  chain["PhotonLoose"]->SetBranchAddress("Phi_multi",              treeVars.LoosePh_phi_multi);
-  chain["PhotonLoose"]->SetBranchAddress("E_multi",                treeVars.LoosePh_E_multi);
-  chain["PhotonLoose"]->SetBranchAddress("SF",                     treeVars.LoosePh_sf);
-
-  chain["PhotonTight"]->SetBranchStatus("PhotonTight_size", 1);
-  chain["PhotonTight"]->SetBranchAddress("PhotonTight_size",       &treeVars.N_TightPh);
-  chain["PhotonTight"]->SetBranchStatus("Particle", 1);
-  chain["PhotonTight"]->SetBranchAddress("Particle",               treeVars.TightPh_g);
-  chain["PhotonTight"]->SetBranchAddress("IsEB",                   treeVars.TightPh_isEB);
-  chain["PhotonTight"]->SetBranchStatus("PT", 1);
-  chain["PhotonTight"]->SetBranchAddress("PT",                     treeVars.TightPh_pt);
-  chain["PhotonTight"]->SetBranchAddress("Eta",                    treeVars.TightPh_eta);
-  chain["PhotonTight"]->SetBranchAddress("Phi",                    treeVars.TightPh_phi);
-  chain["PhotonTight"]->SetBranchAddress("E",                      treeVars.TightPh_E);
-  chain["PhotonTight"]->SetBranchAddress("PT_multi",               treeVars.TightPh_pt_multi);
-  chain["PhotonTight"]->SetBranchAddress("Eta_multi",              treeVars.TightPh_eta_multi);
-  chain["PhotonTight"]->SetBranchAddress("Phi_multi",              treeVars.TightPh_phi_multi);
-  chain["PhotonTight"]->SetBranchAddress("E_multi",                treeVars.TightPh_E_multi);
-  chain["PhotonTight"]->SetBranchAddress("IsolationVarRhoCorr",    treeVars.TightPh_iso);
-  chain["PhotonTight"]->SetBranchAddress("SF",                     treeVars.TightPh_sf);
   */
+
 }

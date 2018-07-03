@@ -74,6 +74,12 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
   if(lead_pt<20 || sublead_pt<20) return false;
   if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
   double dipho_mass=(pho_lead+pho_sublead).M();
+  //---------------------------------------------------------------
+  //cout<<"Mgg="<<dipho_mass<<endl;
+  //cout<<"lead_pt/Mgg="<<lead_pt/dipho_mass<<endl;
+  //cout<<"sublead_pt/Mgg="<<sublead_pt/dipho_mass<<endl;
+  
+  //-------------------------------------------
   if(dipho_mass<100. || dipho_mass>180.) return false;
   if(lead_pt/dipho_mass<0.33) return false;
   if(sublead_pt/dipho_mass<0.25) return false;
@@ -111,12 +117,12 @@ bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet
   int btag1=outtreeVars.jet_BTagLevel[0];
   float pt1 = outtreeVars.jet_pt[0];
   //---------------------------------------------------------------
-  cout<<"0\tbtag"<<btag1<<"\tpt1"<<pt1<<endl;
+  //cout<<"0\tbtag"<<btag1<<"\tpt1"<<pt1<<endl;
   //---------------------------------------------------------------
   for(int i=1; i<outtreeVars.nJets; i++)
   {
     //---------------------------------------------------------------
-    cout<<i<<"\tbtag"<<outtreeVars.jet_BTagLevel[i]<<"\tpt1"<<outtreeVars.jet_pt[i]<<endl;
+    //cout<<i<<"\tbtag"<<outtreeVars.jet_BTagLevel[i]<<"\tpt1"<<outtreeVars.jet_pt[i]<<endl;
     //---------------------------------------------------------------
     //If(BTag>BTagOffset && BTag<4+BTagOffset) <-- already required to fill outtreeVars
     if(outtreeVars.jet_BTagLevel[i] > btag1)
@@ -166,7 +172,7 @@ bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet
   }
 
   //---------------------------------------------------------------
-  cout<<"best score i "<<ijet1<<" "<<ijet2<<endl;
+  //cout<<"best score i "<<ijet1<<" "<<ijet2<<endl;
   //---------------------------------------------------------------
   if(ijet2==-1)
     return false;
@@ -186,14 +192,20 @@ bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet
 }
 
 
-int GetBTagLevel(int BTag)
+int GetBTagLevel(const int &BTag, const bool &useMTD)
 {
-  if(BTag & 0b100000) return 6;
-  if(BTag & 0b010000) return 5;
-  if(BTag & 0b001000) return 4;
-  if(BTag & 0b000100) return 3;
-  if(BTag & 0b000010) return 2;
-  if(BTag & 0b000001) return 1;
+  if(useMTD)
+  {
+    if(BTag & 0b100000) return 6;
+    if(BTag & 0b010000) return 5;
+    if(BTag & 0b001000) return 4;
+  }
+  else
+  {
+    if(BTag & 0b000100) return 3;
+    if(BTag & 0b000010) return 2;
+    if(BTag & 0b000001) return 1;
+  }
   return 0;
 }
 
@@ -245,38 +257,38 @@ bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr)
 
 void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i)
 {
-  if(treeVars.N_TightPh<2) return;
+  if(treeVars.N_SelectedPh<2) return;
   float ptmax1, ptmax2;
-  if(treeVars.TightPh_pt[0]>treeVars.TightPh_pt[1])
+  if(treeVars.SelectedPh_pt[0]>treeVars.SelectedPh_pt[1])
   {
     pho_lead_i=0;
-    ptmax1=treeVars.TightPh_pt[0];
+    ptmax1=treeVars.SelectedPh_pt[0];
     pho_sublead_i=1;
-    ptmax2=treeVars.TightPh_pt[1];
+    ptmax2=treeVars.SelectedPh_pt[1];
   }
   else
   {
     pho_lead_i=1;
-    ptmax1=treeVars.TightPh_pt[1];
+    ptmax1=treeVars.SelectedPh_pt[1];
     pho_sublead_i=0;
-    ptmax2=treeVars.TightPh_pt[0];
+    ptmax2=treeVars.SelectedPh_pt[0];
   }
-  //cout<<"\n0 "<<treeVars.TightPh_pt[0]<<endl;
-  //cout<<"1 "<<treeVars.TightPh_pt[1]<<endl;
-  for(int i=2;i<treeVars.N_TightPh;i++)
+  //cout<<"\n0 "<<treeVars.SelectedPh_pt[0]<<endl;
+  //cout<<"1 "<<treeVars.SelectedPh_pt[1]<<endl;
+  for(int i=2;i<treeVars.N_SelectedPh;i++)
   {
-    //cout<<i<<" "<<treeVars.TightPh_pt[i]<<endl;
-    if(treeVars.TightPh_pt[i]>ptmax1)
+    //cout<<i<<" "<<treeVars.SelectedPh_pt[i]<<endl;
+    if(treeVars.SelectedPh_pt[i]>ptmax1)
     {
       ptmax2=ptmax1;
       pho_sublead_i=pho_lead_i;
-      ptmax1=treeVars.TightPh_pt[i];
+      ptmax1=treeVars.SelectedPh_pt[i];
       pho_lead_i=i;
     }
     else
-      if(treeVars.TightPh_pt[i]>ptmax2)
+      if(treeVars.SelectedPh_pt[i]>ptmax2)
       {
-        ptmax2=treeVars.TightPh_E[i];
+        ptmax2=treeVars.SelectedPh_E[i];
         pho_sublead_i=i;
       }
   }
@@ -294,7 +306,7 @@ bool  FindLeadSublead_bjet(const RawTreeVars &treeVars, int &bjet_lead_i, int &b
   for(int i=0;i<treeVars.N_Jet;i++)
   {
     if(treeVars.Jet_mvav2[i]==0) continue;//NOT a bjet
-    cout<<i<<" "<<treeVars.Jet_pt[i]<<endl;
+    //cout<<i<<" "<<treeVars.Jet_pt[i]<<endl;
 
     if(bjet_lead_i==-1)
     {
@@ -332,7 +344,7 @@ bool  FindLeadSublead_bjet(const RawTreeVars &treeVars, int &bjet_lead_i, int &b
 	    bjet_sublead_i=i;
 	  }
   }
-  cout<<"i_LEAD="<<bjet_lead_i<<"\ti_SUBLEAD="<<bjet_sublead_i<<endl;
+  //cout<<"i_LEAD="<<bjet_lead_i<<"\ti_SUBLEAD="<<bjet_sublead_i<<endl;
   if(bjet_sublead_i==-1)
     return false;
   return true;
@@ -549,16 +561,30 @@ float DeltaRmin_phoRECO_jetRECO(const TLorentzVector &reco_pho , const RawTreeVa
 
 void PrintRecoPhoton(const RawTreeVars& treeVars)
 {
-  cout<<"Event "<<treeVars.event<<"\tRECO Tight photon collection -> "<<treeVars.N_TightPh<<" entries"<<endl;
+  cout<<"Event "<<treeVars.event<<endl;
+  /*
+  cout<<"\tRECO Tight photon collection -> "<<treeVars.N_TightPh<<" entries"<<endl;
   for(int i=0;i<treeVars.N_TightPh;i++)
     cout<<i<<"\tEta="<<treeVars.TightPh_eta[i]<< "\tPhi="<<treeVars.TightPh_phi[i]<< "\tPt="<<treeVars.TightPh_pt[i]<<endl;
   cout<<endl;
+
+  cout<<"\tRECO Loose photon collection -> "<<treeVars.N_LoosePh<<" entries"<<endl;
+  for(int i=0;i<treeVars.N_LoosePh;i++)
+    cout<<i<<"\tEta="<<treeVars.LoosePh_eta[i]<< "\tPhi="<<treeVars.LoosePh_phi[i]<< "\tPt="<<treeVars.LoosePh_pt[i]<<endl;
+  cout<<endl;
+  */
+  cout<<"\tRECO Selected photon collection -> "<<treeVars.N_SelectedPh<<" entries"<<endl;
+  for(int i=0;i<treeVars.N_SelectedPh;i++)
+    cout<<i<<"\tEta="<<treeVars.SelectedPh_eta[i]<< "\tPhi="<<treeVars.SelectedPh_phi[i]<< "\tPt="<<treeVars.SelectedPh_pt[i]<<endl;
+  cout<<endl;
+
+
 }
 
 void PrintRecoJet(const RawTreeVars& treeVars)
 {
   cout<<"Event "<<treeVars.event<<"\tRECO PUPPI jet collection -> "<<treeVars.N_Jet<<" entries"<<endl;
   for(int i=0;i<treeVars.N_Jet;i++)
-    cout<<i<<"\tEta="<<treeVars.Jet_eta[i]<< "\tPhi="<<treeVars.Jet_phi[i]<< "\tPt="<<treeVars.Jet_pt[i]<<endl;
+    cout<<i<<"\tEta="<<treeVars.Jet_eta[i]<< "\tPhi="<<treeVars.Jet_phi[i]<< "\tPt="<<treeVars.Jet_pt[i]<<"\tbtagvalue="<<treeVars.Jet_mvav2[i]<<endl;
   cout<<endl;
 }
