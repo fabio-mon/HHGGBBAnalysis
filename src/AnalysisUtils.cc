@@ -253,6 +253,73 @@ bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr)
   return false;
 
 }
+ 
+bool Findbquark_Hdaug(RawTreeVars &treeVars)
+{
+  int nflag=0;
+  for(int i=0;i<treeVars.N_GenPart;i++)
+  {
+    treeVars.GenPart_isHdaug[i]=false;
+    if(fabs(treeVars.GenPart_pid[i])==5 && treeVars.GenPart_st[i]==23)
+    {
+      treeVars.GenPart_isHdaug[i]=true;
+      nflag++;
+    }
+  }
+  if(nflag!=2)
+  {
+    cout<<"n bquark h daug="<<nflag<<" --->skip event"<<endl;
+    return false;
+  }
+  return true;
+}
+
+bool FindGenJet_Hdaug(RawTreeVars &treeVars, float deltaMthr)
+//function that find the pair of jenjets that minimize M_digenjet - M_higgs
+//if min(M_digenjet - M_higgs)>deltaM_max it returns false, otherwise true
+{
+  //cout<<"in function  FindGenJet_Hdaug"<<endl;
+  if(treeVars.N_GenJet<2) return false;
+  //initialize treeVars.GenJet_isHdaug
+  for(int i=0;i<treeVars.N_GenJet;i++)
+    treeVars.GenJet_isHdaug[i]=false;
+
+  double deltaMaux,deltaMmin;
+  int imin=-1,jmin=-1;
+  TLorentzVector Vi,Vj;
+  for(int i=0;i<treeVars.N_GenJet;i++)
+  {
+    if(treeVars.GenJet_pt[i]<20) continue;
+    Vi.SetPtEtaPhiM(treeVars.GenJet_pt[i],treeVars.GenJet_eta[i],treeVars.GenJet_phi[i],treeVars.GenJet_mass[i]);
+    for(int j=i+1;j<treeVars.N_GenJet;j++) 
+    {  
+      //cout<<"("<<i<<","<<j<<")\t";
+      if(treeVars.GenJet_pt[j]<20) continue;
+      Vj.SetPtEtaPhiM(treeVars.GenJet_pt[j],treeVars.GenJet_eta[j],treeVars.GenJet_phi[j],treeVars.GenJet_mass[j]);
+      deltaMaux=fabs((Vi+Vj).M()-125.);
+      //cout<<deltaMaux<<endl;
+      if(imin==-1 && jmin==-1)//first loop
+      {
+	imin=i;
+	jmin=j;
+	deltaMmin=deltaMaux;
+      }
+      else
+	if(deltaMaux<deltaMmin)
+	{
+	  imin=i;
+	  jmin=j;
+	  deltaMmin=deltaMaux;
+	}
+    }
+  }
+  //cout<<"MIN "<<"("<<imin<<","<<jmin<<")"<<endl;
+  treeVars.GenJet_isHdaug[imin]=true;
+  treeVars.GenJet_isHdaug[jmin]=true;
+  if(deltaMmin<deltaMthr) return true;
+  return false;
+
+}
 
 
 void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i)
@@ -273,6 +340,7 @@ void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho
     pho_sublead_i=0;
     ptmax2=treeVars.SelectedPh_pt[0];
   }
+
   //cout<<"\n0 "<<treeVars.SelectedPh_pt[0]<<endl;
   //cout<<"1 "<<treeVars.SelectedPh_pt[1]<<endl;
   for(int i=2;i<treeVars.N_SelectedPh;i++)

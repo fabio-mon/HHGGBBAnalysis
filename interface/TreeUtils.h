@@ -154,8 +154,10 @@ struct RawTreeVars
    float GenPart_phi[maxpart];
    float GenPart_mass[maxpart];
    float GenPart_relIso[maxpart];
+   bool  GenPart_isHdaug[maxpart];
 
    int   N_GenJet;
+   bool  GenJet_isHdaug[maxpart];
    float GenJet_pt[maxjets];
    float GenJet_eta[maxjets];
    float GenJet_phi[maxjets];
@@ -248,9 +250,9 @@ struct RawTreeVars
    float Jet_mass[maxjets];
    int   Jet_mvav2[maxjets];
    int   Jet_deepcsv[maxjets];
-   float Jet_flav[maxjets];
-   float Jet_hadflav[maxjets];
-   float Jet_pid[maxjets];
+   int   Jet_flav[maxjets];
+   int   Jet_hadflav[maxjets];
+   int   Jet_pid[maxjets];
    float Jet_sf[maxjets];
 
    int   N_Met;

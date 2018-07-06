@@ -30,6 +30,8 @@ void MakePlot3(std::map<std::string,TH1F*> &h);
 int GetBTagLevel(const int &BTag, const bool &useMTD);
 bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho_sublead);
 bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr=10.);
+bool Findbquark_Hdaug(RawTreeVars &treeVars);
+bool FindGenJet_Hdaug(RawTreeVars &treeVars, float deltaMthr=30.);
 bool JetSelection(const RawTreeVars &treeVars, TreeVars &outtreeVars);//const TLorentzVector &bjet_lead, const TLorentzVector &bjet_sublead, const TLorentzVector &pho_lead, const TLorentzVector &pho_sublead)
 void  FindLeadSublead_pho(const RawTreeVars &treeVars, int &pho_lead_i, int &pho_sublead_i);
 bool  FindLeadSublead_bjet(const RawTreeVars &treeVars, int &bjet_lead_i, int &bjet_sublead_i);

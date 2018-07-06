@@ -95,6 +95,11 @@ int main(int argc, char* argv[])
   else
     cout<<"Option <Input.useMTD> not found --> Analysis by default on useMTD="<<useMTD<<endl;
 
+  float CrossSection = 1.;
+  if(opts.OptExist("Input.CrossSection"))
+    CrossSection = opts.GetOpt<float> ("Input.CrossSection");
+
+
 
   //------------------
   // define histograms
@@ -189,15 +194,16 @@ int main(int argc, char* argv[])
   TreeVars outtreeVars;
   InitOutTreeVars(outTree,outtreeVars);
 
+  
   //----------
   // get number of input events to include in the weight
-  std::cout << ">>> Merging Event_weight histograms and temporary storing in /tmp/fmonti/"<<endl;
+  std::cout << ">>> Merging Event_weight histograms and temporary storing in /tmp/$USER/"<<endl;
   float weightMC=1.;
   TH1F* h_weight;
   TString only_filename_tstr(filename.at(0));
   only_filename_tstr.Remove(0,only_filename_tstr.Last('/')+1);
   only_filename_tstr.ReplaceAll("*","all");
-  TString hadd_command="hadd -T -f -k /tmp/fmonti/"+only_filename_tstr;
+  TString hadd_command="hadd -T -f -k /tmp/$USER/"+only_filename_tstr;
   for(unsigned i=0; i<filename.size(); i++)
   {
     //TString filename_tstr(filename);
@@ -206,7 +212,7 @@ int main(int argc, char* argv[])
   }
     
   system(hadd_command.Data()); // -T=merge only histos -f=overwrite target file -k=do not exit in case of corrupted files
-  TFile merged_input(("/tmp/fmonti/"+only_filename_tstr).Data(),"READ");
+  TFile merged_input(("/tmp/$USER/"+only_filename_tstr).Data(),"READ");
   if(merged_input.IsOpen())
   {
     merged_input.GetObject("weightCounter/Event_weight",h_weight);
@@ -215,7 +221,7 @@ int main(int argc, char* argv[])
       weightMC = 1./h_weight->GetEntries();
     else
     {
-      cout<<"[WARNING]: histogram /tmp/fmonti/"<<only_filename_tstr.Data()<<"/weightCounter/Event_weight not found or empty --> Set by default weight 1"<<endl;
+      cout<<"[WARNING]: histogram /tmp/$USER/"<<only_filename_tstr.Data()<<"/weightCounter/Event_weight not found or empty --> Set by default weight 1"<<endl;
       h_weight = new TH1F("Event_weight","Event_weight",1,0,1);
       h_weight ->Fill(0.);
       weightMC = 1.;
@@ -225,16 +231,11 @@ int main(int argc, char* argv[])
     weightfolder->cd();
     h_weight->Write("Event_weight");
     merged_input.Close();
-    outFile -> cd();
   }
+  outFile -> cd();
   
 
-  //----------
-  // get cross section from config file and include it in the weight
-  float CrossSection = 1.;
-  if(opts.OptExist("Input.CrossSection"))
-    CrossSection = opts.GetOpt<float> ("Input.CrossSection");
-
+  
 
   //------------------
   // loop over samples
@@ -250,6 +251,10 @@ int main(int argc, char* argv[])
 
     tree -> GetEntry(i);
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
+    cout<<"Nphselected="<<treeVars.N_SelectedPh<<endl;
+    cout<<"Nphloose="<<treeVars.N_LoosePh<<endl;
+    cout<<"Nphtight="<<treeVars.N_TightPh<<endl;
+
     //    std::cout<<"\n\nEVENT "<<i<<"\n #GEN="<<treeVars.N_GenPart;
     //std::cout<<""<<treeVars.N_GenPart;
     //for(int i=0;i<treeVars.N_GenPart;i++)
@@ -264,15 +269,12 @@ int main(int argc, char* argv[])
     //if( ! FindGenPh_Hdaug(treeVars) ) continue;
 
     //find lead & sublead reco photons
-    //---------------------------------------------------------------
+    
     //PrintRecoPhoton(treeVars);
-    //---------------------------------------------------------------
     int pho_lead_i;
     int pho_sublead_i;
     FindLeadSublead_pho(treeVars,pho_lead_i,pho_sublead_i);
-    //---------------------------------------------------------------
     //cout<<"lead="<<pho_lead_i<<"\t\tsublead="<<pho_sublead_i<<endl;
-    //---------------------------------------------------------------
     TLorentzVector pho_lead,pho_sublead;
     pho_lead.SetPtEtaPhiE(treeVars.SelectedPh_pt[pho_lead_i],treeVars.SelectedPh_eta[pho_lead_i],treeVars.SelectedPh_phi[pho_lead_i],treeVars.SelectedPh_E[pho_lead_i]);
     pho_sublead.SetPtEtaPhiE(treeVars.SelectedPh_pt[pho_sublead_i],treeVars.SelectedPh_eta[pho_sublead_i],treeVars.SelectedPh_phi[pho_sublead_i],treeVars.SelectedPh_E[pho_sublead_i]);
@@ -284,12 +286,11 @@ int main(int argc, char* argv[])
     //Cuts on photons
     if(!DiPhotonSelection(pho_lead,pho_sublead))
     {
-      //cout<<"photonselection_NOTpassed"<<endl;
+      cout<<"photonselection_NOTpassed"<<endl;
       continue;
     }
     ++Nev_phselection;
-    //---------------------------------------------------------------
-    //cout<<"photonselection_passed"<<endl;
+    cout<<"photonselection_passed"<<endl;
 
     //Clean jet collection (to do? maybe required for bkg study...)
     //Tag good jets with a bool, requirements are:
@@ -297,19 +298,11 @@ int main(int argc, char* argv[])
     // 2. ratio Echarge / Eneutral  
     //TagGoodJets(treeVars);
 
-    //Get lead and sublead b-tagged jets
-    //int bjet_lead_i;
-    //int bjet_sublead_i;
-    //if(!FindLeadSublead_bjet(treeVars,bjet_lead_i,bjet_sublead_i))
-    //  continue;
-    //TLorentzVector bjet_lead,bjet_sublead;
-    //bjet_lead.SetPtEtaPhiE(treeVars.Jet_pt[bjet_lead_i],treeVars.Jet_eta[bjet_lead_i],treeVars.Jet_phi[bjet_lead_i],treeVars.Jet_E[bjet_lead_i]);
-    //bjet_sublead.SetPtEtaPhiE(treeVars.Jet_pt[bjet_sublead_i],treeVars.Jet_eta[bjet_sublead_i],treeVars.Jet_phi[bjet_sublead_i],treeVars.Jet_E[bjet_sublead_i]);
+    
+    if( ! FindGenJet_Hdaug(treeVars) ) continue;
+    //cout<<"GenJet_Hdaug found"<<endl;
 
     //Jets selections
-    //if(!JetSelection(treeVars,bjet_lead,bjet_sublead))
-    //  continue;
-
     int BTagOffset;
     //BTag level:
     // 0 no BTag
@@ -324,9 +317,7 @@ int main(int argc, char* argv[])
     else
       BTagOffset=3;
 
-    //---------------------------------------------------------------
     //PrintRecoJet(treeVars);
-    //---------------------------------------------------------------
     outtreeVars.nJets=0;
     outtreeVars.nJets_bTagLoose=0;
     outtreeVars.nJets_bTagMedium=0;	 
@@ -339,9 +330,7 @@ int main(int argc, char* argv[])
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
       int BTag = GetBTagLevel(treeVars.Jet_mvav2[i],useMTD);
-      //---------------------------------------------------------------
       //cout<<i<<"\tbtagvalue="<<treeVars.Jet_mvav2[i]<<"\tbtaglevel="<<BTag<<endl;
-      //---------------------------------------------------------------
       if(BTag>BTagOffset && BTag<4+BTagOffset)
       {
 	outtreeVars.nJets++;
@@ -367,16 +356,11 @@ int main(int argc, char* argv[])
       continue;
     }
     Nev_jet_kin_preselection++;
-    //---------------------------------------------------------------
     //cout<<"pass jet selection"<<endl;
-    //---------------------------------------------------------------
 
     //Select the two jets with the higher BTag level, if they have the same value select the harder one
     int bjet_lead_i;
     int bjet_sublead_i;
-    //---------------------------------------------------------------
-    //cout<<"select best score bjets:"<<endl;
-    //---------------------------------------------------------------
     SelectBestScoreBJets(outtreeVars,bjet_lead_i,bjet_sublead_i,useMTD);
     TLorentzVector bjet_lead,bjet_sublead;
     bjet_lead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_lead_i],outtreeVars.jet_eta[bjet_lead_i],outtreeVars.jet_phi[bjet_lead_i],outtreeVars.jet_mass[bjet_lead_i]);
@@ -387,17 +371,11 @@ int main(int argc, char* argv[])
     if(dibjet_mass<70 || dibjet_mass>180)
       continue;
     ++Nev_jetselection;
-    //---------------------------------------------------------------
     //cout<<"pass jets invariant mass selection"<<endl;
-    //---------------------------------------------------------------
-
-    //---------------------------------------------------------------
     //cout<<"\n\n\n\n\n\n"<<endl;
-    //---------------------------------------------------------------
 
     ++Nev_selected;
 
-    //cout<<"-----------"<<endl;
     //Fill outtree and histos
     outtreeVars.weight = CrossSection*weightMC;
     outtreeVars.cross_sec = CrossSection;
