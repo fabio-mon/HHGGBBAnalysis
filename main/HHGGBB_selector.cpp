@@ -139,7 +139,14 @@ int main(int argc, char* argv[])
   h["dibjet_subleadptoM"] = new TH1F("dibjet_subleadptoM","dibjet_subleadptoM",100,0,3.5);
   h["dibjet_subleadEnergy"] = new TH1F("dibjet_subleadEnergy","dibjet_subleadEnergy",100,0,300);
   h["dibjet_subleadbtagscore"] = new TH1F("dibjet_subleadbtagscore","dibjet_subleadbtagscore",9,-1.5,7.5);
-  
+
+  h["Mx"] = new TH1F("M_x","M_x",100,0,1000);
+  h["DRmin_sel_phots_sel_jets"] = new TH1F("DeltaRmin","DeltaRmin",300,0,4);
+  h["costhetastar_HH"] = new TH1F("costhetastar_HH","costhetastar_HH",200,0,1);
+  h["costhetastar_gg"] = new TH1F("costhetastar_gg","costhetastar_gg",200,0,1);
+  h["costhetastar_bb"] = new TH1F("costhetastar_bb","costhetastar_bb",200,0,1);
+
+
   //h["dipho_leadIso_o_E"] = new TH1F("dipho_leadIso_o_E","dipho_leadIso_o_E",300,0.,0.25);
   //h["dipho_subleadIso_o_E"] = new TH1F("dipho_subleadIso_o_E","dipho_subleadIso_o_E",300,0.,0.25);
   //h["dipho_leaddeltaEta_GenReco"] = new TH1F("dipho_leaddeltaEta_GenReco","dipho_leaddeltaEta_GenReco",300,0.,0.2);
@@ -204,6 +211,7 @@ int main(int argc, char* argv[])
   only_filename_tstr.Remove(0,only_filename_tstr.Last('/')+1);
   only_filename_tstr.ReplaceAll("*","all");
   TString hadd_command="hadd -T -f -k /tmp/$USER/"+only_filename_tstr;
+  int Nev_MC = 1;
   for(unsigned i=0; i<filename.size(); i++)
   {
     //TString filename_tstr(filename);
@@ -218,13 +226,17 @@ int main(int argc, char* argv[])
     merged_input.GetObject("weightCounter/Event_weight",h_weight);
     outFile -> cd();
     if(h_weight && h_weight->GetEntries()>0)
+    {
       weightMC = 1./h_weight->GetEntries();
+      Nev_MC = h_weight->GetEntries();
+    }
     else
     {
       cout<<"[WARNING]: histogram /tmp/$USER/"<<only_filename_tstr.Data()<<"/weightCounter/Event_weight not found or empty --> Set by default weight 1"<<endl;
       h_weight = new TH1F("Event_weight","Event_weight",1,0,1);
       h_weight ->Fill(0.);
       weightMC = 1.;
+      Nev_MC = 1;
     }
 
     TDirectory *weightfolder = outFile->mkdir("weightCounter");
@@ -251,9 +263,6 @@ int main(int argc, char* argv[])
 
     tree -> GetEntry(i);
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
-    cout<<"Nphselected="<<treeVars.N_SelectedPh<<endl;
-    cout<<"Nphloose="<<treeVars.N_LoosePh<<endl;
-    cout<<"Nphtight="<<treeVars.N_TightPh<<endl;
 
     //    std::cout<<"\n\nEVENT "<<i<<"\n #GEN="<<treeVars.N_GenPart;
     //std::cout<<""<<treeVars.N_GenPart;
@@ -268,8 +277,7 @@ int main(int argc, char* argv[])
     //find higgs daugher gen-photons and flag their .isHdaug
     //if( ! FindGenPh_Hdaug(treeVars) ) continue;
 
-    //find lead & sublead reco photons
-    
+    //find lead & sublead reco photons    
     //PrintRecoPhoton(treeVars);
     int pho_lead_i;
     int pho_sublead_i;
@@ -278,7 +286,8 @@ int main(int argc, char* argv[])
     TLorentzVector pho_lead,pho_sublead;
     pho_lead.SetPtEtaPhiE(treeVars.SelectedPh_pt[pho_lead_i],treeVars.SelectedPh_eta[pho_lead_i],treeVars.SelectedPh_phi[pho_lead_i],treeVars.SelectedPh_E[pho_lead_i]);
     pho_sublead.SetPtEtaPhiE(treeVars.SelectedPh_pt[pho_sublead_i],treeVars.SelectedPh_eta[pho_sublead_i],treeVars.SelectedPh_phi[pho_sublead_i],treeVars.SelectedPh_E[pho_sublead_i]);
-    
+    TLorentzVector dipho = pho_lead+pho_sublead;
+
     //Gen-matching
     //if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.1))//default DeltaRmax=0.03
     //   continue;
@@ -286,11 +295,11 @@ int main(int argc, char* argv[])
     //Cuts on photons
     if(!DiPhotonSelection(pho_lead,pho_sublead))
     {
-      cout<<"photonselection_NOTpassed"<<endl;
+      //cout<<"photonselection_NOTpassed"<<endl;
       continue;
     }
     ++Nev_phselection;
-    cout<<"photonselection_passed"<<endl;
+    //cout<<"photonselection_passed"<<endl;
 
     //Clean jet collection (to do? maybe required for bkg study...)
     //Tag good jets with a bool, requirements are:
@@ -299,19 +308,11 @@ int main(int argc, char* argv[])
     //TagGoodJets(treeVars);
 
     
-    if( ! FindGenJet_Hdaug(treeVars) ) continue;
+    //if( ! FindGenJet_Hdaug(treeVars) ) continue;
     //cout<<"GenJet_Hdaug found"<<endl;
 
     //Jets selections
     int BTagOffset;
-    //BTag level:
-    // 0 no BTag
-    // 1 BTag loose
-    // 2 BTag medium
-    // 3 BTag tight
-    // 4 BTag loose with MTD
-    // 5 BTag medium with MTD
-    // 6 BTag tight with MTD
     if(useMTD == false)
       BTagOffset=0;
     else
@@ -366,7 +367,8 @@ int main(int argc, char* argv[])
     bjet_lead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_lead_i],outtreeVars.jet_eta[bjet_lead_i],outtreeVars.jet_phi[bjet_lead_i],outtreeVars.jet_mass[bjet_lead_i]);
     bjet_sublead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_sublead_i],outtreeVars.jet_eta[bjet_sublead_i],outtreeVars.jet_phi[bjet_sublead_i],outtreeVars.jet_mass[bjet_sublead_i]);
 
-    double dibjet_mass = (bjet_lead+bjet_sublead).M();
+    TLorentzVector dibjet= bjet_lead+bjet_sublead;
+    double dibjet_mass = dibjet.M();
     //cout<<"Mjj="<<dibjet_mass<<endl;
     if(dibjet_mass<70 || dibjet_mass>180)
       continue;
@@ -376,56 +378,80 @@ int main(int argc, char* argv[])
 
     ++Nev_selected;
 
+    //Find dR_min between selected gamma and jets
+    vector<TLorentzVector> pho_selected;
+    pho_selected.push_back(pho_lead);
+    pho_selected.push_back(pho_sublead);
+    vector<TLorentzVector> bjet_selected;
+    bjet_selected.push_back(bjet_lead);
+    bjet_selected.push_back(bjet_sublead);
+    float DeltaRmin_bjet_pho = DeltaRmin(pho_selected,bjet_selected);
+
+    //Find interesting angles in the frame of dihigggs
+    TLorentzVector diHiggs= pho_lead+pho_sublead+bjet_lead+bjet_sublead;
+    
+    // get angle between dipho and z-axis in diHiggs rest frame
+    TLorentzVector boosted_dipho(dipho);
+    boosted_dipho.Boost( -diHiggs.BoostVector() );
+    float costheta_HH = fabs(boosted_dipho.CosTheta());
+
+    // get angle between leading photon and z-axiz in dipho rest frame
+    TLorentzVector boosted_pho_lead(pho_lead);
+    boosted_pho_lead.Boost( -dipho.BoostVector() );
+    float costheta_gg = fabs(boosted_pho_lead.CosTheta());
+
+    // get angle between leading jet and z-axiz in dibjet rest frame
+    TLorentzVector boosted_bjet_lead(bjet_lead);
+    boosted_bjet_lead.Boost( -dibjet.BoostVector() );
+    float costheta_bb = fabs(boosted_bjet_lead.CosTheta());
+
+    
     //Fill outtree and histos
     outtreeVars.weight = CrossSection*weightMC;
     outtreeVars.cross_sec = CrossSection;
-
     outtreeVars.nvtx = treeVars.N_Vtx;
-    outtreeVars.dipho_mass = (pho_lead+pho_sublead).M();
-    outtreeVars.dipho_sumpt = (pho_lead+pho_sublead).Pt();
+    outtreeVars.dipho_mass = (dipho).M();
+    outtreeVars.dipho_sumpt = (dipho).Pt();
     outtreeVars.dipho_deltaeta = DeltaEta( pho_lead.Eta() , pho_sublead.Eta() );
     outtreeVars.dipho_deltaphi = DeltaPhi( pho_lead.Phi() , pho_sublead.Phi() );
-
     outtreeVars.dipho_leadPt = pho_lead.Pt();
     outtreeVars.dipho_leadEta = pho_lead.Eta();
     outtreeVars.dipho_leadPhi = pho_lead.Phi();
-    outtreeVars.dipho_leadptoM = pho_lead.Pt() / (pho_lead+pho_sublead).M();
+    outtreeVars.dipho_leadptoM = pho_lead.Pt() / (dipho).M();
     outtreeVars.dipho_leadEnergy = pho_lead.E();
-    //outtreeVars.dipho_leadIso = treeVars.TightPh_iso[pho_lead_i];
     //outtreeVars.dipho_leadDeltaRgenreco = DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen);
     //outtreeVars.dipho_leadDeltaEtagenreco = DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen);
     //outtreeVars.dipho_leadDeltaPhigenreco = DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen);
-
     outtreeVars.dipho_subleadPt = pho_sublead.Pt();
     outtreeVars.dipho_subleadEta = pho_sublead.Eta();
     outtreeVars.dipho_subleadPhi = pho_sublead.Phi();
-    outtreeVars.dipho_subleadptoM = pho_sublead.Pt() / (pho_lead+pho_sublead).M();
+    outtreeVars.dipho_subleadptoM = pho_sublead.Pt() / (dipho).M();
     outtreeVars.dipho_subleadEnergy = pho_sublead.E();
-    //outtreeVars.dipho_subleadIso = treeVars.TightPh_iso[pho_sublead_i];
     //outtreeVars.dipho_subleadDeltaRgenreco = DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen);
     //outtreeVars.dipho_subleadDeltaEtagenreco = DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen);
     //outtreeVars.dipho_subleadDeltaPhigenreco = DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen);
-
-    outtreeVars.dibjet_mass = (bjet_lead+bjet_sublead).M();
-    outtreeVars.dibjet_sumpt = (bjet_lead+bjet_sublead).Pt();
+    outtreeVars.dibjet_mass = (dibjet).M();
+    outtreeVars.dibjet_sumpt = (dibjet).Pt();
     outtreeVars.dibjet_deltaeta = DeltaEta( bjet_lead.Eta() , bjet_sublead.Eta() );
     outtreeVars.dibjet_deltaphi = DeltaPhi( bjet_lead.Phi() , bjet_sublead.Phi() );
-
     outtreeVars.dibjet_leadPt = bjet_lead.Pt();
     outtreeVars.dibjet_leadEta = bjet_lead.Eta();
     outtreeVars.dibjet_leadPhi = bjet_lead.Phi();
-    outtreeVars.dibjet_leadptoM = bjet_lead.Pt() / (bjet_lead+bjet_sublead).M();
+    outtreeVars.dibjet_leadptoM = bjet_lead.Pt() / (dibjet).M();
     outtreeVars.dibjet_leadEnergy = bjet_lead.E();
     outtreeVars.dibjet_leadbtagscore = outtreeVars.jet_BTagLevel[bjet_lead_i];
-
     outtreeVars.dibjet_subleadPt = bjet_sublead.Pt();
     outtreeVars.dibjet_subleadEta = bjet_sublead.Eta();
     outtreeVars.dibjet_subleadPhi = bjet_sublead.Phi();
-    outtreeVars.dibjet_subleadptoM = bjet_sublead.Pt() / (bjet_lead+bjet_sublead).M();
+    outtreeVars.dibjet_subleadptoM = bjet_sublead.Pt() / (dibjet).M();
     outtreeVars.dibjet_subleadEnergy = bjet_sublead.E();
     outtreeVars.dibjet_subleadbtagscore = outtreeVars.jet_BTagLevel[bjet_sublead_i];
-
-
+    outtreeVars.Mx = diHiggs.M() - outtreeVars.dibjet_mass - outtreeVars.dipho_mass + 250.;
+    outtreeVars.DRmin_pho_bjet = DeltaRmin_bjet_pho; 
+    outtreeVars.costheta_HH = costheta_HH; 
+    outtreeVars.costheta_gg = costheta_gg; 
+    outtreeVars.costheta_bb = costheta_bb; 
+    
     h["dipho_mass"] -> Fill(outtreeVars.dipho_mass);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);
     h["dipho_deltaeta"] -> Fill(outtreeVars.dipho_deltaeta);
@@ -461,7 +487,13 @@ int main(int argc, char* argv[])
     h["dibjet_subleadptoM"] -> Fill(outtreeVars.dibjet_subleadptoM);
     h["dibjet_subleadEnergy"] -> Fill(outtreeVars.dibjet_subleadEnergy);
     h["dibjet_subleadbtagscore"] -> Fill(outtreeVars.dibjet_subleadbtagscore);
-    
+    h["Mx"] -> Fill(outtreeVars.Mx);
+    h["DRmin_sel_phots_sel_jets"] -> Fill(outtreeVars.DRmin_pho_bjet); 
+    h["costhetastar_HH"] -> Fill(outtreeVars.costheta_HH); 
+    h["costhetastar_gg"] -> Fill(outtreeVars.costheta_gg); 
+    h["costhetastar_bb"] -> Fill(outtreeVars.costheta_bb); 
+
+
     //h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen) );
     //h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen) );
     //h["dipho_leaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen) );
@@ -474,11 +506,19 @@ int main(int argc, char* argv[])
   }
   std::cout << std::endl;
 
-  cout<<"\n\n\n\n\nselected events = "<<Nev_selected<<" / "<<nEntries<<endl;
+  cout<<"\n-----------------------------------------------------------------"<<endl;
+  cout<<"-----------------------------------------------------------------"<<endl;
+  cout<<"MC events = "<<Nev_MC<<endl;
+  cout<<"2b2g skim = "<<nEntries<<" / "<<Nev_MC<<endl;
+  cout<<"-----------------------------------------------------------------"<<endl;
+  cout<<"selected events = "<<Nev_selected<<" / "<<nEntries<<endl;
   cout<<"\t\tpass photon selection = "<<Nev_phselection<<" / "<<nEntries<<endl;
   cout<<"\t\tpass kinematic bjet preselection = "<< Nev_jet_kin_preselection <<" / "<<nEntries<<endl;
   cout<<"\t\tpass jet selection = "<<Nev_jetselection<<" / "<<nEntries<<endl;
-  cout<<"\n\n\n\n\n"<<endl;
+  cout<<"-----------------------------------------------------------------"<<endl;
+  cout<<"N_selected * XS /N_MC = "<< Nev_jetselection*CrossSection/Nev_MC <<" fb"<<endl; 
+  cout<<"-----------------------------------------------------------------"<<endl;
+  cout<<"-----------------------------------------------------------------\n"<<endl;
 
   outTree -> AutoSave();
   outFile -> Close();

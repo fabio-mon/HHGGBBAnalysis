@@ -8,7 +8,7 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   
   chain -> SetBranchAddress("dipho_sumpt",   &treeVars.dipho_sumpt);
   chain -> SetBranchAddress("dipho_mass",    &treeVars.dipho_mass);
-  chain -> SetBranchAddress("dipho_mass_gen",    &treeVars.dipho_mass_gen);
+  //chain -> SetBranchAddress("dipho_mass_gen",    &treeVars.dipho_mass_gen);
   //  chain -> SetBranchAddress("dipho_sigmaRV", &treeVars.dipho_sigmaRV);
   chain -> SetBranchAddress("dipho_deltaeta",&treeVars.dipho_deltaeta);
   chain -> SetBranchAddress("dipho_deltaphi",&treeVars.dipho_deltaphi);
@@ -69,6 +69,12 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   chain -> SetBranchAddress("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
   chain -> SetBranchAddress("dibjet_subleadbtagscore",          &treeVars.dibjet_subleadbtagscore);
 
+  chain -> SetBranchAddress("Mx",                               &treeVars.Mx);
+  chain -> SetBranchAddress("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
+  chain -> SetBranchAddress("costheta_HH",                      &treeVars.costheta_HH); 
+  chain -> SetBranchAddress("costheta_gg",                      &treeVars.costheta_gg); 
+  chain -> SetBranchAddress("costheta_bb",                      &treeVars.costheta_bb); 
+
 }
 
 
@@ -81,7 +87,7 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
 
   tree -> Branch("dipho_sumpt",   &treeVars.dipho_sumpt);
   tree -> Branch("dipho_mass",    &treeVars.dipho_mass);
-  tree -> Branch("dipho_mass_gen",    &treeVars.dipho_mass_gen);
+  //tree -> Branch("dipho_mass_gen",    &treeVars.dipho_mass_gen);
   tree -> Branch("dipho_deltaeta",&treeVars.dipho_deltaeta);
   tree -> Branch("dipho_deltaphi",&treeVars.dipho_deltaphi);
   
@@ -140,6 +146,12 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("dibjet_subleadptoM",               &treeVars.dibjet_subleadptoM);
   tree -> Branch("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
   tree -> Branch("dibjet_subleadbtagscore",          &treeVars.dibjet_subleadbtagscore);
+  
+  tree -> Branch("Mx",                               &treeVars.Mx);
+  tree -> Branch("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
+  tree -> Branch("costheta_HH",                      &treeVars.costheta_HH); 
+  tree -> Branch("costheta_gg",                      &treeVars.costheta_gg); 
+  tree -> Branch("costheta_bb",                      &treeVars.costheta_bb); 
 }
 
 

@@ -14,15 +14,12 @@ struct TreeVars
   int nvtx;
   float weight;
   float cross_sec;
+
   float dipho_sumpt;
   float dipho_mass;
   float dipho_mass_gen;
-  float dipho_vtxProb;
-  float dipho_sigmaRV;
-  float dipho_sigmaWV;
   float dipho_deltaeta;
   float dipho_deltaphi;
-  float dipho_cosDeltaphi;
   float dipho_leadPt;
   float dipho_leadEta;
   float dipho_leadEta_gen;
@@ -30,11 +27,8 @@ struct TreeVars
   float dipho_leadPhi_gen;
   float dipho_leadEnergy;
   float dipho_leadEnergy_gen;
-  float dipho_leadR9;
   float dipho_leadptoM;
   float dipho_lead_sigmaEoE;
-  float dipho_leadIDMVA;
-  float dipho_leadIso;
   float dipho_leadDeltaRgenreco;
   float dipho_leadDeltaEtagenreco;
   float dipho_leadDeltaPhigenreco;
@@ -45,46 +39,27 @@ struct TreeVars
   float dipho_subleadPhi_gen;
   float dipho_subleadEnergy;
   float dipho_subleadEnergy_gen;
-  float dipho_subleadR9;
   float dipho_subleadptoM;
   float dipho_sublead_sigmaEoE;
-  float dipho_subleadIDMVA;
-  float dipho_subleadIso;
-  float dipho_mva;
   float dipho_subleadDeltaRgenreco;
   float dipho_subleadDeltaEtagenreco;
   float dipho_subleadDeltaPhigenreco;
 
-  
-  float MetPt;
-  float MetPhi;
-  float ttHMVA;
-  
   int nJets;
   int nJets_bTagLoose;
   int nJets_bTagMedium;
   int nJets_bTagTight;
-  
-  float jet_pt[20];
-  float jet_eta[20];
-  float jet_phi[20];
-  int   jet_bdiscriminant[20];
-  int   jet_BTagLevel[20];
-  float jet_mass[20];
-
 
   float dibjet_mass;
   float dibjet_sumpt;
   float dibjet_deltaeta;
   float dibjet_deltaphi;
-
   float dibjet_leadPt;
   float dibjet_leadEta;
   float dibjet_leadPhi;
   float dibjet_leadptoM;
   float dibjet_leadEnergy;
   int   dibjet_leadbtagscore;
-
   float dibjet_subleadPt;
   float dibjet_subleadEta;
   float dibjet_subleadPhi;
@@ -92,40 +67,22 @@ struct TreeVars
   float dibjet_subleadEnergy;
   int   dibjet_subleadbtagscore;
 
+  float Mx;
+  float DRmin_pho_bjet; 
+  float costheta_HH; 
+  float costheta_gg; 
+  float costheta_bb; 
 
-  float mu_pt[2];
-  float mu_eta[2];
-  float mu_phi[2];
-  float mu_energy[2];
-  float mu_isLoose[2];
-  float mu_isMedium[2];
-  float mu_miniIso[2];
-  float mu_trackIso[2];
-  float mu_charge[2];
-  float mu_sumChargedHadronPt[2];
-  float mu_sumNeutralHadronEt[2];
-  float mu_sumPhotonEt[2];
-  float mu_sumPUPt[2];
-  float ele_pt[2];
-  float ele_eta[2];
-  float ele_phi[2];
-  float ele_energy[2];
-  float ele_passVetoId[2];
-  float ele_passLooseId[2];
-  float ele_passMediumId[2];
-  float ele_passTightId[2];
-  float ele_MVAMediumId[2];
-  float ele_MVATightId[2];
-  float ele_miniIso[2];
-  float ele_ecalEnergy[2];
-  float ele_SCx[2];
-  float ele_SCy[2];
-  float ele_SCz[2];
-  float ele_charge[2];
-  float ele_SCeta[2];
-  float ele_SCphi[2];
-  float ele_dEtaTrk[2];
-  float ele_dPhiTrk[2];
+  float jet_pt[20];
+  float jet_eta[20];
+  float jet_phi[20];
+  int   jet_bdiscriminant[20];
+  int   jet_BTagLevel[20];
+  float jet_mass[20];
+
+  float MetPt;
+  float MetPhi;
+
 };
 
 struct RawTreeVars

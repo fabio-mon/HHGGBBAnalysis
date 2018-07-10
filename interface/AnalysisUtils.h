@@ -41,6 +41,7 @@ bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_subl
 bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD);
 float DeltaRmin_phoRECO_phoGEN(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);
 float DeltaRmin_phoRECO_jetRECO(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);
+float DeltaRmin(const vector<TLorentzVector> &coll1 , const vector<TLorentzVector> &coll2);
 void PrintRecoPhoton(const RawTreeVars& treeVars);
 void PrintRecoJet(const RawTreeVars& treeVars);
 #endif

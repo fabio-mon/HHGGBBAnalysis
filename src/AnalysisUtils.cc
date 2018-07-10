@@ -194,6 +194,15 @@ bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet
 
 int GetBTagLevel(const int &BTag, const bool &useMTD)
 {
+  //BTag level:
+  // 0 no BTag
+  // 1 BTag loose
+  // 2 BTag medium
+  // 3 BTag tight
+  // 4 BTag loose with MTD
+  // 5 BTag medium with MTD
+  // 6 BTag tight with MTD
+
   if(useMTD)
   {
     if(BTag & 0b100000) return 6;
@@ -269,6 +278,9 @@ bool Findbquark_Hdaug(RawTreeVars &treeVars)
   if(nflag!=2)
   {
     cout<<"n bquark h daug="<<nflag<<" --->skip event"<<endl;
+    for(int i=0;i<treeVars.N_GenPart;i++)
+      if(fabs(treeVars.GenPart_pid[i])==5)
+	cout<<"status="<<treeVars.GenPart_st[i]<<"\tpt="<<treeVars.GenPart_pt[i]<<"\teta="<<treeVars.GenPart_eta[i]<<"\tphi="<<treeVars.GenPart_phi[i]<<endl;
     return false;
   }
   return true;
@@ -624,6 +636,32 @@ float DeltaRmin_phoRECO_jetRECO(const TLorentzVector &reco_pho , const RawTreeVa
 	deltaRmin=deltaR;
   }
   return deltaRmin;
+}
+
+float DeltaRmin(const vector<TLorentzVector> &coll1 , const vector<TLorentzVector> &coll2)
+{
+  unsigned n1 = coll1.size();
+  unsigned n2 = coll2.size();
+  if(n1==0)
+  {
+    cerr<<"> DeltaRmin error: collection 1 is empty"<<endl;
+    return -1;
+  }
+  if(n2==0)
+  {
+    cerr<<"> DeltaRmin error: collection 2 is empty"<<endl;
+    return -1;
+  }
+  float DR;
+  float DRmin = DeltaR( coll1.at(0).Eta() , coll1.at(0).Phi() , coll2.at(0).Eta() , coll2.at(0).Phi() );
+  for(unsigned i1=1; i1<n1; ++i1)
+    for(unsigned i2=1; i2<n2; ++i2)
+    {
+      DR=DeltaR( coll1.at(i1).Eta() , coll1.at(i1).Phi() , coll2.at(i2).Eta() , coll2.at(i2).Phi() );
+      if(DR<DRmin)
+	DRmin=DR;
+    }
+  return DRmin;
 }
 
 

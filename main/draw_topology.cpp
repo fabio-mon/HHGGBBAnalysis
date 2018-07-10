@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   {
 
     tree -> GetEntry(ientry);
-    if( ientry%1==0 ) std::cout << "Processing entry "<< ientry << "\r" << std::flush;
+    if( ientry%100==0 ) std::cout << "Processing entry "<< ientry << "\r" << std::flush;
     
     if(treeVars.N_SelectedPh<2) continue;
 
@@ -213,10 +213,14 @@ int main(int argc, char* argv[])
 	recobjet.push_back(recobjet_aux);
       }
     }
-    
-    
-    //find selected jets
-    //PrintRecoJet(treeVars);
+
+    //------------------------------------------------------------
+    //select only ambigous events with 3 reco bjets
+    //if(recobjet.size()<3) continue;
+    //------------------------------------------------------------
+
+    //Find Selected Jets
+    //Printrecojet(Treevars);
     outtreeVars.nJets=0;
     outtreeVars.nJets_bTagLoose=0;
     outtreeVars.nJets_bTagMedium=0;
@@ -270,7 +274,7 @@ int main(int argc, char* argv[])
     LongPlanePad->DrawFrame(-5,-2,5,2);
     draw_long(pho_gen,      kCyan,        1,  LongPlanePad,100);
     draw_long(lead_recoph,  kBlue,        2,  LongPlanePad,100);
-    draw_long(bquark_gen,   kMagenta-10,  3,  LongPlanePad,100);
+    draw_long(bquark_gen,   kMagenta-10,  1,  LongPlanePad,100);
     draw_long(recobjet,     kRed,         4,  LongPlanePad,100);
     draw_long(selected_bjet,kGreen,       5,  LongPlanePad,100);
     //if(ientry<100)
@@ -282,7 +286,7 @@ int main(int argc, char* argv[])
     TLegend leg(0.1,0.7,0.48,0.9);
     leg.AddEntry( draw_transv(pho_gen,      kCyan,        1,  TransvPlanePad,100) , "gen photons H daughter","l");
     leg.AddEntry( draw_transv(lead_recoph,  kBlue,        2,  TransvPlanePad,100) , "selected photons","l");
-    leg.AddEntry( draw_transv(bquark_gen,   kMagenta-10,  3,  TransvPlanePad,100) , "b quarks H daughter","l");
+    leg.AddEntry( draw_transv(bquark_gen,   kMagenta-10,  1,  TransvPlanePad,100) , "b quarks H daughter","l");
     leg.AddEntry( draw_transv(recobjet,     kRed,         4,  TransvPlanePad,100) , "reco b jets","l");
     leg.AddEntry( draw_transv(selected_bjet,kGreen,       5,  TransvPlanePad,100) , "selected b jets","l");
     leg.Draw();
