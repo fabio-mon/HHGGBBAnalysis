@@ -196,10 +196,12 @@ int main(int argc, char* argv[])
   std::string outputPlotFolder = opts.GetOpt<std::string>("Output.outputFolder");
   system(Form("mkdir -p %s",outputPlotFolder.c_str()));
   TFile* outFile = TFile::Open(Form("%s/plotTree_%s.root",outputPlotFolder.c_str(),label.c_str()),"RECREATE");
-  outFile -> cd();
+  outFile -> cd();  
   TTree* outTree = new TTree("plotTree","plotTree");
+  TTree* outTree_HPC = new TTree("plotTree_HPC","plotTree_HPC");
   TreeVars outtreeVars;
   InitOutTreeVars(outTree,outtreeVars);
+  InitOutTreeVars(outTree_HPC,outtreeVars);
 
   
   //----------
@@ -503,6 +505,16 @@ int main(int argc, char* argv[])
 
     outTree->Fill();
 
+    //additional selections for high purity category
+    if(outtreeVars.dipho_mass<115 || outtreeVars.dipho_mass>135) continue;
+    if(outtreeVars.dibjet_sumpt<20 || outtreeVars.dibjet_sumpt>550) continue;
+    if(outtreeVars.dipho_sumpt<20 || outtreeVars.dipho_sumpt>550) continue;
+    if(outtreeVars.Mx<300 || outtreeVars.Mx>950) continue;
+    if(outtreeVars.costheta_HH>0.8) continue;
+    if(outtreeVars.dipho_deltaphi>2.6) continue;
+    outTree_HPC->Fill();
+
+
   }
   std::cout << std::endl;
 
@@ -521,6 +533,7 @@ int main(int argc, char* argv[])
   cout<<"-----------------------------------------------------------------\n"<<endl;
 
   outTree -> AutoSave();
+  outTree_HPC->AutoSave();
   outFile -> Close();
 
   MakePlot3(h);

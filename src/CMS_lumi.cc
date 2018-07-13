@@ -23,6 +23,7 @@ float relExtraDY = 1.2;
 // ratio of "CMS" and extra text size
 float extraOverCmsTextSize  = 0.76;
 
+TString lumi_14TeV = "3000 fb^{-1}";//"35.9 fb^{-1}";
 TString lumi_13TeV = "";//"35.9 fb^{-1}";
 TString lumi_8TeV  = "";//"19.7 fb^{-1}";
 TString lumi_7TeV  = "";//"5.1 fb^{-1}";
@@ -83,6 +84,11 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
     {
       lumiText += lumi_13TeV;
       lumiText += " (13 TeV)";
+    }
+  else if ( iPeriod==5 )
+    {
+      lumiText += lumi_14TeV;
+      lumiText += " (14 TeV)";
     }
   else if ( iPeriod==7 )
     { 

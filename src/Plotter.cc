@@ -209,7 +209,7 @@ PlotTH1F::PlotTH1F(const std::string& varName,
   //-------
   // legend
   
-  TLegend* legend = new TLegend(0.80,0.90-0.04*objectList.size(),0.93,0.90);
+  TLegend* legend = new TLegend(0.70,0.90-0.04*objectList.size(),0.93,0.90);
   legend -> SetFillColor(0);
   legend -> SetFillStyle(1000);  
   legend -> SetTextFont(42);  
@@ -335,14 +335,14 @@ PlotTH1F::PlotTH1F(const std::string& varName,
   {
     pad1 -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(pad1,4,10);
+      CMS_lumi(pad1,5,10);
     legend -> Draw("same");
   }
   else
   {
     c_ -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(c_,4,10);
+      CMS_lumi(c_,5,10);
     legend -> Draw("same");
   }
   
@@ -413,14 +413,14 @@ PlotTH1F::PlotTH1F(const std::string& varName,
   {
     pad1 -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(pad1,4,10);
+      CMS_lumi(pad1,5,10);
     legend -> Draw("same");
   }
   else
   {
     clog_ -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(clog_,4,10);
+      CMS_lumi(clog_,5,10);
     legend -> Draw("same");
   }
 }
