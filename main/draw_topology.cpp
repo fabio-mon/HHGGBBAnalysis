@@ -158,16 +158,16 @@ int main(int argc, char* argv[])
 
     
     //find higgs daugher gen-photons and flag their .isHdaug
-    if( ! FindGenPh_Hdaug(treeVars) ) continue;
+    //if( ! FindGenPh_Hdaug(treeVars) ) continue;
     //store phgen higgs daughter
-    vector<TLorentzVector> pho_gen;
-    for(int i=0;i<treeVars.N_GenPh;i++)
-      if(treeVars.GenPh_isHdaug[i]==true)
-      {
-	TLorentzVector pho_gen_aux;
-	pho_gen_aux.SetPtEtaPhiE(treeVars.GenPh_pt[i],treeVars.GenPh_eta[i],treeVars.GenPh_phi[i],treeVars.GenPh_E[i]);
-	pho_gen.push_back(pho_gen_aux);
-      }
+    //vector<TLorentzVector> pho_gen;
+    //for(int i=0;i<treeVars.N_GenPh;i++)
+    //  if(treeVars.GenPh_isHdaug[i]==true)
+    //  {
+    //  TLorentzVector pho_gen_aux;
+    //	pho_gen_aux.SetPtEtaPhiE(treeVars.GenPh_pt[i],treeVars.GenPh_eta[i],treeVars.GenPh_phi[i],treeVars.GenPh_E[i]);
+    //	pho_gen.push_back(pho_gen_aux);
+    //  }
     
 
     //find lead & sublead reco photons
@@ -186,19 +186,19 @@ int main(int argc, char* argv[])
     //Cuts on photons
     if(!DiPhotonSelection(pho_lead,pho_sublead))
       continue;
-
+    //cout<<"pass photon selection"<<endl;
     
     //find higgs daugher b-quarks and flag their .isHdaug                                                                                        
-    if( ! Findbquark_Hdaug(treeVars) ) continue;
+    //if( ! Findbquark_Hdaug(treeVars) ) continue;
     //store b-quarks higgs daugher
-    vector<TLorentzVector> bquark_gen;
-    for(int i=0;i<treeVars.N_GenPart;i++)
-      if(treeVars.GenPart_isHdaug[i]==true)
-      {
-	TLorentzVector bquark_gen_aux;
-	bquark_gen_aux.SetPtEtaPhiE(treeVars.GenPart_pt[i],treeVars.GenPart_eta[i],treeVars.GenPart_phi[i],treeVars.GenPart_E[i]);
-	bquark_gen.push_back(bquark_gen_aux);
-      }
+    //vector<TLorentzVector> bquark_gen;
+    //for(int i=0;i<treeVars.N_GenPart;i++)
+    //  if(treeVars.GenPart_isHdaug[i]==true)
+    //  {
+    //	TLorentzVector bquark_gen_aux;
+    //	bquark_gen_aux.SetPtEtaPhiE(treeVars.GenPart_pt[i],treeVars.GenPart_eta[i],treeVars.GenPart_phi[i],treeVars.GenPart_E[i]);
+    //	bquark_gen.push_back(bquark_gen_aux);
+    //  }
     
 
     
@@ -214,25 +214,30 @@ int main(int argc, char* argv[])
       }
     }
 
-    //------------------------------------------------------------
-    //select only ambigous events with 3 reco bjets
-    //if(recobjet.size()<3) continue;
-    //------------------------------------------------------------
 
-    //Find Selected Jets
-    //Printrecojet(Treevars);
+    
+    //Jets selections
+    int BTagOffset;//--->See AnalysisUtils::GetBTagLevel
+    if(useMTD == false)
+      BTagOffset=0;
+    else
+      BTagOffset=3;
+
+    //PrintRecoJet(treeVars);
     outtreeVars.nJets=0;
     outtreeVars.nJets_bTagLoose=0;
-    outtreeVars.nJets_bTagMedium=0;
+    outtreeVars.nJets_bTagMedium=0;	 
     outtreeVars.nJets_bTagTight=0;
+    //select in output only jets with a certain minimum pt and b-tagged
     for(int i=0;i<treeVars.N_Jet;i++)
     {
       if(treeVars.Jet_pt[i]<25) continue;
       if(fabs(treeVars.Jet_eta[i])>3) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
-      int BTag = GetBTagLevel(treeVars.Jet_mvav2[i],useMTD);  
-      if(BTag>BTagOffset && BTag<4+BTagOffset)
+      int BTag = GetBTagLevel(treeVars.Jet_mvav2[i],useMTD);
+      //cout<<i<<"\tbtagvalue="<<treeVars.Jet_mvav2[i]<<"\tbtaglevel="<<BTag<<"\tbtagoffset="<<BTagOffset<<endl;
+      //if(BTag>BTagOffset && BTag<4+BTagOffset)
       {
 	outtreeVars.nJets++;
 	outtreeVars.jet_pt[outtreeVars.nJets-1] = treeVars.Jet_pt[i];
@@ -240,6 +245,7 @@ int main(int argc, char* argv[])
 	outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
 	outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
 	outtreeVars.jet_BTagLevel[outtreeVars.nJets-1] = BTag;
+	outtreeVars.jet_mvav2[outtreeVars.nJets-1] = treeVars.Jet_mvav2[i];
 	if(BTag-BTagOffset==1)
 	  outtreeVars.nJets_bTagLoose++;
 	else
@@ -250,31 +256,50 @@ int main(int argc, char* argv[])
 	      outtreeVars.nJets_bTagTight++;
       }
     }
+    
+
 
     if(outtreeVars.nJets<2) 
+    {
+      //cout<<"NOT pass jet selection"<<endl;
       continue;
-    
+    }
+    //cout<<"pass jet selection"<<endl;
+
     //Select the two jets with the higher BTag level, if they have the same value select the harder one
     int bjet_lead_i;
     int bjet_sublead_i;
-    SelectBestScoreBJets(outtreeVars,bjet_lead_i,bjet_sublead_i,useMTD);
+    SelectBestScoreBJets2(outtreeVars,bjet_lead_i,bjet_sublead_i,useMTD);
     TLorentzVector bjet_lead,bjet_sublead;
     bjet_lead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_lead_i],outtreeVars.jet_eta[bjet_lead_i],outtreeVars.jet_phi[bjet_lead_i],outtreeVars.jet_mass[bjet_lead_i]);
     bjet_sublead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_sublead_i],outtreeVars.jet_eta[bjet_sublead_i],outtreeVars.jet_phi[bjet_sublead_i],outtreeVars.jet_mass[bjet_sublead_i]);
 
-    double dibjet_mass = (bjet_lead+bjet_sublead).M();
+    TLorentzVector dibjet= bjet_lead+bjet_sublead;
+    double dibjet_mass = dibjet.M();
     //cout<<"Mjj="<<dibjet_mass<<endl;
-    if(dibjet_mass<70 || dibjet_mass>180)
+    if(dibjet_mass<70 || dibjet_mass>200)
       continue;
+    //cout<<"pass jets invariant mass selection"<<endl;
+    //cout<<"\n\n\n\n\n\n"<<endl;
+
+    int BTagMedium_mask;
+    if(useMTD == false)
+      BTagMedium_mask=0b000010;
+    else
+      BTagMedium_mask=0b010000;
+    //if( outtreeVars.dibjet_leadbtagscore-BTagOffset>=2 && outtreeVars.dibjet_subleadbtagscore-BTagOffset>=2 )
+    if( !((outtreeVars.jet_mvav2[bjet_lead_i] & BTagMedium_mask) && (outtreeVars.jet_mvav2[bjet_sublead_i] & BTagMedium_mask)) ) continue;
+    //cout<<"HPC"<<endl;
+    //getchar();
     vector<TLorentzVector> selected_bjet;
     selected_bjet.push_back(bjet_lead);
     selected_bjet.push_back(bjet_sublead);
     
     LongPlanePad->cd();
     LongPlanePad->DrawFrame(-5,-2,5,2);
-    draw_long(pho_gen,      kCyan,        1,  LongPlanePad,100);
+    //draw_long(pho_gen,      kCyan,        1,  LongPlanePad,100);
     draw_long(lead_recoph,  kBlue,        2,  LongPlanePad,100);
-    draw_long(bquark_gen,   kMagenta-10,  1,  LongPlanePad,100);
+    //draw_long(bquark_gen,   kMagenta-10,  1,  LongPlanePad,100);
     draw_long(recobjet,     kRed,         4,  LongPlanePad,100);
     draw_long(selected_bjet,kGreen,       5,  LongPlanePad,100);
     //if(ientry<100)
@@ -284,9 +309,9 @@ int main(int argc, char* argv[])
     TransvPlanePad->cd();
     TransvPlanePad->DrawFrame(-2,-2,2,2);
     TLegend leg(0.1,0.7,0.48,0.9);
-    leg.AddEntry( draw_transv(pho_gen,      kCyan,        1,  TransvPlanePad,100) , "gen photons H daughter","l");
+    //leg.AddEntry( draw_transv(pho_gen,      kCyan,        1,  TransvPlanePad,100) , "gen photons H daughter","l");
     leg.AddEntry( draw_transv(lead_recoph,  kBlue,        2,  TransvPlanePad,100) , "selected photons","l");
-    leg.AddEntry( draw_transv(bquark_gen,   kMagenta-10,  1,  TransvPlanePad,100) , "b quarks H daughter","l");
+    //leg.AddEntry( draw_transv(bquark_gen,   kMagenta-10,  1,  TransvPlanePad,100) , "b quarks H daughter","l");
     leg.AddEntry( draw_transv(recobjet,     kRed,         4,  TransvPlanePad,100) , "reco b jets","l");
     leg.AddEntry( draw_transv(selected_bjet,kGreen,       5,  TransvPlanePad,100) , "selected b jets","l");
     leg.Draw();

@@ -71,8 +71,10 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
 {
   double lead_pt=pho_lead.Pt();
   double sublead_pt=pho_sublead.Pt();
-  if(lead_pt<20 || sublead_pt<20) return false;
+  if(lead_pt<30 || sublead_pt<20) return false;
   if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
+  if(fabs(pho_lead.Eta())>1.44 && fabs(pho_lead.Eta())<1.57) return false;
+  if(fabs(pho_sublead.Eta())>1.44 && fabs(pho_sublead.Eta())<1.57) return false;
   double dipho_mass=(pho_lead+pho_sublead).M();
   //---------------------------------------------------------------
   //cout<<"Mgg="<<dipho_mass<<endl;
@@ -190,6 +192,95 @@ bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet
 
   return true;
 }
+
+
+bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD)
+{
+  int BTagMedium_mask;
+  if(useMTD == false)
+    BTagMedium_mask=0b000010;
+  else
+    BTagMedium_mask=0b010000;
+
+  //select the 2 jets with medium btag score if present , or take the harder ones
+  int ijet1=0;
+  int btag1=outtreeVars.jet_mvav2[0] & BTagMedium_mask;
+  float pt1 = outtreeVars.jet_pt[0];
+  //---------------------------------------------------------------
+  //cout<<"0\tbtag="<<btag1<<"\tpt1="<<pt1<<endl;
+  //---------------------------------------------------------------
+  for(int i=1; i<outtreeVars.nJets; i++)
+  {
+    //---------------------------------------------------------------
+    //cout<<i<<"\tbtag="<<(outtreeVars.jet_mvav2[i] & BTagMedium_mask)<<"\tpt1="<<outtreeVars.jet_pt[i]<<endl;
+    //---------------------------------------------------------------
+    //If(BTag>BTagOffset && BTag<4+BTagOffset) <-- already required to fill outtreeVars
+    if((outtreeVars.jet_mvav2[i] & BTagMedium_mask) > btag1)
+    {
+      ijet1=i;
+      btag1=(outtreeVars.jet_mvav2[i] & BTagMedium_mask);
+      pt1 = outtreeVars.jet_pt[i];
+    }
+    else
+      if((outtreeVars.jet_mvav2[i] & BTagMedium_mask) == btag1)
+	if(outtreeVars.jet_pt[i] > pt1)
+	{
+	  ijet1=i;
+	  btag1=(outtreeVars.jet_mvav2[i] & BTagMedium_mask);
+	  pt1 = outtreeVars.jet_pt[i];
+	}
+  }
+
+  //find second jet with higher btag score
+  int ijet2=-1;
+  int btag2=-1;
+  float pt2=-1;
+  for(int i=0; i<outtreeVars.nJets; i++)
+  {
+    if(i==ijet1) continue;
+    if(ijet2==-1)
+    {
+      ijet2=i;
+      btag2=(outtreeVars.jet_mvav2[i] & BTagMedium_mask);
+      pt2 = outtreeVars.jet_pt[i];
+    }
+    else
+      if((outtreeVars.jet_mvav2[i] & BTagMedium_mask) > btag2)
+      {
+	ijet2=i;
+	btag2=(outtreeVars.jet_mvav2[i] & BTagMedium_mask);
+	pt2 = outtreeVars.jet_pt[i];
+      }
+      else
+	if((outtreeVars.jet_mvav2[i] & BTagMedium_mask) == btag2)
+	  if(outtreeVars.jet_pt[i] > pt2)
+	  {
+	    ijet2=i;
+	    btag2=(outtreeVars.jet_mvav2[i] & BTagMedium_mask);
+	    pt2 = outtreeVars.jet_pt[i];
+	  }
+  }
+
+  //---------------------------------------------------------------
+  //cout<<"best score i "<<ijet1<<" "<<ijet2<<endl;
+  //---------------------------------------------------------------
+  if(ijet2==-1)
+    return false;
+
+  if(pt1>pt2)
+  {
+    bjet_lead_i = ijet1;
+    bjet_sublead_i = ijet2;
+  }
+  else
+  {
+    bjet_lead_i = ijet2;
+    bjet_sublead_i = ijet1;
+  }
+
+  return true;
+}
+
 
 
 int GetBTagLevel(const int &BTag, const bool &useMTD)
@@ -462,19 +553,54 @@ bool PhoGenericGenMatch (const TLorentzVector &reco_pho , const RawTreeVars& tre
   float gen_pho_eta;
   float gen_pho_phi;
 
+  //printf("(eta,phi)reco=(%.2f,%.2f)\tE=%.2f\n\n",reco_pho_eta,reco_pho_phi,reco_pho.E());
   for(int i=0;i<treeVars.N_GenPh;++i)
     {
+      if(treeVars.GenPh_E[i]<10) continue;
       gen_pho_eta=treeVars.GenPh_eta[i];
       gen_pho_phi=treeVars.GenPh_phi[i];
-      if(fabs(treeVars.GenPh_E[i]-reco_pho.E()) > 5) continue;
+      //printf("(eta,phi)gen=(%.2f,%.2f)\tE=%.2f\n",gen_pho_eta,gen_pho_phi,treeVars.GenPh_E[i]);
+      //cout<<"E_GEN-E_RECO="<<treeVars.GenPh_E[i]-reco_pho.E()<<endl;
+      if(fabs(treeVars.GenPh_E[i]-reco_pho.E()) > 18) continue;
       if( DeltaR(reco_pho_eta,reco_pho_phi,gen_pho_eta,gen_pho_phi) < DeltaRmax )
       {
 	gen_pho_match.SetPtEtaPhiE(treeVars.GenPh_pt[i],gen_pho_eta,gen_pho_phi,treeVars.GenPh_E[i]);
-	//cout<<"PtGEN-PtRECO="<<treeVars.GenPh_pt[i]-reco_pho.Pt()<<endl;
 	return true;
       }
     }
 
+  return false;
+}
+
+bool bquarkGenericGenMatch(const TLorentzVector &reco_jet , const RawTreeVars& treeVars , TLorentzVector &gen_b_match, float DeltaRmax)
+{
+
+  float reco_jet_eta = reco_jet.Eta();
+  float reco_jet_phi = reco_jet.Phi();
+  float gen_b_eta;
+  float gen_b_phi;
+  float gen_b_E;
+
+
+  //printf("########\n(eta,phi)reco=(%.2f,%.2f)\tPt=%.2fE=%.2f\n",reco_jet_eta,reco_jet_phi,reco_jet.Pt(),reco_jet.E());
+  for(int i=0;i<treeVars.N_GenPart;++i)
+  {
+     if(treeVars.GenPart_pt[i]<10) continue;
+     if(abs(treeVars.GenPart_pid[i])!=5 && abs(treeVars.GenPart_pid[i])!=4) continue;
+     //cout<<"pid "<<treeVars.GenPart_pid[i]<<endl;
+     gen_b_eta=treeVars.GenPart_eta[i];
+     gen_b_phi=treeVars.GenPart_phi[i];
+     gen_b_E=sqrt(treeVars.GenPart_pt[i]*treeVars.GenPart_pt[i] + treeVars.GenPart_pz[i]*treeVars.GenPart_pz[i]);
+     //printf("(eta,phi)gen=(%.2f,%.2f)\tpt=%.2f\tE=%.2f\t",gen_b_eta,gen_b_phi,treeVars.GenPart_pt[i],gen_b_E);
+     //cout<<"E_GEN-E_RECO="<<gen_b_E-reco_jet.E()<<endl;
+     if(fabs(gen_b_E-reco_jet.E()) > 100) continue;
+     if( DeltaR(reco_jet_eta,reco_jet_phi,gen_b_eta,gen_b_phi) < DeltaRmax )
+     {
+       gen_b_match.SetPtEtaPhiM(treeVars.GenPart_pt[i],gen_b_eta,gen_b_phi,treeVars.GenPart_mass[i]);
+       return true;
+     }
+  }
+  //printf("########\n");
   return false;
 }
 
@@ -664,7 +790,15 @@ float DeltaRmin(const vector<TLorentzVector> &coll1 , const vector<TLorentzVecto
   return DRmin;
 }
 
+/*
+int count_bc_quarks(const RawTreeVars& treeVars, int &b_pair, int &b_single, int &c_pair, int &c_single)
+{
+  int b=0,bbar=0,c=0,cbar=0;
+  map<int,vector<TLorentzVector>> v;
+  
 
+}
+*/
 void PrintRecoPhoton(const RawTreeVars& treeVars)
 {
   cout<<"Event "<<treeVars.event<<endl;

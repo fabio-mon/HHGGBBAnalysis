@@ -45,10 +45,10 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   chain -> SetBranchAddress("nJets_bTagLoose",			&treeVars.nJets_bTagLoose);
   chain -> SetBranchAddress("nJets_bTagMedium",			&treeVars.nJets_bTagMedium);
   chain -> SetBranchAddress("nJets_bTagTight",			&treeVars.nJets_bTagTight);
-  chain -> SetBranchAddress("jet_pt",			        treeVars.jet_pt);
-  chain -> SetBranchAddress("jet_eta",			        treeVars.jet_eta);
-  chain -> SetBranchAddress("jet_phi",			        treeVars.jet_phi);
-  chain -> SetBranchAddress("jet_BTagLevel",			treeVars.jet_BTagLevel);
+  //chain -> SetBranchAddress("jet_pt",			        treeVars.jet_pt);
+  //chain -> SetBranchAddress("jet_eta",			        treeVars.jet_eta);
+  //chain -> SetBranchAddress("jet_phi",			        treeVars.jet_phi);
+  //chain -> SetBranchAddress("jet_BTagLevel",			treeVars.jet_BTagLevel);
 
   chain -> SetBranchAddress("dibjet_mass",                      &treeVars.dibjet_mass);
   chain -> SetBranchAddress("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
@@ -74,6 +74,8 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   chain -> SetBranchAddress("costheta_HH",                      &treeVars.costheta_HH); 
   chain -> SetBranchAddress("costheta_gg",                      &treeVars.costheta_gg); 
   chain -> SetBranchAddress("costheta_bb",                      &treeVars.costheta_bb); 
+  chain -> SetBranchAddress("MetPt",                            &treeVars.MetPt); 
+  chain -> SetBranchAddress("MetPhi",                           &treeVars.MetPhi); 
 
 }
 
@@ -123,10 +125,10 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("nJets_bTagLoose",			&treeVars.nJets_bTagLoose);
   tree -> Branch("nJets_bTagMedium",			&treeVars.nJets_bTagMedium);
   tree -> Branch("nJets_bTagTight",			&treeVars.nJets_bTagTight);
-  tree -> Branch("jet_pt",			        treeVars.jet_pt);
-  tree -> Branch("jet_eta",			        treeVars.jet_eta);
-  tree -> Branch("jet_phi",			        treeVars.jet_phi);
-  tree -> Branch("jet_BTagLevel",			treeVars.jet_BTagLevel);
+  //tree -> Branch("jet_pt",			        treeVars.jet_pt);
+  //tree -> Branch("jet_eta",			        treeVars.jet_eta);
+  //tree -> Branch("jet_phi",			        treeVars.jet_phi);
+  //tree -> Branch("jet_BTagLevel",			treeVars.jet_BTagLevel);
 
   tree -> Branch("dibjet_mass",                      &treeVars.dibjet_mass);
   tree -> Branch("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
@@ -152,6 +154,8 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("costheta_HH",                      &treeVars.costheta_HH); 
   tree -> Branch("costheta_gg",                      &treeVars.costheta_gg); 
   tree -> Branch("costheta_bb",                      &treeVars.costheta_bb); 
+  tree -> Branch("MetPt",                            &treeVars.MetPt); 
+  tree -> Branch("MetPhi",                           &treeVars.MetPhi); 
 }
 
 
