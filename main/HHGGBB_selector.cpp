@@ -340,12 +340,6 @@ int main(int argc, char* argv[])
     //TagGoodJets(treeVars);
     
     //Jets selections
-    int BTagOffset;//--->See AnalysisUtils::GetBTagLevel
-    if(useMTD == false)
-      BTagOffset=0;
-    else
-      BTagOffset=3;
-
     //PrintRecoJet(treeVars);
     outtreeVars.nJets=0;
     outtreeVars.nJets_bTagLoose=0;
@@ -354,31 +348,25 @@ int main(int argc, char* argv[])
     for(int i=0;i<treeVars.N_Jet;i++)
     {
       if(treeVars.Jet_pt[i]<25) continue;
-      if(fabs(treeVars.Jet_eta[i])>3) continue;
+      if(fabs(treeVars.Jet_eta[i])>2.5) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
-      int BTag = GetBTagLevel(treeVars.Jet_mvav2[i],useMTD);
       //cout<<i<<"\tbtagvalue="<<treeVars.Jet_mvav2[i]<<"\tbtaglevel="<<BTag<<"\tbtagoffset="<<BTagOffset<<endl;
-      //if(BTag>BTagOffset && BTag<4+BTagOffset)
-      {
-	outtreeVars.nJets++;
-	outtreeVars.jet_pt[outtreeVars.nJets-1] = treeVars.Jet_pt[i];
-	outtreeVars.jet_eta[outtreeVars.nJets-1] = treeVars.Jet_eta[i];                    
-	outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
-	outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
-	outtreeVars.jet_BTagLevel[outtreeVars.nJets-1] = BTag;
-	outtreeVars.jet_mvav2[outtreeVars.nJets-1] = treeVars.Jet_mvav2[i];
-	outtreeVars.jet_hadflav[outtreeVars.nJets-1] = treeVars.Jet_hadflav[i];//gen level info! handle with care!
-
-	if(BTag-BTagOffset==1)
-	  outtreeVars.nJets_bTagLoose++;
+      outtreeVars.nJets++;
+      outtreeVars.jet_pt[outtreeVars.nJets-1] = treeVars.Jet_pt[i];
+      outtreeVars.jet_eta[outtreeVars.nJets-1] = treeVars.Jet_eta[i];                    
+      outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
+      outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
+      outtreeVars.jet_mvav2[outtreeVars.nJets-1] = treeVars.Jet_mvav2[i];
+      outtreeVars.jet_hadflav[outtreeVars.nJets-1] = treeVars.Jet_hadflav[i];//gen level info! handle with care!
+      if( outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b000001 )
+	outtreeVars.nJets_bTagLoose++;
+      else
+	if( outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b000010 )
+	  outtreeVars.nJets_bTagMedium++;
 	else
-	  if(BTag-BTagOffset==2)
-	    outtreeVars.nJets_bTagMedium++;
-	  else
-	    if(BTag-BTagOffset==3)
-	      outtreeVars.nJets_bTagTight++;
-      }
+	  if( outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b000100 )
+	    outtreeVars.nJets_bTagTight++;
     }
     
 
@@ -402,7 +390,7 @@ int main(int argc, char* argv[])
     TLorentzVector dibjet= bjet_lead+bjet_sublead;
     double dibjet_mass = dibjet.M();
     //cout<<"Mjj="<<dibjet_mass<<endl;
-    if(dibjet_mass<70 || dibjet_mass>200)
+    if(dibjet_mass<80 || dibjet_mass>200)
       continue;
     ++Nev_jetselection;
     //cout<<"pass jets invariant mass selection"<<endl;

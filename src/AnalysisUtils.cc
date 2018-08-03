@@ -72,7 +72,7 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
   double lead_pt=pho_lead.Pt();
   double sublead_pt=pho_sublead.Pt();
   if(lead_pt<30 || sublead_pt<20) return false;
-  if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
+  if(fabs(pho_lead.Eta())>2.5 || fabs(pho_sublead.Eta())>2.5) return false;
   if(fabs(pho_lead.Eta())>1.44 && fabs(pho_lead.Eta())<1.57) return false;
   if(fabs(pho_sublead.Eta())>1.44 && fabs(pho_sublead.Eta())<1.57) return false;
   double dipho_mass=(pho_lead+pho_sublead).M();
@@ -80,7 +80,6 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
   //cout<<"Mgg="<<dipho_mass<<endl;
   //cout<<"lead_pt/Mgg="<<lead_pt/dipho_mass<<endl;
   //cout<<"sublead_pt/Mgg="<<sublead_pt/dipho_mass<<endl;
-  
   //-------------------------------------------
   if(dipho_mass<100. || dipho_mass>180.) return false;
   if(lead_pt/dipho_mass<0.33) return false;
