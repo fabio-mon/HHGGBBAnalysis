@@ -201,18 +201,17 @@ int main(int argc, char* argv[])
   TFile* outFile = TFile::Open(Form("%s/plotTree_%s.root",outputPlotFolder.c_str(),label.c_str()),"RECREATE");
   outFile -> cd();  
   TTree* outTree_preselected = new TTree("preselected","preselected");
-  TTree* outTree_lowMx = new TTree("preselected_lowMx","preselected_lowMx");
-  TTree* outTree_highMx = new TTree("preselected_highMx","preselected_highMx");
-  TTree* outTree_highMx_JCR = new TTree("highMx_JCR","highMx_JCR");
-  TTree* outTree_highMx_MPC = new TTree("highMx_MPC","highMx_MPC");
-  TTree* outTree_highMx_HPC = new TTree("highMx_HPC","highMx_HPC");
+  TTree* outTree_preselected_lowMx = new TTree("preselected_lowMx","preselected_lowMx");
+  TTree* outTree_preselected_highMx = new TTree("preselected_highMx","preselected_highMx");
+  TTree* outTree_all_lowMx  = new TTree("all_lowMx", "all_lowMx");
+  TTree* outTree_all_highMx = new TTree("all_highMx","all_highMx");
   TreeVars outtreeVars;
   InitOutTreeVars(outTree_preselected,outtreeVars);
-  InitOutTreeVars(outTree_lowMx,outtreeVars);
-  InitOutTreeVars(outTree_highMx,outtreeVars);
-  InitOutTreeVars(outTree_highMx_MPC,outtreeVars);
-  InitOutTreeVars(outTree_highMx_HPC,outtreeVars);
-
+  InitOutTreeVars(outTree_preselected_lowMx,outtreeVars);
+  InitOutTreeVars(outTree_preselected_highMx,outtreeVars);
+  InitOutTreeVars(outTree_all_highMx,outtreeVars);
+  InitOutTreeVars(outTree_all_lowMx, outtreeVars);
+  
   
   //----------
   // get number of input events to include in the weight
@@ -270,7 +269,9 @@ int main(int argc, char* argv[])
   int Nev_highMx_JCR=0;
   int Nev_highMx_MPC=0;
   int Nev_highMx_HPC=0;
-
+  int Nev_all_lowMx=0;
+  int Nev_all_highMx=0;
+  
   int Nev_phselection=0;
   int Nev_jet_kin_preselection=0;
   int Nev_jetselection=0;
@@ -481,7 +482,9 @@ int main(int argc, char* argv[])
     outtreeVars.costheta_bb = costheta_bb; 
     outtreeVars.MetPt = treeVars.Met_pt[0];
     outtreeVars.MetPhi = treeVars.Met_phi[0];
-  
+    
+    outtreeVars.ttHTagger = 0;
+    
     h["dipho_mass"] -> Fill(outtreeVars.dipho_mass);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);
     h["dipho_deltaeta"] -> Fill(outtreeVars.dipho_deltaeta);
@@ -524,8 +527,8 @@ int main(int argc, char* argv[])
     h["costhetastar_bb"] -> Fill(outtreeVars.costheta_bb); 
     h["MET"] -> Fill(outtreeVars.MetPt); 
     h["MET_phi"] -> Fill(outtreeVars.MetPhi); 
-
-
+    
+    
     //h["dipho_leaddeltaR_GenReco"] -> Fill( DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen) );
     //h["dipho_subleaddeltaR_GenReco"] -> Fill( DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen) );
     //h["dipho_leaddeltaEta_GenReco"] -> Fill( DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen) );
@@ -534,19 +537,19 @@ int main(int argc, char* argv[])
     //h["dipho_subleaddeltaPhi_GenReco"] -> Fill( DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen) );
     ++Nev_preselected;
     outTree_preselected->Fill();
-
+    
     //fill low mass and high mass categories
-    //cout<<"Mx="<<outtreeVars.Mx<<endl;
     if(outtreeVars.Mx<=350)
     {
-      //cout<<"low mass"<<endl;
       ++Nev_preselected_lowMx;
-      outTree_lowMx->Fill();
-      continue;//!!!!!!!!!
+      outTree_preselected_lowMx->Fill();
     }
-
-    ++Nev_preselected_highMx;
-    outTree_highMx->Fill();
+    else
+    {
+      ++Nev_preselected_highMx;
+      outTree_preselected_highMx->Fill();
+    }
+    
     //cout<<"high mass"<<endl;
     //high mass events: categorization based on b-tag level of the two selected jets
     //JCR(jet control region): less than one jet with medium b-tag  
@@ -562,56 +565,86 @@ int main(int argc, char* argv[])
     if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )
     {
       //cout<<"HPC"<<endl;
-      ++Nev_highMx_HPC;
-      outTree_highMx_HPC->Fill();
-      TLorentzVector v;
-      int NphPrompt=0;
-      if (PhoGenericGenMatch(pho_lead,treeVars,v,0.1)) NphPrompt++;
-      if (PhoGenericGenMatch(pho_sublead,treeVars,v,0.1)) NphPrompt++;
-      if(NphPrompt==2) 
-	Nev_Phpromptprompt++;
-      else
-	if(NphPrompt==1)
-	  Nev_Phpromptfake++;
-	else
-	  Nev_Phfakefake++;
-      int NbjetPrompt=0;
-      if (outtreeVars.jet_hadflav[bjet_lead_i]==5 || outtreeVars.jet_hadflav[bjet_lead_i]==4) NbjetPrompt++; 
-      if (outtreeVars.jet_hadflav[bjet_sublead_i]==5 || outtreeVars.jet_hadflav[bjet_lead_i]==4) NbjetPrompt++; 
-      if(NbjetPrompt==2) 
-	Nev_bjetpromptprompt++;
-      else
-	if(NbjetPrompt==1)
-	  Nev_bjetpromptfake++;
-	else
-	  Nev_bjetfakefake++;
-
-      int NbquarkPrompt=0;
-      if (bquarkGenericGenMatch(bjet_lead,treeVars,v,0.4)) 	NbquarkPrompt++;
-      if (bquarkGenericGenMatch(bjet_sublead,treeVars,v,0.4))	NbquarkPrompt++;
-      if(NbquarkPrompt==2) 
-	Nev_bquarkpromptprompt++;
-      else
-	if(NbquarkPrompt==1)
-	  Nev_bquarkpromptfake++;
-	else
-	  Nev_bquarkfakefake++;
+      outtreeVars.cut_based_ct = 0;
+    }
+    else if( ( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask)  && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) ||
+             ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) ) //must be after HPC!!!
+    {
+      //cout<<"MPC"<<endl;
+      outtreeVars.cut_based_ct = 1;
+    }
+    else if( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )
+    {
+      //cout<<"JCR"<<endl;
+      outtreeVars.cut_based_ct = -1;
+    }
+    
+    
+    //fill low mass and high mass categories
+    if(outtreeVars.Mx<=350)
+    {
+      ++Nev_all_lowMx;
+      outTree_all_lowMx->Fill();
     }
     else
-      if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ||
-	 !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )//must be after HPC!!!
-      {
-	//cout<<"MPC"<<endl;
-	++Nev_highMx_MPC;
-	outTree_highMx_MPC->Fill();
-      }
-      else
-	if ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )  
-	{
-	  //cout<<"JCR"<<endl;
-	  ++Nev_highMx_JCR;
-	  outTree_highMx_JCR->Fill();
-	}
+    {
+      ++Nev_all_highMx;
+      outTree_all_highMx->Fill();
+    }
+    
+    // if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )
+    // {
+    //   //cout<<"HPC"<<endl;
+    //   ++Nev_highMx_HPC;
+    //   outTree_highMx_HPC->Fill();
+    //   TLorentzVector v;
+    //   int NphPrompt=0;
+    //   if (PhoGenericGenMatch(pho_lead,treeVars,v,0.1)) NphPrompt++;
+    //   if (PhoGenericGenMatch(pho_sublead,treeVars,v,0.1)) NphPrompt++;
+    //   if(NphPrompt==2) 
+    //     Nev_Phpromptprompt++;
+    //   else
+    //     if(NphPrompt==1)
+    //       Nev_Phpromptfake++;
+    //     else
+    //       Nev_Phfakefake++;
+    //   int NbjetPrompt=0;
+    //   if (outtreeVars.jet_hadflav[bjet_lead_i]==5 || outtreeVars.jet_hadflav[bjet_lead_i]==4) NbjetPrompt++; 
+    //   if (outtreeVars.jet_hadflav[bjet_sublead_i]==5 || outtreeVars.jet_hadflav[bjet_lead_i]==4) NbjetPrompt++; 
+    //   if(NbjetPrompt==2) 
+    //     Nev_bjetpromptprompt++;
+    //   else
+    //     if(NbjetPrompt==1)
+    //       Nev_bjetpromptfake++;
+    //     else
+    //       Nev_bjetfakefake++;
+
+    //   int NbquarkPrompt=0;
+    //   if (bquarkGenericGenMatch(bjet_lead,treeVars,v,0.4)) 	NbquarkPrompt++;
+    //   if (bquarkGenericGenMatch(bjet_sublead,treeVars,v,0.4))	NbquarkPrompt++;
+    //   if(NbquarkPrompt==2) 
+    //     Nev_bquarkpromptprompt++;
+    //   else
+    //     if(NbquarkPrompt==1)
+    //       Nev_bquarkpromptfake++;
+    //     else
+    //       Nev_bquarkfakefake++;
+    // }
+    // else
+    //   if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ||
+    //      !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )//must be after HPC!!!
+    //   {
+    //     //cout<<"MPC"<<endl;
+    //     ++Nev_highMx_MPC;
+    //     outTree_highMx_MPC->Fill();
+    //   }
+    //   else
+    //     if ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )  
+    //     {
+    //       //cout<<"JCR"<<endl;
+    //       ++Nev_highMx_JCR;
+    //       outTree_highMx_JCR->Fill();
+    //     }
 	  
     //additional possible selections for high purity category
     //if(outtreeVars.dipho_mass<115 || outtreeVars.dipho_mass>135) continue;
@@ -622,6 +655,7 @@ int main(int argc, char* argv[])
     //if(outtreeVars.dipho_deltaphi>2.6) continue;
 
   }
+
   std::cout << std::endl;
 
   cout<<"\n-----------------------------------------------------------------"<<endl;
@@ -658,11 +692,13 @@ int main(int argc, char* argv[])
   cout<<"-----------------------------------------------------------------\n"<<endl;
 
   outTree_preselected -> AutoSave();
-  outTree_lowMx -> AutoSave();
-  outTree_highMx -> AutoSave();
-  outTree_highMx_JCR -> AutoSave();
-  outTree_highMx_MPC -> AutoSave();
-  outTree_highMx_HPC -> AutoSave();
+  outTree_preselected_lowMx -> AutoSave();
+  outTree_preselected_highMx -> AutoSave();
+  // outTree_highMx_JCR -> AutoSave();
+  // outTree_highMx_MPC -> AutoSave();
+  // outTree_highMx_HPC -> AutoSave();
+  outTree_all_lowMx -> AutoSave();
+  outTree_all_highMx -> AutoSave();
   outFile -> Close();
   
   MakePlot3(h);

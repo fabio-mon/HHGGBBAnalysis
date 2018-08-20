@@ -83,12 +83,12 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
 
 void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
 {
-  tree -> Branch("weight",&treeVars.weight);
-  tree -> Branch("nvtx",            &treeVars.nvtx);
-  tree -> Branch("cross_sec",            &treeVars.cross_sec);
+  tree -> Branch("evWeight",  &treeVars.weight);
+  tree -> Branch("nvtx",      &treeVars.nvtx);
+  tree -> Branch("cross_sec", &treeVars.cross_sec);
 
   tree -> Branch("dipho_sumpt",   &treeVars.dipho_sumpt);
-  tree -> Branch("dipho_mass",    &treeVars.dipho_mass);
+  tree -> Branch("mgg",           &treeVars.dipho_mass);
   //tree -> Branch("dipho_mass_gen",    &treeVars.dipho_mass_gen);
   tree -> Branch("dipho_deltaeta",&treeVars.dipho_deltaeta);
   tree -> Branch("dipho_deltaphi",&treeVars.dipho_deltaphi);
@@ -130,7 +130,7 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   //tree -> Branch("jet_phi",			        treeVars.jet_phi);
   //tree -> Branch("jet_BTagLevel",			treeVars.jet_BTagLevel);
 
-  tree -> Branch("dibjet_mass",                      &treeVars.dibjet_mass);
+  tree -> Branch("mjj",                              &treeVars.dibjet_mass);
   tree -> Branch("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
   tree -> Branch("dibjet_deltaeta",                  &treeVars.dibjet_deltaeta);
   tree -> Branch("dibjet_deltaphi",                  &treeVars.dibjet_deltaphi);
@@ -149,13 +149,16 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
   tree -> Branch("dibjet_subleadbtagscore",          &treeVars.dibjet_subleadbtagscore);
   
-  tree -> Branch("Mx",                               &treeVars.Mx);
+  tree -> Branch("mtot",                               &treeVars.Mx);
   tree -> Branch("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
   tree -> Branch("costheta_HH",                      &treeVars.costheta_HH); 
   tree -> Branch("costheta_gg",                      &treeVars.costheta_gg); 
   tree -> Branch("costheta_bb",                      &treeVars.costheta_bb); 
   tree -> Branch("MetPt",                            &treeVars.MetPt); 
   tree -> Branch("MetPhi",                           &treeVars.MetPhi); 
+  
+  tree -> Branch("cut_based_ct", &treeVars.cut_based_ct); 
+  tree -> Branch("ttHTagger",    &treeVars.ttHTagger); 
 }
 
 

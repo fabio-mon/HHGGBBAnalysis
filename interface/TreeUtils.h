@@ -83,10 +83,12 @@ struct TreeVars
   int   jet_mvav2[200];
   float jet_mass[200];
   int   jet_hadflav[200];
-
+  
   float MetPt;
   float MetPhi;
-
+  
+  int cut_based_ct;
+  int ttHTagger;
 };
 
 struct RawTreeVars
