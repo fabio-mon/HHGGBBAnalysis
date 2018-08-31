@@ -1,0 +1,10 @@
+./bin/countEvents.exe cfg/fileList_HHggbb.txt
+./bin/countEvents.exe cfg/fileList_ggH.txt
+./bin/countEvents.exe cfg/fileList_qqH.txt
+./bin/countEvents.exe cfg/fileList_VH.txt
+./bin/countEvents.exe cfg/fileList_ttH.txt
+./bin/countEvents.exe cfg/fileList_bbH.txt
+./bin/countEvents.exe cfg/fileList_gg.txt
+./bin/countEvents.exe cfg/fileList_ttg.txt
+./bin/countEvents.exe cfg/fileList_gjet.txt
+./bin/countEvents.exe cfg/fileList_qcd.txt
