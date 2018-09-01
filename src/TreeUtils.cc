@@ -153,11 +153,17 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   
   tree -> Branch("mtot",                             &treeVars.Mx);
   tree -> Branch("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
+  tree -> Branch("DRmin_met_bjet",                   &treeVars.DRmin_met_bjet); 
+  tree -> Branch("DRmax_met_bjet",                   &treeVars.DRmax_met_bjet); 
   tree -> Branch("costheta_HH",                      &treeVars.costheta_HH); 
   tree -> Branch("costheta_gg",                      &treeVars.costheta_gg); 
   tree -> Branch("costheta_bb",                      &treeVars.costheta_bb); 
   tree -> Branch("MetPt",                            &treeVars.MetPt); 
   tree -> Branch("MetPhi",                           &treeVars.MetPhi); 
+  
+  tree -> Branch("nEle", &treeVars.nEle);
+  tree -> Branch("nMu",  &treeVars.nMu);
+  tree -> Branch("nLep", &treeVars.nLep);
   
   tree -> Branch("cut_based_ct", &treeVars.cut_based_ct); 
   tree -> Branch("ttHTagger",    &treeVars.ttHTagger); 
@@ -228,15 +234,15 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   // chain["ElectronLoose"]->SetBranchAddress("IsolationVar", treeVars.LooseEl_relIso);
   // chain["ElectronLoose"]->SetBranchAddress("SF", treeVars.LooseEl_sf);
 
-  // chain["ElectronTight"]->SetBranchAddress("ElectronTight_size", &treeVars.N_TightEl);
-  // chain["ElectronTight"]->SetBranchAddress("Charge",       treeVars.TightEl_ch);
-  // chain["ElectronTight"]->SetBranchAddress("Particle",     treeVars.TightEl_g);
-  // chain["ElectronTight"]->SetBranchAddress("PT",           treeVars.TightEl_pt);
-  // chain["ElectronTight"]->SetBranchAddress("Eta",          treeVars.TightEl_eta);
-  // chain["ElectronTight"]->SetBranchAddress("Phi",          treeVars.TightEl_phi);
-  // chain["ElectronTight"]->SetBranchAddress("Mass",         treeVars.TightEl_mass);
-  // chain["ElectronTight"]->SetBranchAddress("IsolationVar", treeVars.TightEl_relIso);
-  // chain["ElectronTight"]->SetBranchAddress("SF",           treeVars.TightEl_sf);
+  chain["ElectronTight"]->SetBranchAddress("ElectronTight_size", &treeVars.N_TightEl);
+  chain["ElectronTight"]->SetBranchAddress("Charge",              treeVars.TightEl_ch);
+  chain["ElectronTight"]->SetBranchAddress("Particle",            treeVars.TightEl_g);
+  chain["ElectronTight"]->SetBranchAddress("PT",                  treeVars.TightEl_pt);
+  chain["ElectronTight"]->SetBranchAddress("Eta",                 treeVars.TightEl_eta);
+  chain["ElectronTight"]->SetBranchAddress("Phi",                 treeVars.TightEl_phi);
+  chain["ElectronTight"]->SetBranchAddress("Mass",                treeVars.TightEl_mass);
+  chain["ElectronTight"]->SetBranchAddress("IsolationVar",        treeVars.TightEl_relIso);
+  chain["ElectronTight"]->SetBranchAddress("SF",                  treeVars.TightEl_sf);
   
   // chain["ElectronMedium"]->SetBranchAddress("ElectronMedium_size", &treeVars.N_MedEl);
   // chain["ElectronMedium"]->SetBranchAddress("Charge",               treeVars.MedEl_ch);
@@ -246,27 +252,27 @@ void InitRawTreeVars(std::map<std::string,TChain*> &chain, RawTreeVars& treeVars
   // chain["ElectronMedium"]->SetBranchAddress("Phi",                  treeVars.MedEl_phi);
   // chain["ElectronMedium"]->SetBranchAddress("Mass",                 treeVars.MedEl_mass);
   // chain["ElectronMedium"]->SetBranchAddress("IsolationVar",         treeVars.MedEl_relIso);
-  // chain["ElectronMedium"]->SetBranchAddress("SF",           treeVars.MedEl_sf);
-
+  // chain["ElectronMedium"]->SetBranchAddress("SF",                   treeVars.MedEl_sf);
+  
   // chain["MuonLoose"]->SetBranchAddress("MuonLoose_size", &treeVars.N_LooseMu);
-  // chain["MuonLoose"]->SetBranchAddress("Charge",       treeVars.LooseMu_ch);
-  // chain["MuonLoose"]->SetBranchAddress("Particle",     treeVars.LooseMu_g);
-  // chain["MuonLoose"]->SetBranchAddress("PT",           treeVars.LooseMu_pt);
-  // chain["MuonLoose"]->SetBranchAddress("Eta",          treeVars.LooseMu_eta);
-  // chain["MuonLoose"]->SetBranchAddress("Phi",          treeVars.LooseMu_phi);
-  // chain["MuonLoose"]->SetBranchAddress("Mass",         treeVars.LooseMu_mass);
-  // chain["MuonLoose"]->SetBranchAddress("IsolationVar", treeVars.LooseMu_relIso);
-  // chain["MuonLoose"]->SetBranchAddress("SF",           treeVars.LooseMu_sf);
+  // chain["MuonLoose"]->SetBranchAddress("Charge",          treeVars.LooseMu_ch);
+  // chain["MuonLoose"]->SetBranchAddress("Particle",        treeVars.LooseMu_g);
+  // chain["MuonLoose"]->SetBranchAddress("PT",              treeVars.LooseMu_pt);
+  // chain["MuonLoose"]->SetBranchAddress("Eta",             treeVars.LooseMu_eta);
+  // chain["MuonLoose"]->SetBranchAddress("Phi",             treeVars.LooseMu_phi);
+  // chain["MuonLoose"]->SetBranchAddress("Mass",            treeVars.LooseMu_mass);
+  // chain["MuonLoose"]->SetBranchAddress("IsolationVar",    treeVars.LooseMu_relIso);
+  // chain["MuonLoose"]->SetBranchAddress("SF",              treeVars.LooseMu_sf);
 
-  // chain["MuonTight"]->SetBranchAddress("MuonTight_size", &treeVars.N_TightMu);
-  // chain["MuonTight"]->SetBranchAddress("Charge",       treeVars.TightMu_ch);
-  // chain["MuonTight"]->SetBranchAddress("Particle",     treeVars.TightMu_g);
-  // chain["MuonTight"]->SetBranchAddress("PT",           treeVars.TightMu_pt);
-  // chain["MuonTight"]->SetBranchAddress("Eta",          treeVars.TightMu_eta);
-  // chain["MuonTight"]->SetBranchAddress("Phi",          treeVars.TightMu_phi);
-  // chain["MuonTight"]->SetBranchAddress("Mass",         treeVars.TightMu_mass);
-  // chain["MuonTight"]->SetBranchAddress("IsolationVar", treeVars.TightMu_relIso);
-  // chain["MuonTight"]->SetBranchAddress("SF",           treeVars.TightMu_sf);
+  chain["MuonTight"]->SetBranchAddress("MuonTight_size", &treeVars.N_TightMu);
+  chain["MuonTight"]->SetBranchAddress("Charge",       treeVars.TightMu_ch);
+  chain["MuonTight"]->SetBranchAddress("Particle",     treeVars.TightMu_g);
+  chain["MuonTight"]->SetBranchAddress("PT",           treeVars.TightMu_pt);
+  chain["MuonTight"]->SetBranchAddress("Eta",          treeVars.TightMu_eta);
+  chain["MuonTight"]->SetBranchAddress("Phi",          treeVars.TightMu_phi);
+  chain["MuonTight"]->SetBranchAddress("Mass",         treeVars.TightMu_mass);
+  chain["MuonTight"]->SetBranchAddress("IsolationVar", treeVars.TightMu_relIso);
+  chain["MuonTight"]->SetBranchAddress("SF",           treeVars.TightMu_sf);
 
   // chain["TauAll"]->SetBranchAddress("TauAll_size", &treeVars.N_Tau);
   // chain["TauAll"]->SetBranchAddress("Charge",       treeVars.Tau_ch);

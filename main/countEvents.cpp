@@ -20,19 +20,23 @@ int main(int argc, char** argv)
 {
   if( argc < 2 )
   {
-    std::cerr << ">>>>> countEvents.cpp::usage:   " << argv[0] << " inputFileList" << std::endl;
+    std::cerr << ">>>>> countEvents.cpp::usage:   " << argv[0] << " inputFileList   [default=0/debug=1]" << std::endl;
     return -1;
   }
-
+  TDirectory* baseDir = gDirectory;
+  
   
   //----------------------
   // parse the config file
   CfgManager opts;
   opts.ParseConfigFile(argv[1]);
   
+  int debugMode = 0;
+  if( argc > 2 ) debugMode = atoi(argv[2]);
+  
   std::string inputFileList(argv[1]);
   
-  TH1F* h_pileup = NULL;
+  TH1F* h_eventCounter = NULL;
   std::ifstream list(inputFileList.c_str(),std::ios::in);
   std::string fileName;
   while(1)
@@ -40,18 +44,32 @@ int main(int argc, char** argv)
     getline(list,fileName,'\n');
     if( !list.good() ) break;
     
+    if( debugMode ) std::cout << ">>> opening file " << fileName << "...";
     TFile* inFile = TFile::Open(fileName.c_str(),"READ");
     
-    if( h_pileup == NULL )
-      h_pileup = (TH1F*)( inFile->Get("weightCounter/Event_weight"));
+    if( h_eventCounter == NULL )
+    {
+      h_eventCounter = (TH1F*)( inFile->Get("weightCounter/Event_weight"));
+      if( h_eventCounter != NULL )
+      {
+        baseDir -> cd();
+        h_eventCounter = (TH1F*)( h_eventCounter->Clone());
+      }
+    }
     else
     {
       TH1F* h_temp = (TH1F*)( inFile->Get("weightCounter/Event_weight"));
-      h_pileup -> Add( h_temp );
+      if( h_temp != NULL )
+      {
+        h_eventCounter -> Add( h_temp );
+      }
     } 
+    
+    inFile -> Close();
+    if( debugMode ) std::cout << "<<< file closed" << std::endl;
   }
   
-  std::cout << ">>> nTotEvents: " << std::fixed << std::setprecision(0) << h_pileup->GetEntries() << std::endl;
+  std::cout << ">>> nTotEvents: " << std::fixed << std::setprecision(0) << h_eventCounter->GetEntries() << std::endl;
   
   return 0;
 }

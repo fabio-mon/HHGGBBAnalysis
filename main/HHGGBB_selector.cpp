@@ -38,15 +38,8 @@
 #include "RooRealVar.h"
 
 using namespace std;
-using namespace RooFit;
 
-bool cutBased = false;
 
-float lumi = 35.9;
-
-int jetThreshold = 2;
-int bjetThreshold = 1;
-float jetPtThreshold = 0.;
 
 int main(int argc, char* argv[])
 {
@@ -57,32 +50,17 @@ int main(int argc, char* argv[])
   }
   
   
-  //------------------
-  // graphics settings
-  
-  writeExtraText = true;
-  extraText  = "Preliminary";
-  lumi_sqrtS = "";//Form("%.1f fb^{-1} (13 TeV)",lumi);
-  
-  setTDRStyle();
-  gStyle -> SetOptFit(0);
-  gStyle -> SetOptStat(0);
-  
-  RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
-  
   //----------------------
   // parse the config file
   
   CfgManager opts;
   opts.ParseConfigFile(argv[1]);
   
-  //std::vector<std::string> input = opts.GetOpt<std::vector<std::string> >("Input.input");
-  
-  std::vector<std::string> filename = opts.GetOpt<std::vector<std::string> >("Input.filename");
+  std::string filelist = opts.GetOpt<std::string>("Input.filelist");
   std::vector<std::string> treename = opts.GetOpt<std::vector<std::string> >("Input.treename");
   std::string label =  opts.GetOpt<std::string> ("Input.label");
   
-  std::string Loose_Tight_Photon = "PhotonTight";
+  std::string Loose_Tight_Photon = "PhotonLoose";
   if(opts.OptExist("Input.Loose_Tight_Photon"))
     Loose_Tight_Photon = opts.GetOpt<std::string> ("Input.Loose_Tight_Photon");
   else
@@ -107,8 +85,10 @@ int main(int argc, char* argv[])
   if(opts.OptExist("Input.Nph_veto"))
     Nph_veto = opts.GetOpt<int> ("Input.Nph_veto");
   
+  
   //------------------
   // define histograms
+  
   std::map<std::string,TH1F*> h;
   h["dipho_mass"] = new TH1F("dipho_mass","dipho_mass",100,90.,160.);
   h["dipho_sumpt"] = new TH1F("dipho_sumpt","dipho_sumpt",100,0.,300);
@@ -162,10 +142,11 @@ int main(int argc, char* argv[])
   //h["dipho_subleaddeltaEta_GenReco"] = new TH1F("dipho_subleaddeltaEta_GenReco","dipho_subleaddeltaEta_GenReco",300,0.,0.2);
   //h["dipho_leaddeltaPhi_GenReco"] = new TH1F("dipho_leaddeltaPhi_GenReco","dipho_leaddeltaPhi_GenReco",300,0.,0.2);
   //h["dipho_subleaddeltaPhi_GenReco"] = new TH1F("dipho_subleaddeltaPhi_GenReco","dipho_subleaddeltaPhi_GenReco",300,0.,0.2);
-
+  
+  
+  
   //----------
   // get trees
-  
   std::map<std::string,TChain*> trees;
   std::vector<std::string> onlytreename_str;
   for(unsigned int ntree = 0; ntree < treename.size(); ++ntree)
@@ -174,25 +155,30 @@ int main(int argc, char* argv[])
     onlytreename.Remove(0,onlytreename.Last('/')+1);
     onlytreename_str.push_back(onlytreename.Data());
     trees[onlytreename_str.at(ntree)] = new TChain(onlytreename_str.at(ntree).c_str(),"");
-    for(unsigned int nfile = 0; nfile < filename.size(); ++nfile)
+    
+    std::cout << ">>> Adding trees " << treename.at(ntree) << " to chain " << onlytreename_str.at(ntree) << std::endl;
+    
+    std::ifstream list(filelist.c_str(),std::ios::in);
+    std::string filename;
+    while(1)
     {
-      std::cout << ">>> Adding trees " << filename.at(nfile)+"/"+treename.at(ntree) << " to chain " << onlytreename_str.at(ntree) << std::endl;
-      trees[onlytreename_str.at(ntree)] -> Add((filename.at(nfile)+"/"+treename.at(ntree)).c_str());
+      getline(list,filename,'\n');
+      if( !list.good() ) break;
+      if( filename.at(0) == '#' ) continue;
+      
+      trees[onlytreename_str.at(ntree)] -> Add((filename+"/"+treename.at(ntree)).c_str());
     }
   }
-
-
+  
+  
   //---------------
   // tree variables
   RawTreeVars treeVars;
   
-  //------------------
   // branch tree: the only functioning way consists in branching separately the trees and, only after, adding them as friends
   InitRawTreeVars(trees,treeVars,Loose_Tight_Photon);
   TChain *tree = trees[onlytreename_str.at(0)];
   
-
-  //----------
   // add tree_i as friends to tree_0
   for(unsigned int ntree = 1; ntree < onlytreename_str.size(); ++ntree)
   {
@@ -200,8 +186,9 @@ int main(int argc, char* argv[])
     tree->AddFriend(onlytreename_str.at(ntree).c_str(),"");
   }
   
-  //------------------      
-  //output trees
+  
+  //-------------      
+  // output trees
   std::string outputPlotFolder = opts.GetOpt<std::string>("Output.outputFolder");
   system(Form("mkdir -p %s",outputPlotFolder.c_str()));
   TFile* outFile = TFile::Open(Form("%s/plotTree_%s.root",outputPlotFolder.c_str(),label.c_str()),"RECREATE");
@@ -219,63 +206,17 @@ int main(int argc, char* argv[])
   InitOutTreeVars(outTree_all_lowMx, outtreeVars);
   
   
-  // //----------
-  // // get number of input events to include in the weight
-  // std::cout << ">>> Merging Event_weight histograms"<<endl;
-  // float weightMC=1.;
-  // TH1F* h_weight = NULL;
-  // TString only_filename_tstr(filename.at(0));
-  // only_filename_tstr.Remove(only_filename_tstr.Last('/'),only_filename_tstr.Last('/')+1);
-  // std::cout << "*** " << only_filename_tstr << std::endl;
-  // // only_filename_tstr.ReplaceAll("*","all");
-  // int NEventsMC = 1;
-  // for(unsigned i=0; i<filename.size(); i++)
-  // {
-  //   // TString filename_tstr(filename);
-  //   std::cout << ">>>>>>>>>>>>>>>>>> " << filename.at(i) << std::endl;
-  //   // hadd_command+=' ';
-  //   // hadd_command+=filename.at(i).c_str();
-  // }
-    
-  // // system(hadd_command.Data()); // -T=merge only histos -f=overwrite target file -k=do not exit in case of corrupted files
-  // TFile merged_input(("/tmp/$USER/"+only_filename_tstr).Data(),"READ");
-  // if(merged_input.IsOpen())
-  // {
-  //   merged_input.GetObject("weightCounter/Event_weight",h_weight);
-  //   outFile -> cd();
-  //   if(h_weight && h_weight->GetEntries()>0)
-  //   {
-  //     weightMC = 1./h_weight->GetEntries();
-  //     NEventsMC = h_weight->GetEntries();
-  //   }
-  //   else
-  //   {
-  //     cout<<"[WARNING]: histogram /tmp/$USER/"<<only_filename_tstr.Data()<<"/weightCounter/Event_weight not found or empty --> Set by default weight 1"<<endl;
-  //     h_weight = new TH1F("Event_weight","Event_weight",1,0,1);
-  //     h_weight ->Fill(0.);
-  //     weightMC = 1.;
-  //     NEventsMC = 1;
-  //   }
-
-  //   TDirectory *weightfolder = outFile->mkdir("weightCounter");
-  //   weightfolder->cd();
-  //   h_weight->Write("Event_weight");
-  //   merged_input.Close();
-  // }
-  // outFile -> cd();
-  
-
-  
-
   //------------------
   // loop over samples
-
   int Nev_preselected=0;
   int Nev_preselected_lowMx=0;
   int Nev_preselected_highMx=0;
   int Nev_highMx_JCR=0;
   int Nev_highMx_MPC=0;
   int Nev_highMx_HPC=0;
+  int Nev_lowMx_JCR=0;
+  int Nev_lowMx_MPC=0;
+  int Nev_lowMx_HPC=0;
   int Nev_all_lowMx=0;
   int Nev_all_highMx=0;
   
@@ -291,44 +232,40 @@ int main(int argc, char* argv[])
   int Nev_bquarkpromptprompt=0;
   int Nev_bquarkpromptfake=0;
   int Nev_bquarkfakefake=0;
-
+  
   int nEntries = tree->GetEntries();
   std::cout << "Total entries = " << nEntries << std::endl;
   for(int i=0; i<nEntries; i++)
   {
-
     tree -> GetEntry(i);
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
 
     if(treeVars.N_SelectedPh<2) continue;
-
+    
+    
     //find higgs daugher gen-photons and flag their .isHdaug
     // if( ! FindGenPh_Hdaug(treeVars) ) continue;
-
+    
+    
     //find lead & sublead reco photons    
     //PrintRecoPhoton(treeVars);
     int pho_lead_i;
     int pho_sublead_i;
     FindLeadSublead_pho(treeVars,pho_lead_i,pho_sublead_i);
-    //cout<<"lead="<<pho_lead_i<<"\t\tsublead="<<pho_sublead_i<<endl;
     TLorentzVector pho_lead,pho_sublead;
     pho_lead.SetPtEtaPhiE(treeVars.SelectedPh_pt[pho_lead_i],treeVars.SelectedPh_eta[pho_lead_i],treeVars.SelectedPh_phi[pho_lead_i],treeVars.SelectedPh_E[pho_lead_i]);
     pho_sublead.SetPtEtaPhiE(treeVars.SelectedPh_pt[pho_sublead_i],treeVars.SelectedPh_eta[pho_sublead_i],treeVars.SelectedPh_phi[pho_sublead_i],treeVars.SelectedPh_E[pho_sublead_i]);
     TLorentzVector dipho = pho_lead+pho_sublead;
-
+    
     //Gen-matching
     // if(!PhoGenMatch(pho_lead,pho_sublead,treeVars,outtreeVars,0.1))//default DeltaRmax=0.03
     //   continue;
     
     //Cuts on photons
-    if(!DiPhotonSelection(pho_lead,pho_sublead))
-    {
-      //cout<<"photonselection_NOTpassed"<<endl;
-      continue;
-    }
+    if(!DiPhotonSelection(pho_lead,pho_sublead)) continue;
+    
     ++Nev_phselection;
-    //cout<<"photonselection_passed"<<endl;
-
+    
     if(Nph_veto>=0)
     {
       //cout<<"veto loop"<<endl;
@@ -340,7 +277,8 @@ int main(int argc, char* argv[])
       if(Nph_gen_match>Nph_veto) continue;
       //cout<<"passed veto loop"<<endl;
     }
-
+    
+    
     //Clean jet collection (to do? maybe required for bkg study...)
     //Tag good jets with a bool, requirements are:
     // 1. Not matching with any reco photon or any reco electron
@@ -409,14 +347,11 @@ int main(int argc, char* argv[])
     }
     
     
-    if(outtreeVars.nJets<2) 
-    {
-      //cout<<"NOT pass jet selection"<<endl;
-      continue;
-    }
+    if(outtreeVars.nJets<2) continue;
+    
     Nev_jet_kin_preselection++;
-    //cout<<"pass jet selection"<<endl;
-
+    
+    
     //Select the two jets with the higher BTag level, if they have the same value select the harder one
     int bjet_lead_i;
     int bjet_sublead_i;
@@ -424,16 +359,47 @@ int main(int argc, char* argv[])
     TLorentzVector bjet_lead,bjet_sublead;
     bjet_lead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_lead_i],outtreeVars.jet_eta[bjet_lead_i],outtreeVars.jet_phi[bjet_lead_i],outtreeVars.jet_mass[bjet_lead_i]);
     bjet_sublead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_sublead_i],outtreeVars.jet_eta[bjet_sublead_i],outtreeVars.jet_phi[bjet_sublead_i],outtreeVars.jet_mass[bjet_sublead_i]);
-
+    
     TLorentzVector dibjet= bjet_lead+bjet_sublead;
     double dibjet_mass = dibjet.M();
-    //cout<<"Mjj="<<dibjet_mass<<endl;
-    if(dibjet_mass<70 || dibjet_mass>200)
+    
+    if(dibjet_mass<80 || dibjet_mass>200)
       continue;
+    
     ++Nev_jetselection;
-    //cout<<"pass jets invariant mass selection"<<endl;
-    //cout<<"\n\n\n\n\n\n"<<endl;
-
+    
+    
+    // count leptons
+    outtreeVars.nEle = 0;
+    outtreeVars.nMu  = 0;
+    outtreeVars.nLep = 0;
+    for(int i=0;i<treeVars.N_TightEl;i++)
+    {
+      if( treeVars.TightEl_pt[i]<10 ) continue;
+      if( fabs(treeVars.TightEl_eta[i])>2.5 ) continue;
+      if( fabs(treeVars.TightEl_eta[i])>1.44 && fabs(treeVars.TightEl_eta[i])<1.57 ) continue;
+      if( DeltaR(treeVars.TightEl_eta[i],treeVars.TightEl_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.TightEl_eta[i],treeVars.TightEl_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.TightEl_eta[i],treeVars.TightEl_phi[i],bjet_lead.Eta(),bjet_lead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.TightEl_eta[i],treeVars.TightEl_phi[i],bjet_sublead.Eta(),bjet_sublead.Phi()) < 0.4 ) continue;
+      
+      outtreeVars.nEle += 1;
+      outtreeVars.nLep += 1;
+    }
+    for(int i=0;i<treeVars.N_TightMu;i++)
+    {
+      if( treeVars.TightMu_pt[i]<5 ) continue;
+      if( fabs(treeVars.TightMu_eta[i])>2.4 ) continue;
+      if( DeltaR(treeVars.TightMu_eta[i],treeVars.TightMu_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.TightMu_eta[i],treeVars.TightMu_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.TightMu_eta[i],treeVars.TightMu_phi[i],bjet_lead.Eta(),bjet_lead.Phi()) < 0.4 ) continue;
+      if( DeltaR(treeVars.TightMu_eta[i],treeVars.TightMu_phi[i],bjet_sublead.Eta(),bjet_sublead.Phi()) < 0.4 ) continue;
+      
+      outtreeVars.nMu += 1;
+      outtreeVars.nLep += 1;
+    }
+    
+    
     //Find dR_min between selected gamma and jets
     vector<TLorentzVector> pho_selected;
     pho_selected.push_back(pho_lead);
@@ -442,7 +408,10 @@ int main(int argc, char* argv[])
     bjet_selected.push_back(bjet_lead);
     bjet_selected.push_back(bjet_sublead);
     float DeltaRmin_bjet_pho = DeltaRmin(pho_selected,bjet_selected);
-
+    float DeltaPhimin_met_bjet = std::min(DeltaPhi(treeVars.Met_phi[0],bjet_lead.Phi()),DeltaPhi(treeVars.Met_phi[0],bjet_sublead.Phi()));
+    float DeltaPhimax_met_bjet = std::max(DeltaPhi(treeVars.Met_phi[0],bjet_lead.Phi()),DeltaPhi(treeVars.Met_phi[0],bjet_sublead.Phi()));
+    
+    
     //Find interesting angles in the frame of dihigggs
     TLorentzVector diHiggs= pho_lead+pho_sublead+bjet_lead+bjet_sublead;   
     // get angle between dipho and z-axis in diHiggs rest frame
@@ -457,6 +426,7 @@ int main(int argc, char* argv[])
     TLorentzVector boosted_bjet_lead(bjet_lead);
     boosted_bjet_lead.Boost( -dibjet.BoostVector() );
     float costheta_bb = fabs(boosted_bjet_lead.CosTheta());
+    
     
     //Fill outtree and histos
     outtreeVars.weight = CrossSection*weightMC;
@@ -503,6 +473,8 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_subleadmvav2 = outtreeVars.jet_mvav2[bjet_sublead_i];
     outtreeVars.Mx = diHiggs.M() - outtreeVars.dibjet_mass - outtreeVars.dipho_mass + 250.;
     outtreeVars.DRmin_pho_bjet = DeltaRmin_bjet_pho; 
+    outtreeVars.DPhimin_met_bjet = DeltaPhimin_met_bjet;
+    outtreeVars.DPhimax_met_bjet = DeltaPhimax_met_bjet;
     outtreeVars.costheta_HH = costheta_HH; 
     outtreeVars.costheta_gg = costheta_gg; 
     outtreeVars.costheta_bb = costheta_bb; 
@@ -598,76 +570,19 @@ int main(int argc, char* argv[])
     if(outtreeVars.Mx<=350)
     {
       ++Nev_all_lowMx;
+      if(outtreeVars.cut_based_ct == -1) ++Nev_lowMx_JCR;
+      if(outtreeVars.cut_based_ct ==  0) ++Nev_lowMx_HPC;
+      if(outtreeVars.cut_based_ct ==  1) ++Nev_lowMx_MPC;
       outTree_all_lowMx->Fill();
     }
     else
     {
       ++Nev_all_highMx;
+      if(outtreeVars.cut_based_ct == -1) ++Nev_highMx_JCR;
+      if(outtreeVars.cut_based_ct ==  0) ++Nev_highMx_HPC;
+      if(outtreeVars.cut_based_ct ==  1) ++Nev_highMx_MPC;
       outTree_all_highMx->Fill();
     }
-    
-    // if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )
-    // {
-    //   //cout<<"HPC"<<endl;
-    //   ++Nev_highMx_HPC;
-    //   outTree_highMx_HPC->Fill();
-    //   TLorentzVector v;
-    //   int NphPrompt=0;
-    //   if (PhoGenericGenMatch(pho_lead,treeVars,v,0.1)) NphPrompt++;
-    //   if (PhoGenericGenMatch(pho_sublead,treeVars,v,0.1)) NphPrompt++;
-    //   if(NphPrompt==2) 
-    //     Nev_Phpromptprompt++;
-    //   else
-    //     if(NphPrompt==1)
-    //       Nev_Phpromptfake++;
-    //     else
-    //       Nev_Phfakefake++;
-    //   int NbjetPrompt=0;
-    //   if (outtreeVars.jet_hadflav[bjet_lead_i]==5 || outtreeVars.jet_hadflav[bjet_lead_i]==4) NbjetPrompt++; 
-    //   if (outtreeVars.jet_hadflav[bjet_sublead_i]==5 || outtreeVars.jet_hadflav[bjet_lead_i]==4) NbjetPrompt++; 
-    //   if(NbjetPrompt==2) 
-    //     Nev_bjetpromptprompt++;
-    //   else
-    //     if(NbjetPrompt==1)
-    //       Nev_bjetpromptfake++;
-    //     else
-    //       Nev_bjetfakefake++;
-
-    //   int NbquarkPrompt=0;
-    //   if (bquarkGenericGenMatch(bjet_lead,treeVars,v,0.4)) 	NbquarkPrompt++;
-    //   if (bquarkGenericGenMatch(bjet_sublead,treeVars,v,0.4))	NbquarkPrompt++;
-    //   if(NbquarkPrompt==2) 
-    //     Nev_bquarkpromptprompt++;
-    //   else
-    //     if(NbquarkPrompt==1)
-    //       Nev_bquarkpromptfake++;
-    //     else
-    //       Nev_bquarkfakefake++;
-    // }
-    // else
-    //   if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ||
-    //      !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )//must be after HPC!!!
-    //   {
-    //     //cout<<"MPC"<<endl;
-    //     ++Nev_highMx_MPC;
-    //     outTree_highMx_MPC->Fill();
-    //   }
-    //   else
-    //     if ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )  
-    //     {
-    //       //cout<<"JCR"<<endl;
-    //       ++Nev_highMx_JCR;
-    //       outTree_highMx_JCR->Fill();
-    //     }
-	  
-    //additional possible selections for high purity category
-    //if(outtreeVars.dipho_mass<115 || outtreeVars.dipho_mass>135) continue;
-    //if(outtreeVars.dibjet_sumpt<20 || outtreeVars.dibjet_sumpt>550) continue;
-    //if(outtreeVars.dipho_sumpt<20 || outtreeVars.dipho_sumpt>550) continue;
-    //if(outtreeVars.Mx<300 || outtreeVars.Mx>950) continue;
-    //if(outtreeVars.costheta_HH>0.8) continue;
-    //if(outtreeVars.dipho_deltaphi>2.6) continue;
-
   }
 
   std::cout << std::endl;
@@ -685,9 +600,14 @@ int main(int argc, char* argv[])
   cout<<"\t\tpreselection acceptance = "<<Nev_preselected<<" / "<<NEventsMC<<" = "<<Nev_preselected/NEventsMC<<endl;
   cout<<"\t\tpreselection low mass acceptance = "<<Nev_preselected_lowMx<<" / "<<NEventsMC<<" = "<<1.*Nev_preselected_lowMx/NEventsMC<<endl;
   cout<<"\t\tpreselection high mass acceptance = "<<Nev_preselected_highMx<<" / "<<NEventsMC<<" = "<<1.*Nev_preselected_highMx/NEventsMC<<endl;
+  cout<<"\t\t\t-----------------------------------------------------------------"<<endl;  
   cout<<"\t\t\thigh mass jet control region acceptance = "<<Nev_highMx_JCR<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_JCR/NEventsMC<<endl;
   cout<<"\t\t\thigh mass medium purity cat. acceptance = "<<Nev_highMx_MPC<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_MPC/NEventsMC<<endl;
   cout<<"\t\t\thigh mass high purity cat. acceptance = "<<Nev_highMx_HPC<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_HPC/NEventsMC<<endl;
+  cout<<"\t\t\t-----------------------------------------------------------------"<<endl;
+  cout<<"\t\t\tlow mass jet control region acceptance = "<<Nev_lowMx_JCR<<" / "<<NEventsMC<<" = "<<1.*Nev_lowMx_JCR/NEventsMC<<endl;
+  cout<<"\t\t\tlow mass medium purity cat. acceptance = "<<Nev_lowMx_MPC<<" / "<<NEventsMC<<" = "<<1.*Nev_lowMx_MPC/NEventsMC<<endl;
+  cout<<"\t\t\tlow mass high purity cat. acceptance = "<<Nev_lowMx_HPC<<" / "<<NEventsMC<<" = "<<1.*Nev_lowMx_HPC/NEventsMC<<endl;
   cout<<"\t\t\t\tdiphoton promptprompt = "<<Nev_Phpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_Phpromptprompt/NEventsMC<<endl;
   cout<<"\t\t\t\tdiphoton promptfake = "<<Nev_Phpromptfake<<" / "<<NEventsMC<<" = "<<1.*Nev_Phpromptfake/NEventsMC<<endl;
   cout<<"\t\t\t\tdiphoton fakefake = "<<Nev_Phfakefake<<" / "<<NEventsMC<<" = "<<1.*Nev_Phfakefake/NEventsMC<<endl;

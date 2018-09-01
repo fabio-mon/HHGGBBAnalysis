@@ -72,6 +72,8 @@ struct TreeVars
 
   float Mx;
   float DRmin_pho_bjet; 
+  float DPhimin_met_bjet;
+  float DPhimax_met_bjet;
   float costheta_HH; 
   float costheta_gg; 
   float costheta_bb; 
@@ -87,6 +89,10 @@ struct TreeVars
   
   float MetPt;
   float MetPhi;
+  
+  int nEle;
+  int nMu;
+  int nLep;
   
   int cut_based_ct;
   int ttHTagger;
