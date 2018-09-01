@@ -6,7 +6,7 @@
   
   "variables"  : [ "mtot", "costheta_HH", "costheta_bb", "costheta_gg", "dibjet_deltaeta", "dibjet_deltaphi", "dibjet_leadptoM", "dibjet_subleadptoM", "dipho_deltaeta", "dipho_deltaphi" ,"dipho_leadptoM", "dipho_subleadptoM" , "cut_based_ct" , "dibjet_leadbtagmedium", "dibjet_subleadbtagmedium" ],
   
-  "spectators" : [ "dipho_mass", "myweight:=evWeight", "dibjet_mass", "event" ],
+  "spectators" : [ "mgg", "myweight:=evWeight", "mjj", "event" ],
   
   "commonCuts" : [ " 1." ],
   
@@ -19,22 +19,22 @@
   "classes" : {  
     "Signal" : { 
       "samples" : [
-        ["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_HHggbb.root", "preselected_highMx", 1,"(event%2 != 0)",0,1],
-        ["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_HHggbb.root", "preselected_highMx", 1,"(event%2 == 0)",1,1] ],
+        ["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_HHggbb.root", "preselected_highMx", 1,"(event%2 != 0)",0,1],
+        ["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_HHggbb.root", "preselected_highMx", 1,"(event%2 == 0)",1,1] ],
       "weight" : "evWeight"
     },
     "Background" : { 
       "samples" : [
-        ["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_gg.root",               "preselected_highMx", 1,"(event%2 != 0)",0,4],
-        ["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_gg.root",               "preselected_highMx", 1,"(event%2 == 0)",1,4],
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_ggH.root",              "preselected_highMx", 1,"(event%2 != 0)",0,5], 
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_ggH.root",              "preselected_highMx", 1,"(event%2 == 0)",1,5], 
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_qqH.root",              "preselected_highMx", 1,"(event%2 != 0)",0,6], 
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_qqH.root",              "preselected_highMx", 1,"(event%2 == 0)",1,6], 
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_VH.root",               "preselected_highMx", 1,"(event%2 != 0)",0,7], 
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_VH.root",               "preselected_highMx", 1,"(event%2 == 0)",1,7], 
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_ttH.root",              "preselected_highMx", 1,"(event%2 != 0)",0,8],
-	["/afs/cern.ch/user/f/fmonti/work/HHGGBBAnalysis/output/PhotonLoose/plotTree_ttH.root",              "preselected_highMx", 1,"(event%2 == 0)",1,8] ],
+        ["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_gg.root",               "preselected_highMx", 1,"(event%2 != 0)",0,4],
+        ["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_gg.root",               "preselected_highMx", 1,"(event%2 == 0)",1,4],
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_ggH.root",              "preselected_highMx", 1,"(event%2 != 0)",0,5], 
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_ggH.root",              "preselected_highMx", 1,"(event%2 == 0)",1,5], 
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_qqH.root",              "preselected_highMx", 1,"(event%2 != 0)",0,6], 
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_qqH.root",              "preselected_highMx", 1,"(event%2 == 0)",1,6], 
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_VH.root",               "preselected_highMx", 1,"(event%2 != 0)",0,7], 
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_VH.root",               "preselected_highMx", 1,"(event%2 == 0)",1,7], 
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_ttH.root",              "preselected_highMx", 1,"(event%2 != 0)",0,8],
+	["/afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200/plotTree_ttH.root",              "preselected_highMx", 1,"(event%2 == 0)",1,8] ],
       "weight" : "evWeight"
     }
   },
