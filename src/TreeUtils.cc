@@ -153,8 +153,8 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   
   tree -> Branch("mtot",                             &treeVars.Mx);
   tree -> Branch("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
-  tree -> Branch("DRmin_met_bjet",                   &treeVars.DRmin_met_bjet); 
-  tree -> Branch("DRmax_met_bjet",                   &treeVars.DRmax_met_bjet); 
+  tree -> Branch("DPhimin_met_bjet",                 &treeVars.DPhimin_met_bjet); 
+  tree -> Branch("DPhimax_met_bjet",                 &treeVars.DPhimax_met_bjet); 
   tree -> Branch("costheta_HH",                      &treeVars.costheta_HH); 
   tree -> Branch("costheta_gg",                      &treeVars.costheta_gg); 
   tree -> Branch("costheta_bb",                      &treeVars.costheta_bb); 

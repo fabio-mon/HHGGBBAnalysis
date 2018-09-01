@@ -149,23 +149,29 @@ int main(int argc, char* argv[])
   // get trees
   std::map<std::string,TChain*> trees;
   std::vector<std::string> onlytreename_str;
+  
   for(unsigned int ntree = 0; ntree < treename.size(); ++ntree)
   {
     TString onlytreename(treename.at(ntree));//treename could be "ntuple/only_treename" but the method InitRawTreeVars wants only only_treename
     onlytreename.Remove(0,onlytreename.Last('/')+1);
     onlytreename_str.push_back(onlytreename.Data());
     trees[onlytreename_str.at(ntree)] = new TChain(onlytreename_str.at(ntree).c_str(),"");
+  }
+  
+  std::ifstream list(filelist.c_str(),std::ios::in);
+  std::string filename;
+  while(1)
+  {
+    getline(list,filename,'\n');
+    if( !list.good() ) break;
+    if( filename.at(0) == '#' ) continue;
+    std::cout << ">>> reading file " << filename << std::endl;
     
-    std::cout << ">>> Adding trees " << treename.at(ntree) << " to chain " << onlytreename_str.at(ntree) << std::endl;
-    
-    std::ifstream list(filelist.c_str(),std::ios::in);
-    std::string filename;
-    while(1)
+    for(unsigned int ntree = 0; ntree < treename.size(); ++ntree)
     {
-      getline(list,filename,'\n');
-      if( !list.good() ) break;
-      if( filename.at(0) == '#' ) continue;
+      TString onlytreename(treename.at(ntree));//treename could be "ntuple/only_treename" but the method InitRawTreeVars wants only only_treename
       
+      //std::cout << ">>> Adding trees " << treename.at(ntree) << " to chain " << onlytreename_str.at(ntree) << std::endl;
       trees[onlytreename_str.at(ntree)] -> Add((filename+"/"+treename.at(ntree)).c_str());
     }
   }
@@ -635,7 +641,7 @@ int main(int argc, char* argv[])
   outTree_all_highMx -> AutoSave();
   outFile -> Close();
   
-  MakePlot3(h);
+  // MakePlot3(h);
 
   system(Form("mv *.png %s",outputPlotFolder.c_str()));
   system(Form("mv *.pdf %s",outputPlotFolder.c_str()));  

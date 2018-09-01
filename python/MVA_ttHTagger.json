@@ -1,0 +1,35 @@
+{
+  "methods"    : [ "BDT" ],
+   
+  "settings"   : { "BDT" : "!H:!V:!CreateMVAPdfs:BoostType=Grad:UseBaggedBoost:NegWeightTreatment=NoNegWeightsInTraining:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=2000:MinNodeSize=0.125:Shrinkage=0.1:NTrees=2000:!UseYesNoLeaf:MaxDepth=3"
+  },
+  
+  "variables"  : [ "MetPt", "nLep", "DPhimin_met_bjet", "DPhimax_met_bjet", "nJets", "DRmin_pho_bjet", "costheta_HH", "costheta_bb" ],
+  
+  "spectators" : [ "mgg", "mjj", "evWeight", "event" ],
+  
+  "commonCuts" : [ " 1. * (cut_based_ct >= 0)" ],
+  
+  "categories" : [ ],
+  
+  "subcategories" : [ ],
+  
+  "selection" : " ",
+  
+  "classes" : {  
+    "Signal" : { 
+      "samples" : [
+        ["plotTree_HHggbb.root", "all_highMx", 1, "(event%2 != 0)", 0, 1],
+        ["plotTree_HHggbb.root", "all_highMx", 1, "(event%2 == 0)", 1, 1] ],
+      "weight" : "evWeight"
+    },
+    "Background" : { 
+      "samples" : [
+      	["plotTree_ttH.root", "all_highMx", 1, "(event%2 != 0)", 0, 2],
+	["plotTree_ttH.root", "all_highMx", 1, "(event%2 == 0)", 1, 2] ],
+      "weight" : "evWeight"                                                                                    
+    }
+  },
+  
+  "label" : "__ttHTagger_v1"
+}
