@@ -1,0 +1,48 @@
+{
+  "methods"    : [ "BDT" ],
+   
+  "settings"   : { "BDT" : "!H:!V:!CreateMVAPdfs:BoostType=Grad:UseBaggedBoost:NegWeightTreatment=NoNegWeightsInTraining:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=2000:MinNodeSize=0.125:Shrinkage=0.1:NTrees=2000:!UseYesNoLeaf:MaxDepth=3"
+  },
+  
+  "variables"  : [ "mtot", "costheta_HH", "costheta_bb", "costheta_gg", "dibjet_deltaeta", "dibjet_deltaphi", "dibjet_leadptoM", "dibjet_subleadptoM", "dipho_deltaeta", "dipho_deltaphi" ,"dipho_leadptoM", "dipho_subleadptoM" , "cut_based_ct" , "dibjet_leadbtagscore", "dibjet_subleadbtagscore" ],
+  
+  "spectators" : [ "dipho_mass", "myweight:=evWeight", "dibjet_mass", "event" ],
+  
+  "commonCuts" : [ " 1." ],
+  
+  "categories" : [ ],
+  
+  "subcategories" : [ ],
+  
+  "selection" : " ",
+  
+  "classes" : {  
+    "Signal" : { 
+      "samples" : [
+        ["~/www/HHGGBB/DelphesDump10_v4/PhotonLoose/plotTree_HHGGBB_loose.root", "preselected_highMx", 1,"(event%2 != 0)",0,1],
+        ["~/www/HHGGBB/DelphesDump10_v4/PhotonLoose/plotTree_HHGGBB_loose.root", "preselected_highMx", 1,"(event%2 == 0)",1,1] ],
+      "weight" : "evWeight"
+    },
+    "Background" : { 
+      "samples" : [
+        ["~/www/HHGGBB/BKG_DiPhotonJetsBox_DelphesDump10_v5/PhotonLoose/plotTree_DiPhotonJetsBox_loose.root","preselected_highMx", 1,"(event%2 != 0)",0,4],
+        ["~/www/HHGGBB/BKG_DiPhotonJetsBox_DelphesDump10_v5/PhotonLoose/plotTree_DiPhotonJetsBox_loose.root","preselected_highMx", 1,"(event%2 == 0)",1,4],
+        ["~/www/HHGGBB/BKG_GJet_DelphesDump10_v5/PhotonLoose/plotTree_GJet_loose.root",                      "preselected_highMx", 1,"(event%2 != 0)",0,5],
+        ["~/www/HHGGBB/BKG_GJet_DelphesDump10_v5/PhotonLoose/plotTree_GJet_loose.root",                      "preselected_highMx", 1,"(event%2 == 0)",1,5],
+	["~/www/HHGGBB/BKG_HGG_DelphesDump10_v5/PhotonLoose/plotTree_HGG_loose.root",                        "preselected_highMx", 1,"(event%2 != 0)",0,6], 
+	["~/www/HHGGBB/BKG_HGG_DelphesDump10_v5/PhotonLoose/plotTree_HGG_loose.root",                        "preselected_highMx", 1,"(event%2 == 0)",1,6], 
+	["~/www/HHGGBB/BKG_VBFHGG_DelphesDump10_v5/plotTree_VBFHgg_loose.root",                              "preselected_highMx", 1,"(event%2 != 0)",0,7], 
+	["~/www/HHGGBB/BKG_VBFHGG_DelphesDump10_v5/plotTree_VBFHgg_loose.root",                              "preselected_highMx", 1,"(event%2 == 0)",1,7], 
+	["~/www/HHGGBB/BKG_ZHqqgg_DelphesDump10_v5/PhotonLoose/plotTree_ZHqqgg_loose.root",                  "preselected_highMx", 1,"(event%2 != 0)",0,8], 
+	["~/www/HHGGBB/BKG_ZHqqgg_DelphesDump10_v5/PhotonLoose/plotTree_ZHqqgg_loose.root",                  "preselected_highMx", 1,"(event%2 == 0)",1,8], 
+	["~/www/HHGGBB/BKG_ttGammaHadr_DelphesDump10_v5/PhotonLoose/plotTree_ttGammaHadr_loose.root",        "preselected_highMx", 1,"(event%2 != 0)",0,9], 
+	["~/www/HHGGBB/BKG_ttGammaHadr_DelphesDump10_v5/PhotonLoose/plotTree_ttGammaHadr_loose.root",        "preselected_highMx", 1,"(event%2 == 0)",1,9], 
+	["~/www/HHGGBB/BKG_ttH_DelphesDump10_v5/PhotonLoose/plotTree_ttH_loose.root",                        "preselected_highMx", 1,"(event%2 != 0)",0,10],
+	["~/www/HHGGBB/BKG_ttH_DelphesDump10_v5/PhotonLoose/plotTree_ttH_loose.root",                        "preselected_highMx", 1,"(event%2 == 0)",1,10],
+	["~/www/HHGGBB/BKG_QCD_DelphesDump10_v5/PhotonLoose/plotTree_QCD_loose.root",                        "preselected_highMx", 1,"(event%2 != 0)",0,11],
+	["~/www/HHGGBB/BKG_QCD_DelphesDump10_v5/PhotonLoose/plotTree_QCD_loose.root",                        "preselected_highMx", 1,"(event%2 == 0)",1,11],       ],
+      "weight" : "evWeight"
+    }
+  },
+  "label" : "__HHGGBB_BDT_test1__"
+}
