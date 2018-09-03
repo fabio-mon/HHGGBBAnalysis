@@ -33,7 +33,7 @@ void MakePlot3(std::map<std::string,TH1F*> &h)
     it->second -> SetFillStyle(0);
     it->second -> Draw("E1");
 
-    if(it->first == "dipho_mass")
+    if(it->first == "mgg")
       it->second -> GetXaxis() -> SetTitle("diphoton mass (GeV/c^{2})");
     if(it->first == "dipho_sumpt")
       it->second -> GetXaxis() -> SetTitle("diphoton P_{T} sum (GeV/c)");
@@ -75,16 +75,16 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
   if(fabs(pho_lead.Eta())>2.5 || fabs(pho_sublead.Eta())>2.5) return false;
   if(fabs(pho_lead.Eta())>1.44 && fabs(pho_lead.Eta())<1.57) return false;
   if(fabs(pho_sublead.Eta())>1.44 && fabs(pho_sublead.Eta())<1.57) return false;
-  double dipho_mass=(pho_lead+pho_sublead).M();
+  double mgg=(pho_lead+pho_sublead).M();
   //---------------------------------------------------------------
-  //cout<<"Mgg="<<dipho_mass<<endl;
-  //cout<<"lead_pt/Mgg="<<lead_pt/dipho_mass<<endl;
-  //cout<<"sublead_pt/Mgg="<<sublead_pt/dipho_mass<<endl;
+  //cout<<"Mgg="<<mgg<<endl;
+  //cout<<"lead_pt/Mgg="<<lead_pt/mgg<<endl;
+  //cout<<"sublead_pt/Mgg="<<sublead_pt/mgg<<endl;
   
   //-------------------------------------------
-  if(dipho_mass<100. || dipho_mass>180.) return false;
-  if(lead_pt/dipho_mass<0.33) return false;
-  if(sublead_pt/dipho_mass<0.25) return false;
+  if(mgg<100. || mgg>180.) return false;
+  if(lead_pt/mgg<0.33) return false;
+  if(sublead_pt/mgg<0.25) return false;
   
   return true;
 }

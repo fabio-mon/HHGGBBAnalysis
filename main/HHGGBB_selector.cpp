@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   // define histograms
   
   std::map<std::string,TH1F*> h;
-  h["dipho_mass"] = new TH1F("dipho_mass","dipho_mass",100,90.,160.);
+  h["mgg"] = new TH1F("mgg","mgg",100,90.,160.);
   h["dipho_sumpt"] = new TH1F("dipho_sumpt","dipho_sumpt",100,0.,300);
   h["dipho_deltaeta"] = new TH1F("dipho_deltaeta","dipho_deltaeta",100,0,8);
   h["dipho_deltaphi"] = new TH1F("dipho_deltaphi","dipho_deltaphi",100,0,3.14);
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
   h["nJets_bTagLoose"] = new TH1F("nJets_bTagLoose","nJets_bTagLoose",11,-0.5,10.5);
   h["nJets_bTagMedium"] = new TH1F("nJets_bTagMedium","nJets_bTagMedium",11,-0.5,10.5);
   h["nJets_bTagTight"] = new TH1F("nJets_bTagTight","nJets_bTagTight",11,-0.5,10.5);
-  h["dibjet_mass"] = new TH1F("dibjet_mass","dibjet_mass",100,60,200);
+  h["mjj"] = new TH1F("mjj","mjj",100,60,200);
   h["dibjet_sumpt"] = new TH1F("dibjet_sumpt","dibjet_sumpt",100,0,300);
   h["dibjet_deltaeta"] = new TH1F("dibjet_deltaeta","dibjet_deltaeta",100,0,8);
   h["dibjet_deltaphi"] = new TH1F("dibjet_deltaphi","dibjet_deltaphi",100,0,3.14);
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
   h["dibjet_subleadEnergy"] = new TH1F("dibjet_subleadEnergy","dibjet_subleadEnergy",100,0,300);
   h["dibjet_subleadbtagscore"] = new TH1F("dibjet_subleadbtagscore","dibjet_subleadbtagscore",9,-1.5,7.5);
 
-  h["Mx"] = new TH1F("M_x","M_x",100,0,1000);
+  h["mtot"] = new TH1F("M_x","M_x",100,0,1000);
   h["DRmin_sel_phots_sel_jets"] = new TH1F("DeltaRmin","DeltaRmin",300,0,4);
   h["costhetastar_HH"] = new TH1F("costhetastar_HH","costhetastar_HH",200,0,1);
   h["costhetastar_gg"] = new TH1F("costhetastar_gg","costhetastar_gg",200,0,1);
@@ -199,24 +199,15 @@ int main(int argc, char* argv[])
   system(Form("mkdir -p %s",outputPlotFolder.c_str()));
   TFile* outFile = TFile::Open(Form("%s/plotTree_%s.root",outputPlotFolder.c_str(),label.c_str()),"RECREATE");
   outFile -> cd();  
-  TTree* outTree_preselected = new TTree("preselected","preselected");
-  TTree* outTree_preselected_lowMx = new TTree("preselected_lowMx","preselected_lowMx");
-  TTree* outTree_preselected_highMx = new TTree("preselected_highMx","preselected_highMx");
   TTree* outTree_all_lowMx  = new TTree("all_lowMx", "all_lowMx");
   TTree* outTree_all_highMx = new TTree("all_highMx","all_highMx");
   TreeVars outtreeVars;
-  InitOutTreeVars(outTree_preselected,outtreeVars);
-  InitOutTreeVars(outTree_preselected_lowMx,outtreeVars);
-  InitOutTreeVars(outTree_preselected_highMx,outtreeVars);
   InitOutTreeVars(outTree_all_highMx,outtreeVars);
   InitOutTreeVars(outTree_all_lowMx, outtreeVars);
   
   
   //------------------
   // loop over samples
-  int Nev_preselected=0;
-  int Nev_preselected_lowMx=0;
-  int Nev_preselected_highMx=0;
   int Nev_highMx_JCR=0;
   int Nev_highMx_MPC=0;
   int Nev_highMx_HPC=0;
@@ -226,6 +217,7 @@ int main(int argc, char* argv[])
   int Nev_all_lowMx=0;
   int Nev_all_highMx=0;
   
+  int Nev_preselected=0;
   int Nev_phselection=0;
   int Nev_jet_kin_preselection=0;
   int Nev_jetselection=0;
@@ -245,10 +237,10 @@ int main(int argc, char* argv[])
   {
     tree -> GetEntry(i);
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
-
+    
     if(treeVars.N_SelectedPh<2) continue;
     
-    
+    ++Nev_preselected;
     //find higgs daugher gen-photons and flag their .isHdaug
     // if( ! FindGenPh_Hdaug(treeVars) ) continue;
     
@@ -311,43 +303,43 @@ int main(int argc, char* argv[])
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
       
       outtreeVars.nJets++;
-      outtreeVars.jet_pt[outtreeVars.nJets-1] = treeVars.Jet_pt[i];
-      outtreeVars.jet_eta[outtreeVars.nJets-1] = treeVars.Jet_eta[i];                    
-      outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
-      outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
-      outtreeVars.jet_mvav2[outtreeVars.nJets-1] = treeVars.Jet_mvav2[i];
-      outtreeVars.jet_hadflav[outtreeVars.nJets-1] = treeVars.Jet_hadflav[i];//gen level info! handle with care!
+      outtreeVars.jet_pt[int(outtreeVars.nJets)-1] = treeVars.Jet_pt[i];
+      outtreeVars.jet_eta[int(outtreeVars.nJets)-1] = treeVars.Jet_eta[i];                    
+      outtreeVars.jet_phi[int(outtreeVars.nJets)-1] = treeVars.Jet_phi[i];
+      outtreeVars.jet_mass[int(outtreeVars.nJets)-1] = treeVars.Jet_mass[i];
+      outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] = treeVars.Jet_mvav2[i];
+      outtreeVars.jet_hadflav[int(outtreeVars.nJets)-1] = treeVars.Jet_hadflav[i];//gen level info! handle with care!
       
       if(useMTD)
       {
-        if(outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b001000)
+        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b001000)
           outtreeVars.nJets_bTagLoose++;
         
-        if(outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b010000)
+        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b010000)
         {
           outtreeVars.nJets_bTagMedium++;
-          outtreeVars.jet_BTagMedium[outtreeVars.nJets-1] = 1;
+          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 1;
         }
         else
-          outtreeVars.jet_BTagMedium[outtreeVars.nJets-1] = 0;
+          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
         
-        if(outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b100000)
+        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b100000)
           outtreeVars.nJets_bTagTight++;
       }
       else
       {
-        if(outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b000001)
+        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000001)
           outtreeVars.nJets_bTagLoose++;
         
-        if(outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b000010)
+        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000010)
         {
           outtreeVars.nJets_bTagMedium++;
-          outtreeVars.jet_BTagMedium[outtreeVars.nJets-1] = 1;
+          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 1;
         }
         else
-          outtreeVars.jet_BTagMedium[outtreeVars.nJets-1] = 0;
+          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
         
-        if(outtreeVars.jet_mvav2[outtreeVars.nJets-1] & 0b000100)
+        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000100)
           outtreeVars.nJets_bTagTight++;
       }
     }
@@ -367,9 +359,9 @@ int main(int argc, char* argv[])
     bjet_sublead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_sublead_i],outtreeVars.jet_eta[bjet_sublead_i],outtreeVars.jet_phi[bjet_sublead_i],outtreeVars.jet_mass[bjet_sublead_i]);
     
     TLorentzVector dibjet= bjet_lead+bjet_sublead;
-    double dibjet_mass = dibjet.M();
+    double mjj = dibjet.M();
     
-    if(dibjet_mass<80 || dibjet_mass>200)
+    if(mjj<80 || mjj>200)
       continue;
     
     ++Nev_jetselection;
@@ -435,11 +427,11 @@ int main(int argc, char* argv[])
     
     
     //Fill outtree and histos
-    outtreeVars.weight = CrossSection*weightMC;
+    outtreeVars.evWeight = CrossSection*weightMC;
     outtreeVars.cross_sec = CrossSection;
     outtreeVars.event = treeVars.event;
     outtreeVars.nvtx = treeVars.N_Vtx;
-    outtreeVars.dipho_mass = (dipho).M();
+    outtreeVars.mgg = (dipho).M();
     outtreeVars.dipho_sumpt = (dipho).Pt();
     outtreeVars.dipho_deltaeta = DeltaEta( pho_lead.Eta() , pho_sublead.Eta() );
     outtreeVars.dipho_deltaphi = DeltaPhi( pho_lead.Phi() , pho_sublead.Phi() );
@@ -459,7 +451,7 @@ int main(int argc, char* argv[])
     //outtreeVars.dipho_subleadDeltaRgenreco = DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen);
     //outtreeVars.dipho_subleadDeltaEtagenreco = DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen);
     //outtreeVars.dipho_subleadDeltaPhigenreco = DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen);
-    outtreeVars.dibjet_mass = (dibjet).M();
+    outtreeVars.mjj = (dibjet).M();
     outtreeVars.dibjet_sumpt = (dibjet).Pt();
     outtreeVars.dibjet_deltaeta = DeltaEta( bjet_lead.Eta() , bjet_sublead.Eta() );
     outtreeVars.dibjet_deltaphi = DeltaPhi( bjet_lead.Phi() , bjet_sublead.Phi() );
@@ -477,7 +469,7 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_subleadEnergy = bjet_sublead.E();
     outtreeVars.dibjet_subleadbtagmedium = outtreeVars.jet_BTagMedium[bjet_sublead_i];
     outtreeVars.dibjet_subleadmvav2 = outtreeVars.jet_mvav2[bjet_sublead_i];
-    outtreeVars.Mx = diHiggs.M() - outtreeVars.dibjet_mass - outtreeVars.dipho_mass + 250.;
+    outtreeVars.mtot = diHiggs.M() - outtreeVars.mjj - outtreeVars.mgg + 250.;
     outtreeVars.DRmin_pho_bjet = DeltaRmin_bjet_pho; 
     outtreeVars.DPhimin_met_bjet = DeltaPhimin_met_bjet;
     outtreeVars.DPhimax_met_bjet = DeltaPhimax_met_bjet;
@@ -489,7 +481,7 @@ int main(int argc, char* argv[])
     
     outtreeVars.ttHTagger = 0;
     
-    h["dipho_mass"] -> Fill(outtreeVars.dipho_mass);
+    h["mgg"] -> Fill(outtreeVars.mgg);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);
     h["dipho_deltaeta"] -> Fill(outtreeVars.dipho_deltaeta);
     h["dipho_deltaphi"] -> Fill(outtreeVars.dipho_deltaphi);
@@ -506,7 +498,7 @@ int main(int argc, char* argv[])
     h["nJets_bTagLoose"] -> Fill(outtreeVars.nJets_bTagLoose);
     h["nJets_bTagMedium"] -> Fill(outtreeVars.nJets_bTagMedium);
     h["nJets_bTagTight"] -> Fill(outtreeVars.nJets_bTagTight);
-    h["dibjet_mass"] -> Fill(outtreeVars.dibjet_mass);
+    h["mjj"] -> Fill(outtreeVars.mjj);
     h["dibjet_sumpt"] -> Fill(outtreeVars.dibjet_sumpt);
     h["dibjet_deltaeta"] -> Fill(outtreeVars.dibjet_deltaeta);
     h["dibjet_deltaphi"] -> Fill(outtreeVars.dibjet_deltaphi);
@@ -525,7 +517,7 @@ int main(int argc, char* argv[])
     h["dibjet_subleadEnergy"] -> Fill(outtreeVars.dibjet_subleadEnergy);
     h["dibjet_subleadbtagmedium"] -> Fill(outtreeVars.dibjet_subleadbtagmedium);
     
-    h["Mx"] -> Fill(outtreeVars.Mx);
+    h["mtot"] -> Fill(outtreeVars.mtot);
     h["DRmin_sel_phots_sel_jets"] -> Fill(outtreeVars.DRmin_pho_bjet); 
     h["costhetastar_HH"] -> Fill(outtreeVars.costheta_HH); 
     h["costhetastar_gg"] -> Fill(outtreeVars.costheta_gg); 
@@ -533,23 +525,6 @@ int main(int argc, char* argv[])
     h["MET"] -> Fill(outtreeVars.MetPt); 
     h["MET_phi"] -> Fill(outtreeVars.MetPhi); 
     
-    ++Nev_preselected;
-    outTree_preselected->Fill();
-    
-    //fill low mass and high mass categories
-    if(outtreeVars.Mx<=350)
-    {
-      ++Nev_preselected_lowMx;
-      outTree_preselected_lowMx->Fill();
-    }
-    else
-    {
-      ++Nev_preselected_highMx;
-      outTree_preselected_highMx->Fill();
-    }
-    
-    //cout<<"high mass"<<endl;
-    //high mass events: categorization based on b-tag level of the two selected jets
     //JCR(jet control region): less than one jet with medium b-tag  
     //MPC: exactly one jet with medium b-tag
     //HPC: at least two jets with medium b-tag
@@ -573,7 +548,7 @@ int main(int argc, char* argv[])
     
     
     //fill low mass and high mass categories
-    if(outtreeVars.Mx<=350)
+    if(outtreeVars.mtot<=350)
     {
       ++Nev_all_lowMx;
       if(outtreeVars.cut_based_ct == -1) ++Nev_lowMx_JCR;
@@ -598,14 +573,11 @@ int main(int argc, char* argv[])
   cout<<"MC events = "<<NEventsMC<<endl;
   cout<<"2b2g skim = "<<nEntries<<" / "<<NEventsMC<<endl;
   cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"preselected events = "<<Nev_preselected<<" / "<<nEntries<<endl;
+  cout<<"\t\tpreselection acceptance = "<<Nev_preselected<<" / "<<NEventsMC<<" = "<<Nev_preselected/NEventsMC<<endl;
   cout<<"\t\tpass photon preselection = "<<Nev_phselection<<" / "<<nEntries<<endl;
   cout<<"\t\tpass kinematic jet preselection = "<< Nev_jet_kin_preselection <<" / "<<nEntries<<endl;
   cout<<"\t\tpass jet preselection = "<<Nev_jetselection<<" / "<<nEntries<<endl;
   cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"\t\tpreselection acceptance = "<<Nev_preselected<<" / "<<NEventsMC<<" = "<<Nev_preselected/NEventsMC<<endl;
-  cout<<"\t\tpreselection low mass acceptance = "<<Nev_preselected_lowMx<<" / "<<NEventsMC<<" = "<<1.*Nev_preselected_lowMx/NEventsMC<<endl;
-  cout<<"\t\tpreselection high mass acceptance = "<<Nev_preselected_highMx<<" / "<<NEventsMC<<" = "<<1.*Nev_preselected_highMx/NEventsMC<<endl;
   cout<<"\t\t\t-----------------------------------------------------------------"<<endl;  
   cout<<"\t\t\thigh mass jet control region acceptance = "<<Nev_highMx_JCR<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_JCR/NEventsMC<<endl;
   cout<<"\t\t\thigh mass medium purity cat. acceptance = "<<Nev_highMx_MPC<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_MPC/NEventsMC<<endl;
@@ -631,24 +603,15 @@ int main(int argc, char* argv[])
   cout<<"-----------------------------------------------------------------"<<endl;
   cout<<"-----------------------------------------------------------------\n"<<endl;
 
-  outTree_preselected -> AutoSave();
-  outTree_preselected_lowMx -> AutoSave();
-  outTree_preselected_highMx -> AutoSave();
-  // outTree_highMx_JCR -> AutoSave();
-  // outTree_highMx_MPC -> AutoSave();
-  // outTree_highMx_HPC -> AutoSave();
   outTree_all_lowMx -> AutoSave();
   outTree_all_highMx -> AutoSave();
   outFile -> Close();
   
   // MakePlot3(h);
-
-  system(Form("mv *.png %s",outputPlotFolder.c_str()));
-  system(Form("mv *.pdf %s",outputPlotFolder.c_str()));  
-
-
-
+  // system(Form("mv *.png %s",outputPlotFolder.c_str()));
+  // system(Form("mv *.pdf %s",outputPlotFolder.c_str()));
+  
+  
+  
   return 0;
 }
-
-

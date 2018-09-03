@@ -239,11 +239,11 @@ int main(int argc, char* argv[])
       //if(BTag>BTagOffset && BTag<4+BTagOffset)
       {
 	outtreeVars.nJets++;
-	outtreeVars.jet_pt[outtreeVars.nJets-1] = treeVars.Jet_pt[i];
-	outtreeVars.jet_eta[outtreeVars.nJets-1] = treeVars.Jet_eta[i];                    
-	outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
-	outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
-	outtreeVars.jet_mvav2[outtreeVars.nJets-1] = treeVars.Jet_mvav2[i];
+	outtreeVars.jet_pt[int(outtreeVars.nJets)-1] = treeVars.Jet_pt[i];
+	outtreeVars.jet_eta[int(outtreeVars.nJets)-1] = treeVars.Jet_eta[i];                    
+	outtreeVars.jet_phi[int(outtreeVars.nJets)-1] = treeVars.Jet_phi[i];
+	outtreeVars.jet_mass[int(outtreeVars.nJets)-1] = treeVars.Jet_mass[i];
+	outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] = treeVars.Jet_mvav2[i];
       }
     }
     

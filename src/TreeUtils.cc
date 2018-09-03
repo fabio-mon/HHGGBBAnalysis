@@ -2,13 +2,13 @@
 
 void InitTreeVars(TChain* chain, TreeVars& treeVars)
 {
-  chain -> SetBranchAddress("weight",    &treeVars.weight);
+  chain -> SetBranchAddress("evWeight",  &treeVars.evWeight);
   chain -> SetBranchAddress("event",     &treeVars.event);
   chain -> SetBranchAddress("nvtx",      &treeVars.nvtx);
   chain -> SetBranchAddress("cross_sec", &treeVars.cross_sec);
   
   chain -> SetBranchAddress("dipho_sumpt",     &treeVars.dipho_sumpt);
-  chain -> SetBranchAddress("dipho_mass",      &treeVars.dipho_mass);
+  chain -> SetBranchAddress("mgg",             &treeVars.mgg);
   //chain -> SetBranchAddress("dipho_mass_gen", &treeVars.dipho_mass_gen);
   //chain -> SetBranchAddress("dipho_sigmaRV",  &treeVars.dipho_sigmaRV);
   chain -> SetBranchAddress("dipho_deltaeta",  &treeVars.dipho_deltaeta);
@@ -51,7 +51,7 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   //chain -> SetBranchAddress("jet_phi",		         treeVars.jet_phi);
   //chain -> SetBranchAddress("jet_BTagLevel",                   treeVars.jet_BTagLevel);
   
-  chain -> SetBranchAddress("dibjet_mass",                      &treeVars.dibjet_mass);
+  chain -> SetBranchAddress("mjj",                              &treeVars.mjj);
   chain -> SetBranchAddress("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
   chain -> SetBranchAddress("dibjet_deltaeta",                  &treeVars.dibjet_deltaeta);
   chain -> SetBranchAddress("dibjet_deltaphi",                  &treeVars.dibjet_deltaphi);
@@ -70,27 +70,30 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   chain -> SetBranchAddress("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
   chain -> SetBranchAddress("dibjet_subleadbtagmedium",         &treeVars.dibjet_subleadbtagmedium);
   
-  chain -> SetBranchAddress("Mx",                               &treeVars.Mx);
+  chain -> SetBranchAddress("mtot",                             &treeVars.mtot);
   chain -> SetBranchAddress("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
+  chain -> SetBranchAddress("DPhimin_met_bjet",                 &treeVars.DPhimin_met_bjet); 
+  chain -> SetBranchAddress("DPhimax_met_bjet",                 &treeVars.DPhimax_met_bjet); 
   chain -> SetBranchAddress("costheta_HH",                      &treeVars.costheta_HH); 
   chain -> SetBranchAddress("costheta_gg",                      &treeVars.costheta_gg); 
   chain -> SetBranchAddress("costheta_bb",                      &treeVars.costheta_bb); 
   chain -> SetBranchAddress("MetPt",                            &treeVars.MetPt); 
-  chain -> SetBranchAddress("MetPhi",                           &treeVars.MetPhi); 
-
+  chain -> SetBranchAddress("MetPhi",                           &treeVars.MetPhi);
+  
+  chain -> SetBranchAddress("nLep", &treeVars.nLep);
 }
 
 
 
 void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
 {
-  tree -> Branch("evWeight",  &treeVars.weight);
+  tree -> Branch("evWeight",  &treeVars.evWeight);
   tree -> Branch("event",     &treeVars.event);
   tree -> Branch("nvtx",      &treeVars.nvtx);
   tree -> Branch("cross_sec", &treeVars.cross_sec);
 
   tree -> Branch("dipho_sumpt",   &treeVars.dipho_sumpt);
-  tree -> Branch("mgg",           &treeVars.dipho_mass);
+  tree -> Branch("mgg",           &treeVars.mgg);
   //tree -> Branch("dipho_mass_gen",    &treeVars.dipho_mass_gen);
   tree -> Branch("dipho_deltaeta",&treeVars.dipho_deltaeta);
   tree -> Branch("dipho_deltaphi",&treeVars.dipho_deltaphi);
@@ -132,7 +135,7 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   //tree -> Branch("jet_phi",			        treeVars.jet_phi);
   //tree -> Branch("jet_BTagLevel",			treeVars.jet_BTagLevel);
 
-  tree -> Branch("mjj",                              &treeVars.dibjet_mass);
+  tree -> Branch("mjj",                              &treeVars.mjj);
   tree -> Branch("dibjet_sumpt",                     &treeVars.dibjet_sumpt);
   tree -> Branch("dibjet_deltaeta",                  &treeVars.dibjet_deltaeta);
   tree -> Branch("dibjet_deltaphi",                  &treeVars.dibjet_deltaphi);
@@ -151,7 +154,7 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("dibjet_subleadEnergy",             &treeVars.dibjet_subleadEnergy);
   tree -> Branch("dibjet_subleadbtagmedium",         &treeVars.dibjet_subleadbtagmedium);
   
-  tree -> Branch("mtot",                             &treeVars.Mx);
+  tree -> Branch("mtot",                             &treeVars.mtot);
   tree -> Branch("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
   tree -> Branch("DPhimin_met_bjet",                 &treeVars.DPhimin_met_bjet); 
   tree -> Branch("DPhimax_met_bjet",                 &treeVars.DPhimax_met_bjet); 
