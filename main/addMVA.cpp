@@ -58,6 +58,7 @@ int main(int argc, char** argv)
   InitTreeVars(t,treeVars);
   
   std::map<std::string,float*> varMap;
+  varMap["mtot"] = &treeVars.mtot;
   varMap["mgg"] = &treeVars.mgg;
   varMap["mjj"] = &treeVars.mjj;
   varMap["evWeight"] = &treeVars.evWeight;
@@ -67,11 +68,17 @@ int main(int argc, char** argv)
   varMap["DRmin_pho_bjet"] = &treeVars.DRmin_pho_bjet;
   varMap["costheta_HH"] = &treeVars.costheta_HH;
   varMap["costheta_bb"] = &treeVars.costheta_bb;
+  varMap["costheta_gg"] = &treeVars.costheta_gg;
   varMap["event"] = &treeVars.event;
   varMap["nLep"] = &treeVars.nLep;
   varMap["nJets"] = &treeVars.nJets;
-  
-  
+  varMap["dibjet_leadptoM"] = &treeVars.dibjet_leadptoM;
+  varMap["dibjet_subleadptoM"] = &treeVars.dibjet_subleadptoM;
+  varMap["dipho_leadptoM"] = &treeVars.dipho_leadptoM;
+  varMap["dipho_subleadptoM"] = &treeVars.dipho_subleadptoM;
+  varMap["dibjet_leadbtagmedium"] = &treeVars.dibjet_leadbtagmedium;
+  varMap["dibjet_subleadbtagmedium"] = &treeVars.dibjet_subleadbtagmedium;
+
   //---------------
   // clone the tree
   std::string outputFileName = opts.GetOpt<std::string>("Output.outputFileName");
@@ -130,6 +137,28 @@ int main(int argc, char** argv)
   {
     if( ii%1000 == 0 ) std::cout << ">>> Reading entry " << ii << " / " << nEntries << std::endl;
     t -> GetEntry(ii);
+
+    // // Print
+    //cout<<"--------------------------------"<<endl;
+    //cout<<"mtot"<<treeVars.mtot<<endl;
+    //cout<<"mgg"<<treeVars.mgg<<endl;
+    //cout<<"mjj"<<treeVars.mjj<<endl;
+    //cout<<"evWeight"<<treeVars.evWeight<<endl;
+    //cout<<"MetPt"<<treeVars.MetPt<<endl;
+    //cout<<"DPhimin_met_bjet"<<treeVars.DPhimin_met_bjet<<endl;
+    //cout<<"DPhimax_met_bjet"<<treeVars.DPhimax_met_bjet<<endl;
+    //cout<<"DRmin_pho_bjet"<<treeVars.DRmin_pho_bjet<<endl;
+    //cout<<"costheta_HH"<<treeVars.costheta_HH<<endl;
+    //cout<<"costheta_bb"<<treeVars.costheta_bb<<endl;
+    //cout<<"costheta_gg"<<treeVars.costheta_gg<<endl;
+    //cout<<"event"<<treeVars.event<<endl;
+    //cout<<"nLep"<<treeVars.nLep<<endl;
+    //cout<<"nJets"<<treeVars.nJets<<endl;
+    //cout<<"dibjet_leadptoM"<<treeVars.dibjet_leadptoM<<endl;
+    //cout<<"dibjet_subleadptoM"<<treeVars.dibjet_subleadptoM<<endl;
+    //cout<<"dibjet_leadbtagmedium"<<treeVars.dibjet_leadbtagmedium<<endl;
+    //cout<<"dibjet_subleadbtagmedium"<<treeVars.dibjet_subleadbtagmedium<<endl;
+ 
     
     // evaluate  MVA
     for(unsigned int ii = 0; ii < MVA_labels.size(); ++ii)
