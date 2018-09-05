@@ -176,15 +176,14 @@ int main(int argc, char* argv[])
     }
   }
   
-  
   //---------------
   // tree variables
   RawTreeVars treeVars;
-  
+
   // branch tree: the only functioning way consists in branching separately the trees and, only after, adding them as friends
   InitRawTreeVars(trees,treeVars,Loose_Tight_Photon);
   TChain *tree = trees[onlytreename_str.at(0)];
-  
+
   // add tree_i as friends to tree_0
   for(unsigned int ntree = 1; ntree < onlytreename_str.size(); ++ntree)
   {
@@ -205,7 +204,14 @@ int main(int argc, char* argv[])
   InitOutTreeVars(outTree_all_highMx,outtreeVars);
   InitOutTreeVars(outTree_all_lowMx, outtreeVars);
   
-  
+  //Get photon resolution from external file (HHGGBBAnalysis/data/Delphes_Ph_resolution.root)
+  TFile* Ph_resolution_file = TFile::Open("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/Delphes_Ph_resolution.root","READ");
+  TH2F* ph_resolution_map;
+  Ph_resolution_file->GetObject("rel_resolution_plus1_in_quad",ph_resolution_map);
+  ph_resolution_map->SetDirectory(0);
+  Ph_resolution_file->Close();
+  outFile -> cd();
+
   //------------------
   // loop over samples
   int Nev_highMx_JCR=0;
@@ -440,6 +446,7 @@ int main(int argc, char* argv[])
     outtreeVars.dipho_leadPhi = pho_lead.Phi();
     outtreeVars.dipho_leadptoM = pho_lead.Pt() / (dipho).M();
     outtreeVars.dipho_leadEnergy = pho_lead.E();
+    outtreeVars.dipho_lead_sigmaEoE = ph_resolution_map->GetBinContent(ph_resolution_map->FindBin(fabs(pho_lead.Eta()),pho_lead.E()));
     //outtreeVars.dipho_leadDeltaRgenreco = DeltaR(pho_lead.Eta(),pho_lead.Phi(),outtreeVars.dipho_leadEta_gen,outtreeVars.dipho_leadPhi_gen);
     //outtreeVars.dipho_leadDeltaEtagenreco = DeltaEta(pho_lead.Eta(),outtreeVars.dipho_leadEta_gen);
     //outtreeVars.dipho_leadDeltaPhigenreco = DeltaPhi(pho_lead.Phi(),outtreeVars.dipho_leadPhi_gen);
@@ -448,6 +455,7 @@ int main(int argc, char* argv[])
     outtreeVars.dipho_subleadPhi = pho_sublead.Phi();
     outtreeVars.dipho_subleadptoM = pho_sublead.Pt() / (dipho).M();
     outtreeVars.dipho_subleadEnergy = pho_sublead.E();
+    outtreeVars.dipho_sublead_sigmaEoE = ph_resolution_map->GetBinContent(ph_resolution_map->FindBin(fabs(pho_sublead.Eta()),pho_sublead.E()));
     //outtreeVars.dipho_subleadDeltaRgenreco = DeltaR(pho_sublead.Eta(),pho_sublead.Phi(),outtreeVars.dipho_subleadEta_gen,outtreeVars.dipho_subleadPhi_gen);
     //outtreeVars.dipho_subleadDeltaEtagenreco = DeltaEta(pho_sublead.Eta(),outtreeVars.dipho_subleadEta_gen);
     //outtreeVars.dipho_subleadDeltaPhigenreco = DeltaPhi(pho_sublead.Phi(),outtreeVars.dipho_subleadPhi_gen);
