@@ -78,6 +78,10 @@ int main(int argc, char** argv)
   varMap["dipho_subleadptoM"] = &treeVars.dipho_subleadptoM;
   varMap["dibjet_leadbtagmedium"] = &treeVars.dibjet_leadbtagmedium;
   varMap["dibjet_subleadbtagmedium"] = &treeVars.dibjet_subleadbtagmedium;
+  varMap["dipho_lead_sigmaEoE"] = &treeVars.dipho_lead_sigmaEoE;
+  varMap["dipho_sublead_sigmaEoE"] = &treeVars.dipho_sublead_sigmaEoE;
+  varMap["dipho_leadEta"] = &treeVars.dipho_leadEta;
+  varMap["dipho_subleadEta"] = &treeVars.dipho_subleadEta;
 
   //---------------
   // clone the tree

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # 
+#NOTE: tree for training is 0 and tree for testing is 1 https://root.cern.ch/doc/v608/Types_8h_source.html#l00145 
 # --------------------------------------------
 # Standard python import
 from optparse import OptionParser, make_option
