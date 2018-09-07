@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   }
   long int nEntries = t->GetEntries();
   std::cout << "Added " << nEntries << " entries to the chain" << std::endl;
-  
+
   int nJobs = opts.GetOpt<int>("Input.nJobs");
   int jobId = opts.GetOpt<int>("Input.jobId");
   long int nEntriesPerJob = int(nEntries/nJobs);
@@ -53,10 +53,8 @@ int main(int argc, char** argv)
   long int lastEntry = firstEntry + nEntriesPerJob;
   if( jobId == nJobs ) lastEntry = nEntries;
 
-  
   TreeVars treeVars;
   InitTreeVars(t,treeVars);
-  
   std::map<std::string,float*> varMap;
   varMap["mtot"] = &treeVars.mtot;
   varMap["mgg"] = &treeVars.mgg;
@@ -95,7 +93,7 @@ int main(int argc, char** argv)
   for(unsigned int ii = 0; ii < MVA_labels.size(); ++ii)
   {
     std::string MVA_label = MVA_labels.at(ii);
-    newTree -> Branch(Form("mva_%s",MVA_label.c_str()),&mva[MVA_label]);
+    newTree -> Branch(Form("%s",MVA_label.c_str()),&mva[MVA_label]);
   }
   
   

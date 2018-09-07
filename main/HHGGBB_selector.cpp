@@ -487,7 +487,6 @@ int main(int argc, char* argv[])
     outtreeVars.MetPt = treeVars.Met_pt[0];
     outtreeVars.MetPhi = treeVars.Met_phi[0];
     
-    outtreeVars.ttHTagger = 0;
     
     h["mgg"] -> Fill(outtreeVars.mgg);
     h["dipho_sumpt"] -> Fill(outtreeVars.dipho_sumpt);

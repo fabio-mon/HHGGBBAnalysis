@@ -169,7 +169,6 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("nLep", &treeVars.nLep);
   
   tree -> Branch("cut_based_ct", &treeVars.cut_based_ct); 
-  tree -> Branch("ttHTagger",    &treeVars.ttHTagger); 
 }
 
 
