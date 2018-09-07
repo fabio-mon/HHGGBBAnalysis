@@ -235,6 +235,7 @@ int main(int argc, char* argv[])
       if(fabs(treeVars.Jet_eta[i])>3) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
+      int BTag = GetBTagLevel(treeVars.Jet_mvav2[i],useMTD);
       //cout<<i<<"\tbtagvalue="<<treeVars.Jet_mvav2[i]<<"\tbtaglevel="<<BTag<<"\tbtagoffset="<<BTagOffset<<endl;
       //if(BTag>BTagOffset && BTag<4+BTagOffset)
       {
@@ -243,8 +244,16 @@ int main(int argc, char* argv[])
 	outtreeVars.jet_eta[outtreeVars.nJets-1] = treeVars.Jet_eta[i];                    
 	outtreeVars.jet_phi[outtreeVars.nJets-1] = treeVars.Jet_phi[i];
 	outtreeVars.jet_mass[outtreeVars.nJets-1] = treeVars.Jet_mass[i];
+	outtreeVars.jet_BTagLevel[outtreeVars.nJets-1] = BTag;
 	outtreeVars.jet_mvav2[outtreeVars.nJets-1] = treeVars.Jet_mvav2[i];
-
+	if(BTag-BTagOffset==1)
+	  outtreeVars.nJets_bTagLoose++;
+	else
+	  if(BTag-BTagOffset==2)
+	    outtreeVars.nJets_bTagMedium++;
+	  else
+	    if(BTag-BTagOffset==3)
+	      outtreeVars.nJets_bTagTight++;
       }
     }
     
