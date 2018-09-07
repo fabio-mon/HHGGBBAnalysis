@@ -1,0 +1,52 @@
+{
+  "methods"    : [ "BDT" ],
+   
+  "settings"   : { "BDT" : "!H:!V:!CreateMVAPdfs:BoostType=Grad:UseBaggedBoost:NegWeightTreatment=NoNegWeightsInTraining:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=2000:MinNodeSize=0.125:Shrinkage=0.1:NTrees=2000:!UseYesNoLeaf:MaxDepth=3"
+  },
+  
+  "variables"  : [ "DRmin_pho_bjet", "costheta_HH", "costheta_bb", "costheta_gg", "dipho_leadptoM", "dipho_subleadptoM", "dibjet_leadptoM", "dibjet_subleadptoM", "dibjet_leadbtagmedium", "dibjet_subleadbtagmedium", "dipho_lead_sigmaEoE", "dipho_sublead_sigmaEoE" ],
+  
+  "spectators" : [ "mtot", "mgg", "myweight:=evWeight", "mjj", "event" ],
+  
+  "commonCuts" : [ " 1. * (cut_based_ct >= 0)" ],
+  
+  "categories" : [ ],
+  
+  "subcategories" : [ ],
+  
+  "selection" : " ",
+  
+  "classes" : {  
+    "Signal" : { 
+      "samples" : [
+        ["plotTree_HHggbb.root", "all_highMx", 1,"(event%2 != 0)",0,1],
+        ["plotTree_HHggbb.root", "all_highMx", 1,"(event%2 == 0)",1,1] ],
+      "weight" : "evWeight"
+    },
+    "Background" : { 
+      "samples" : [
+        ["plotTree_gg.root",                  "all_highMx", 1,"(event%2 != 0)",0,4],
+        ["plotTree_gg.root",                  "all_highMx", 1,"(event%2 == 0)",1,4],
+        ["plotTree_tt.root",                  "all_highMx", 1,"(event%2 != 0)",0,5],
+        ["plotTree_tt.root",                  "all_highMx", 1,"(event%2 == 0)",1,5],
+        ["plotTree_ttghad.root",              "all_highMx", 1,"(event%2 != 0)",0,6],
+        ["plotTree_ttghad.root",              "all_highMx", 1,"(event%2 == 0)",1,6],
+        ["plotTree_ttgsemilepfromt.root",     "all_highMx", 1,"(event%2 != 0)",0,7],
+        ["plotTree_ttgsemilepfromt.root",     "all_highMx", 1,"(event%2 == 0)",1,7],
+        ["plotTree_ttgsemilepfromtbar.root",  "all_highMx", 1,"(event%2 != 0)",0,8],
+        ["plotTree_ttgsemilepfromtbar.root",  "all_highMx", 1,"(event%2 == 0)",1,8],
+        ["plotTree_ttglep.root",              "all_highMx", 1,"(event%2 != 0)",0,9],
+        ["plotTree_ttglep.root",              "all_highMx", 1,"(event%2 == 0)",1,9],
+        ["plotTree_ttgg.root",                "all_highMx", 1,"(event%2 != 0)",0,10],
+        ["plotTree_ttgg.root",                "all_highMx", 1,"(event%2 == 0)",1,10],
+        ["plotTree_ggH.root",                 "all_highMx", 1,"(event%2 != 0)",0,11],
+        ["plotTree_ggH.root",                 "all_highMx", 1,"(event%2 == 0)",1,11],
+        ["plotTree_qqH.root",                 "all_highMx", 1,"(event%2 != 0)",0,12],
+        ["plotTree_qqH.root",                 "all_highMx", 1,"(event%2 == 0)",1,12],
+        ["plotTree_VH.root",                  "all_highMx", 1,"(event%2 != 0)",0,13],
+        ["plotTree_VH.root",                  "all_highMx", 1,"(event%2 == 0)",1,13] ],
+      "weight" : "evWeight"
+    }
+  },
+  "label" : "__HHGGBB_BDT_v7__"
+}

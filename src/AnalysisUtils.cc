@@ -33,7 +33,7 @@ void MakePlot3(std::map<std::string,TH1F*> &h)
     it->second -> SetFillStyle(0);
     it->second -> Draw("E1");
 
-    if(it->first == "dipho_mass")
+    if(it->first == "mgg")
       it->second -> GetXaxis() -> SetTitle("diphoton mass (GeV/c^{2})");
     if(it->first == "dipho_sumpt")
       it->second -> GetXaxis() -> SetTitle("diphoton P_{T} sum (GeV/c)");
@@ -72,19 +72,19 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
   double lead_pt=pho_lead.Pt();
   double sublead_pt=pho_sublead.Pt();
   if(lead_pt<30 || sublead_pt<20) return false;
-  if(fabs(pho_lead.Eta())>3 || fabs(pho_sublead.Eta())>3) return false;
+  if(fabs(pho_lead.Eta())>2.5 || fabs(pho_sublead.Eta())>2.5) return false;
   if(fabs(pho_lead.Eta())>1.44 && fabs(pho_lead.Eta())<1.57) return false;
   if(fabs(pho_sublead.Eta())>1.44 && fabs(pho_sublead.Eta())<1.57) return false;
-  double dipho_mass=(pho_lead+pho_sublead).M();
+  double mgg=(pho_lead+pho_sublead).M();
   //---------------------------------------------------------------
-  //cout<<"Mgg="<<dipho_mass<<endl;
-  //cout<<"lead_pt/Mgg="<<lead_pt/dipho_mass<<endl;
-  //cout<<"sublead_pt/Mgg="<<sublead_pt/dipho_mass<<endl;
+  //cout<<"Mgg="<<mgg<<endl;
+  //cout<<"lead_pt/Mgg="<<lead_pt/mgg<<endl;
+  //cout<<"sublead_pt/Mgg="<<sublead_pt/mgg<<endl;
   
   //-------------------------------------------
-  if(dipho_mass<100. || dipho_mass>180.) return false;
-  if(lead_pt/dipho_mass<0.33) return false;
-  if(sublead_pt/dipho_mass<0.25) return false;
+  if(mgg<100. || mgg>180.) return false;
+  if(lead_pt/mgg<0.33) return false;
+  if(sublead_pt/mgg<0.25) return false;
   
   return true;
 }
@@ -105,94 +105,6 @@ bool JetSelection(const RawTreeVars &treeVars, TreeVars &outtreeVars)//const TLo
   //if(N_hardJet<2) return false;
   return true;
 }
-
-bool SelectBestScoreBJets(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD)
-{
-  int BTagOffset;
-  if(useMTD == false)
-    BTagOffset=0;
-  else
-    BTagOffset=3;
-
-  //find jet with higher btag score
-  int ijet1=0;
-  int btag1=outtreeVars.jet_BTagLevel[0];
-  float pt1 = outtreeVars.jet_pt[0];
-  //---------------------------------------------------------------
-  //cout<<"0\tbtag"<<btag1<<"\tpt1"<<pt1<<endl;
-  //---------------------------------------------------------------
-  for(int i=1; i<outtreeVars.nJets; i++)
-  {
-    //---------------------------------------------------------------
-    //cout<<i<<"\tbtag"<<outtreeVars.jet_BTagLevel[i]<<"\tpt1"<<outtreeVars.jet_pt[i]<<endl;
-    //---------------------------------------------------------------
-    //If(BTag>BTagOffset && BTag<4+BTagOffset) <-- already required to fill outtreeVars
-    if(outtreeVars.jet_BTagLevel[i] > btag1)
-    {
-      ijet1=i;
-      btag1=outtreeVars.jet_BTagLevel[i];
-      pt1 = outtreeVars.jet_pt[i];
-    }
-    else
-      if(outtreeVars.jet_BTagLevel[i] == btag1)
-	if(outtreeVars.jet_pt[i] > pt1)
-	{
-	  ijet1=i;
-	  btag1=outtreeVars.jet_BTagLevel[i];
-	  pt1 = outtreeVars.jet_pt[i];
-	}
-  }
-
-  //find second jet with higher btag score
-  int ijet2=-1;
-  int btag2=-1;
-  float pt2=-1;
-  for(int i=0; i<outtreeVars.nJets; i++)
-  {
-    if(i==ijet1) continue;
-    if(ijet2==-1)
-    {
-      ijet2=i;
-      btag2=outtreeVars.jet_BTagLevel[i];
-      pt2 = outtreeVars.jet_pt[i];
-    }
-    else
-      if(outtreeVars.jet_BTagLevel[i] > btag2)
-      {
-	ijet2=i;
-	btag2=outtreeVars.jet_BTagLevel[i];
-	pt2 = outtreeVars.jet_pt[i];
-      }
-      else
-	if(outtreeVars.jet_BTagLevel[i] == btag2)
-	  if(outtreeVars.jet_pt[i] > pt2)
-	  {
-	    ijet2=i;
-	    btag2=outtreeVars.jet_BTagLevel[i];
-	    pt2 = outtreeVars.jet_pt[i];
-	  }
-  }
-
-  //---------------------------------------------------------------
-  //cout<<"best score i "<<ijet1<<" "<<ijet2<<endl;
-  //---------------------------------------------------------------
-  if(ijet2==-1)
-    return false;
-
-  if(pt1>pt2)
-  {
-    bjet_lead_i = ijet1;
-    bjet_sublead_i = ijet2;
-  }
-  else
-  {
-    bjet_lead_i = ijet2;
-    bjet_sublead_i = ijet1;
-  }
-
-  return true;
-}
-
 
 bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD)
 {
@@ -280,35 +192,6 @@ bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bje
 
   return true;
 }
-
-
-
-int GetBTagLevel(const int &BTag, const bool &useMTD)
-{
-  //BTag level:
-  // 0 no BTag
-  // 1 BTag loose
-  // 2 BTag medium
-  // 3 BTag tight
-  // 4 BTag loose with MTD
-  // 5 BTag medium with MTD
-  // 6 BTag tight with MTD
-
-  if(useMTD)
-  {
-    if(BTag & 0b100000) return 6;
-    if(BTag & 0b010000) return 5;
-    if(BTag & 0b001000) return 4;
-  }
-  else
-  {
-    if(BTag & 0b000100) return 3;
-    if(BTag & 0b000010) return 2;
-    if(BTag & 0b000001) return 1;
-  }
-  return 0;
-}
-
 
 bool FindGenPh_Hdaug(RawTreeVars &treeVars, float deltaMthr)
 //function that find the pair of photons that minimize M_diphogen - M_higgs

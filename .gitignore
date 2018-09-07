@@ -36,8 +36,6 @@
 # Root
 *.root
 
-#executable of TTHAnalysis
-main/DiLeptonStudy.cpp  
-main/addMVA.cpp  
-main/createControlSample.cpp  
-main/filterFakes.cpp
+# Images
+*.pdf
+*.png

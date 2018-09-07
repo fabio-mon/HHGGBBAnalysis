@@ -10,13 +10,13 @@
 /*** tree variables ***/
 struct TreeVars
 {
-
-  int nvtx;
-  float weight;
+  float nvtx;
+  float evWeight;
   float cross_sec;
-
+  float event;
+  
   float dipho_sumpt;
-  float dipho_mass;
+  float mgg;
   float dipho_mass_gen;
   float dipho_deltaeta;
   float dipho_deltaphi;
@@ -45,12 +45,12 @@ struct TreeVars
   float dipho_subleadDeltaEtagenreco;
   float dipho_subleadDeltaPhigenreco;
 
-  int nJets;
-  int nJets_bTagLoose;
-  int nJets_bTagMedium;
-  int nJets_bTagTight;
+  float nJets;
+  float nJets_bTagLoose;
+  float nJets_bTagMedium;
+  float nJets_bTagTight;
 
-  float dibjet_mass;
+  float mjj;
   float dibjet_sumpt;
   float dibjet_deltaeta;
   float dibjet_deltaphi;
@@ -59,18 +59,20 @@ struct TreeVars
   float dibjet_leadPhi;
   float dibjet_leadptoM;
   float dibjet_leadEnergy;
-  int   dibjet_leadbtagscore;
-  int   dibjet_leadmvav2;
+  float dibjet_leadbtagmedium;
+  int dibjet_leadmvav2;
   float dibjet_subleadPt;
   float dibjet_subleadEta;
   float dibjet_subleadPhi;
   float dibjet_subleadptoM;
   float dibjet_subleadEnergy;
-  int   dibjet_subleadbtagscore;
-  int   dibjet_subleadmvav2;
-
-  float Mx;
+  float dibjet_subleadbtagmedium;
+  int dibjet_subleadmvav2;
+  
+  float mtot;
   float DRmin_pho_bjet; 
+  float DPhimin_met_bjet;
+  float DPhimax_met_bjet;
   float costheta_HH; 
   float costheta_gg; 
   float costheta_bb; 
@@ -78,17 +80,20 @@ struct TreeVars
   float jet_pt[200];
   float jet_eta[200];
   float jet_phi[200];
-  int   jet_bdiscriminant[200];
-  int   jet_BTagLevel[200];
-  int   jet_mvav2[200];
+  float jet_bdiscriminant[200];
+  float jet_BTagMedium[200];
+  int jet_mvav2[200];
   float jet_mass[200];
-  int   jet_hadflav[200];
+  float jet_hadflav[200];
   
   float MetPt;
   float MetPhi;
   
-  int cut_based_ct;
-  int ttHTagger;
+  float nEle;
+  float nMu;
+  float nLep;
+  
+  float cut_based_ct;
 };
 
 struct RawTreeVars
@@ -125,7 +130,7 @@ struct RawTreeVars
    float GenJet_eta[maxjets];
    float GenJet_phi[maxjets];
    float GenJet_mass[maxjets];
-
+  
    int   N_GenPh;
    int   GenPh_st[maxpart];
    bool  GenPh_isHdaug[maxpart];

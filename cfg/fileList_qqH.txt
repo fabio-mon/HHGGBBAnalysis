@@ -1,0 +1,17 @@
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_10_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_11_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_12_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_13_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_14_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_15_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_16_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_17_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_18_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_1_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_2_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_3_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_5_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_6_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_7_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_8_p2ntuple_VBFHgg_PU200_0.root
+/eos/user/f/fmonti/HHGGBB/data/BKG/VBFHgg/VBFHgg_PU200/VBFHToGG_M125_14TeV_amcatnlo_pythia8_9_p2ntuple_VBFHgg_PU200_0.root
