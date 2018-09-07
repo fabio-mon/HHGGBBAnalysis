@@ -94,7 +94,6 @@ struct TreeVars
   float nLep;
   
   float cut_based_ct;
-  float ttHTagger;
 };
 
 struct RawTreeVars
