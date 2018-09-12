@@ -38,6 +38,8 @@ bool RecoJetGenericMatch(const TLorentzVector &reco_pho , const RawTreeVars& tre
 bool PhoGenericGenMatch(const TLorentzVector &reco_pho , const RawTreeVars& treeVars , TLorentzVector &gen_pho_match, float DeltaRmax=0.03);
 bool bquarkGenericGenMatch(const TLorentzVector &reco_jet , const RawTreeVars& treeVars , TLorentzVector &gen_b_match, float DeltaRmax=0.03);
 bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_sublead , const RawTreeVars& treeVars , TreeVars &outtreeVars, float DeltaRmax=0.03);
+void ReducebtagEfficiency(TreeVars &outtreeVars, const bool &useMTD, const float &prob );
+void IncreasebtagEfficiency(TreeVars &outtreeVars, const bool &useMTD, const float &prob );
 bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD);
 float DeltaRmin_phoRECO_phoGEN(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);
 float DeltaRmin_phoRECO_jetRECO(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);

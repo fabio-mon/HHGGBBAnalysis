@@ -1,6 +1,6 @@
 #include "interface/AnalysisUtils.h"
 #include "TLorentzVector.h"
-
+#include "TRandom3.h"
 float DeltaEta(const float& eta1, const float& eta2)
 {
   return fabs( eta1 - eta2 );
@@ -106,7 +106,74 @@ bool JetSelection(const RawTreeVars &treeVars, TreeVars &outtreeVars)//const TLo
   return true;
 }
 
-bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD)
+//reduce of a fraction "prob" the medium btagged jets from selected jets collection
+void ReducebtagEfficiency(TreeVars &outtreeVars, const bool &useMTD, const float &prob )
+{
+  TRandom3 random;
+  random.SetSeed(0);
+  int BTagMedium_mask;
+  if(useMTD == false)
+    BTagMedium_mask=0b000010;
+  else
+    BTagMedium_mask=0b010000;
+
+  //random deletion
+  for(int i=0; i<outtreeVars.nJets; i++)
+  {
+    //---------------------------------------------------------------
+    //cout<<i<<"\tbtag="<<(outtreeVars.jet_mvav2[i] & BTagMedium_mask)<<"\tflavor="<<outtreeVars.jet_hadflav[i];
+    //---------------------------------------------------------------
+    if(outtreeVars.jet_mvav2[i] & BTagMedium_mask)
+      if(fabs(outtreeVars.jet_hadflav[i])==4 || fabs(outtreeVars.jet_hadflav[i])==5)
+	if(random.Uniform()<prob)
+	{
+	  //cout<<"deleted"<<endl;
+	  if(useMTD)
+	    outtreeVars.jet_mvav2[i] -= 16;
+	  else
+	    outtreeVars.jet_mvav2[i] -= 2;	    
+	  outtreeVars.nJets_bTagMedium--;
+	  outtreeVars.jet_BTagMedium[i] = 0;
+	}
+    //cout<<endl;
+  }
+}
+
+//increase of a fraction "prob" the medium btagged jets from selected jets collection
+void IncreasebtagEfficiency(TreeVars &outtreeVars, const bool &useMTD, const float &prob )
+{
+  TRandom3 random;
+  random.SetSeed(0);
+  int BTagMedium_mask;
+  if(useMTD == false)
+    BTagMedium_mask=0b000010;
+  else
+    BTagMedium_mask=0b010000;
+
+  //random deletion
+  for(int i=0; i<outtreeVars.nJets; i++)
+  {
+    //---------------------------------------------------------------
+    //cout<<i<<"\tbtag="<<(outtreeVars.jet_mvav2[i] & BTagMedium_mask)<<"\tflavor="<<outtreeVars.jet_hadflav[i];
+    //---------------------------------------------------------------
+    if(!(outtreeVars.jet_mvav2[i] & BTagMedium_mask))
+      if(fabs(outtreeVars.jet_hadflav[i])==4 || fabs(outtreeVars.jet_hadflav[i])==5)
+	if(random.Uniform()<prob)
+	{
+	  //cout<<"added"<<endl;
+	  if(useMTD)
+	    outtreeVars.jet_mvav2[i] += 16;
+	  else
+	    outtreeVars.jet_mvav2[i] += 2;	    
+	  outtreeVars.nJets_bTagMedium++;
+	  outtreeVars.jet_BTagMedium[i] = 1;
+	}
+    //cout<<endl;
+  }
+}
+
+
+bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD )
 {
   int BTagMedium_mask;
   if(useMTD == false)

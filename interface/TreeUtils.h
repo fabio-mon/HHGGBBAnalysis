@@ -93,7 +93,8 @@ struct TreeVars
   float nMu;
   float nLep;
   
-  float cut_based_ct;
+  int cut_based_ct;
+  int mva_based_ct;
 };
 
 struct RawTreeVars

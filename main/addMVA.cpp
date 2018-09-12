@@ -12,6 +12,8 @@
 #include "TFile.h"
 #include "TChain.h"
 #include "TTree.h"
+#include "TCut.h"
+#include "TTreeFormula.h"
 
 #include "TMVA/Reader.h"
 
@@ -30,8 +32,7 @@ int main(int argc, char** argv)
   // parse the config file
   CfgManager opts;
   opts.ParseConfigFile(argv[1]);
-  
-  
+
   //-------------------------
   // open files and get trees
   std::vector<std::string> input = opts.GetOpt<std::vector<std::string> >("Input.input");
@@ -43,6 +44,21 @@ int main(int argc, char** argv)
     std::string treeName = input.at(1+ii*2);
     t -> Add((inFileName+"/"+treeName).c_str());
   }
+
+  TTreeFormula *cutTraining=0;
+  float reWeight = 1.;
+  //----------------------
+  // training events to be removed and consequent reweight to apply
+  if(opts.OptExist("Input.removeTraining"))
+  {
+    std::string removeTraining = opts.GetOpt<std::string> ("Input.removeTraining");
+    reWeight = opts.GetOpt<float> ("Input.reWeight");
+    std::cout<<"Training events: "<<removeTraining<<std::endl;
+    cutTraining = new TTreeFormula("cutTraining", TCut(removeTraining.c_str()), t);
+
+  }
+   
+
   long int nEntries = t->GetEntries();
   std::cout << "Added " << nEntries << " entries to the chain" << std::endl;
 
@@ -60,6 +76,7 @@ int main(int argc, char** argv)
   varMap["mgg"] = &treeVars.mgg;
   varMap["mjj"] = &treeVars.mjj;
   varMap["evWeight"] = &treeVars.evWeight;
+  varMap["event"] = &treeVars.event;
   varMap["MetPt"] = &treeVars.MetPt;
   varMap["DPhimin_met_bjet"] = &treeVars.DPhimin_met_bjet;
   varMap["DPhimax_met_bjet"] = &treeVars.DPhimax_met_bjet;
@@ -96,6 +113,20 @@ int main(int argc, char** argv)
     newTree -> Branch(Form("%s",MVA_label.c_str()),&mva[MVA_label]);
   }
   
+  //----------------------
+  // MVA cuts for medium purity and high purity
+  TTreeFormula* cutMPC=0;
+  TTreeFormula* cutHPC=0;
+  if(opts.OptExist("Input.MPcut"))
+  {
+    std::string MPcut = opts.GetOpt<std::string> ("Input.MPcut");
+    std::string HPcut = opts.GetOpt<std::string> ("Input.HPcut");
+    newTree -> Branch("mva_based_ct",&treeVars.mva_based_ct);
+    cutMPC = new TTreeFormula("cutMPC", TCut(MPcut.c_str()), newTree);
+    cutHPC = new TTreeFormula("cutHPC", TCut(HPcut.c_str()), newTree);
+
+  }
+
   
   //-----
   // TMVA
@@ -135,12 +166,25 @@ int main(int argc, char** argv)
   std::cout << "tot entries: " << nEntries << std::endl;
   std::cout << "first entry: " << firstEntry << std::endl;
   std::cout << " last entry: " << lastEntry << std::endl;
+  int treenumber = 1;
   for(long int ii = firstEntry; ii < lastEntry; ++ii)
   {
     if( ii%1000 == 0 ) std::cout << ">>> Reading entry " << ii << " / " << nEntries << std::endl;
     t -> GetEntry(ii);
-
-    // // Print
+    t -> LoadTree(ii);
+    if(cutTraining)
+    {
+      if (t->GetTreeNumber() != treenumber) 
+      {
+	treenumber = t->GetTreeNumber();   
+	cutTraining->UpdateFormulaLeaves();   
+      }
+      if(cutTraining->EvalInstance())
+	continue;
+      treeVars.evWeight *= reWeight;
+    }
+ 
+    // Print
     //cout<<"--------------------------------"<<endl;
     //cout<<"mtot"<<treeVars.mtot<<endl;
     //cout<<"mgg"<<treeVars.mgg<<endl;
@@ -160,7 +204,6 @@ int main(int argc, char** argv)
     //cout<<"dibjet_subleadptoM"<<treeVars.dibjet_subleadptoM<<endl;
     //cout<<"dibjet_leadbtagmedium"<<treeVars.dibjet_leadbtagmedium<<endl;
     //cout<<"dibjet_subleadbtagmedium"<<treeVars.dibjet_subleadbtagmedium<<endl;
- 
     
     // evaluate  MVA
     for(unsigned int ii = 0; ii < MVA_labels.size(); ++ii)
@@ -169,6 +212,17 @@ int main(int argc, char** argv)
       mva[MVA_label] = MVAReaders[MVA_label] -> EvaluateMVA(MVA_methods[MVA_label].c_str());
     }
     
+    if(cutMPC)
+    {
+      if(cutMPC->EvalInstance())
+	treeVars.mva_based_ct=1;
+      else
+	if(cutHPC->EvalInstance())
+	  treeVars.mva_based_ct=0;
+	else
+	  treeVars.mva_based_ct=-1;
+    }
+     
     newTree -> Fill();
   }
   
