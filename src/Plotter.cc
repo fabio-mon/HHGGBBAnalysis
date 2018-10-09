@@ -33,12 +33,13 @@ void Plotter::DrawPlots()
       PlotTH1F myplot(varName,opts_);
       
       TCanvas* c = myplot.Plot();
-      c -> Print(Form("%s/c_%s.pdf",outputFolder_.c_str(),varName.c_str()));
       c -> Print(Form("%s/c_%s.png",outputFolder_.c_str(),varName.c_str()));
-      
+      c -> Print(Form("%s/c_%s.pdf",outputFolder_.c_str(),varName.c_str()));
+      c -> SaveAs(Form("%s/c_%s.root",outputFolder_.c_str(),varName.c_str()));
       TCanvas* clog = myplot.PlotLog();
-      clog -> Print(Form("%s/clog_%s.pdf",outputFolder_.c_str(),varName.c_str()));
       clog -> Print(Form("%s/clog_%s.png",outputFolder_.c_str(),varName.c_str()));
+      clog -> Print(Form("%s/clog_%s.pdf",outputFolder_.c_str(),varName.c_str()));
+      c -> SaveAs(Form("%s/clog_%s.root",outputFolder_.c_str(),varName.c_str()));
     }
   }
 }

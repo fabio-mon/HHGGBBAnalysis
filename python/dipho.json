@@ -4,9 +4,9 @@
   "settings"   : { "BDT" : "!H:!V:!CreateMVAPdfs:BoostType=Grad:UseBaggedBoost:NegWeightTreatment=NoNegWeightsInTraining:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=2000:MinNodeSize=0.125:Shrinkage=0.1:NTrees=2000:!UseYesNoLeaf:MaxDepth=3"
   },
   
-  "variables"  : [ "DRmin_pho_bjet", "costheta_HH", "costheta_bb", "costheta_gg", "dipho_leadptoM", "dipho_subleadptoM", "dibjet_leadptoM", "dibjet_subleadptoM", "dibjet_leadbtagmedium", "dibjet_subleadbtagmedium", "dipho_lead_sigmaEoE", "dipho_sublead_sigmaEoE" ],
+  "variables"  : [  "DRmin_pho_bjet", "costheta_HH", "costheta_bb", "costheta_gg", "dipho_leadptoM", "dipho_subleadptoM", "dibjet_leadptoM", "dibjet_subleadptoM", "dibjet_leadbtagmedium", "dibjet_subleadbtagmedium", "dipho_lead_sigmaEoE", "dipho_sublead_sigmaEoE", "dipho_leadEta", "dipho_subleadEta", "nJets", "nJets_bTagMedium", "mtot"],
   
-  "spectators" : [ "mtot", "mgg", "myweight:=evWeight", "mjj", "event" ],
+  "spectators" : [ "mgg", "myweight:=evWeight", "mjj", "event" ],
   
   "commonCuts" : [ " 1. * (cut_based_ct >= 0)" ],
   
@@ -48,5 +48,5 @@
       "weight" : "evWeight"
     }
   },
-  "label" : "__HHGGBB_BDT_v7__"
+  "label" : "__HHGGBB_BDT_v7bis__"
 }

@@ -87,12 +87,19 @@ int main(int argc, char** argv)
   varMap["event"] = &treeVars.event;
   varMap["nLep"] = &treeVars.nLep;
   varMap["nJets"] = &treeVars.nJets;
+  varMap["nJets_bTagLoose"] = &treeVars.nJets_bTagLoose;
+  varMap["nJets_bTagMedium"] = &treeVars.nJets_bTagMedium;
+  varMap["nJets_bTagTight"] = &treeVars.nJets_bTagTight;
   varMap["dibjet_leadptoM"] = &treeVars.dibjet_leadptoM;
   varMap["dibjet_subleadptoM"] = &treeVars.dibjet_subleadptoM;
   varMap["dipho_leadptoM"] = &treeVars.dipho_leadptoM;
   varMap["dipho_subleadptoM"] = &treeVars.dipho_subleadptoM;
+  varMap["dibjet_leadbtagloose"] = &treeVars.dibjet_leadbtagloose;
+  varMap["dibjet_subleadbtagloose"] = &treeVars.dibjet_subleadbtagloose;
   varMap["dibjet_leadbtagmedium"] = &treeVars.dibjet_leadbtagmedium;
   varMap["dibjet_subleadbtagmedium"] = &treeVars.dibjet_subleadbtagmedium;
+  varMap["dibjet_leadbtagtight"] = &treeVars.dibjet_leadbtagtight;
+  varMap["dibjet_subleadbtagtight"] = &treeVars.dibjet_subleadbtagtight;
   varMap["dipho_lead_sigmaEoE"] = &treeVars.dipho_lead_sigmaEoE;
   varMap["dipho_sublead_sigmaEoE"] = &treeVars.dipho_sublead_sigmaEoE;
   varMap["dipho_leadEta"] = &treeVars.dipho_leadEta;
@@ -214,13 +221,16 @@ int main(int argc, char** argv)
     
     if(cutMPC)
     {
-      if(cutMPC->EvalInstance())
-	treeVars.mva_based_ct=1;
+      if(treeVars.cut_based_ct==-1)
+	treeVars.mva_based_ct=-1;//equivalent to require at least 1 bjet
       else
-	if(cutHPC->EvalInstance())
-	  treeVars.mva_based_ct=0;
+	if(cutMPC->EvalInstance())
+	  treeVars.mva_based_ct=1;
 	else
-	  treeVars.mva_based_ct=-1;
+	  if(cutHPC->EvalInstance())
+	    treeVars.mva_based_ct=0;
+	  else
+	    treeVars.mva_based_ct=-1;
     }
      
     newTree -> Fill();

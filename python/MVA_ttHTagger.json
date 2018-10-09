@@ -4,7 +4,7 @@
   "settings"   : { "BDT" : "!H:!V:!CreateMVAPdfs:BoostType=Grad:UseBaggedBoost:NegWeightTreatment=NoNegWeightsInTraining:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=2000:MinNodeSize=0.125:Shrinkage=0.1:NTrees=2000:!UseYesNoLeaf:MaxDepth=3"
   },
   
-  "variables"  : [ "MetPt", "nLep", "DPhimin_met_bjet", "DPhimax_met_bjet", "nJets", "DRmin_pho_bjet", "costheta_HH", "costheta_bb" ],
+  "variables"  : [ "nLep", "DPhimin_met_bjet", "DPhimax_met_bjet", "nJets", "nJets_bTagMedium", "DRmin_pho_bjet", "costheta_HH", "costheta_gg",  "dipho_leadptoM", "dipho_subleadptoM", "dibjet_leadptoM", "dibjet_subleadptoM" ],
   
   "spectators" : [ "mgg", "mjj", "evWeight", "event" ],
   
@@ -31,5 +31,5 @@
     }
   },
   
-  "label" : "__ttHTagger_v1"
+  "label" : "__ttHTagger_v4"
 }

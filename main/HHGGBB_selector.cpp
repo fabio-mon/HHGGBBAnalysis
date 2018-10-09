@@ -232,7 +232,10 @@ int main(int argc, char* argv[])
   int Nev_Phfakefake=0;
   int Nev_bjetpromptprompt=0;
   int Nev_bjetpromptfake=0;
-  int Nev_bjetfakefake=0;
+  int Nev_cjetpromptprompt=0;
+  int Nev_cjetpromptfake=0;
+  int Nev_jetfakefake=0;
+  int Nev_bcjet=0;
   int Nev_bquarkpromptprompt=0;
   int Nev_bquarkpromptfake=0;
   int Nev_bquarkfakefake=0;
@@ -317,10 +320,15 @@ int main(int argc, char* argv[])
       outtreeVars.jet_hadflav[int(outtreeVars.nJets)-1] = treeVars.Jet_hadflav[i];//gen level info! handle with care!
       
       if(useMTD)
-      {
+      {        
         if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b001000)
+        {
           outtreeVars.nJets_bTagLoose++;
-        
+          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 1;
+        }
+        else
+          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 0;
+
         if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b010000)
         {
           outtreeVars.nJets_bTagMedium++;
@@ -328,15 +336,25 @@ int main(int argc, char* argv[])
         }
         else
           outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
-        
+
         if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b100000)
+        {
           outtreeVars.nJets_bTagTight++;
+          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 1;
+        }
+        else
+          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 0;
       }
       else
       {
         if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000001)
+        {
           outtreeVars.nJets_bTagLoose++;
-        
+          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 1;
+        }
+        else
+          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 0;
+
         if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000010)
         {
           outtreeVars.nJets_bTagMedium++;
@@ -344,9 +362,14 @@ int main(int argc, char* argv[])
         }
         else
           outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
-        
+
         if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000100)
+        {
           outtreeVars.nJets_bTagTight++;
+          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 1;
+        }
+        else
+          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 0;
       }
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -470,14 +493,18 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_leadPhi = bjet_lead.Phi();
     outtreeVars.dibjet_leadptoM = bjet_lead.Pt() / (dibjet).M();
     outtreeVars.dibjet_leadEnergy = bjet_lead.E();
+    outtreeVars.dibjet_leadbtagloose = outtreeVars.jet_BTagLoose[bjet_lead_i];
     outtreeVars.dibjet_leadbtagmedium = outtreeVars.jet_BTagMedium[bjet_lead_i];
+    outtreeVars.dibjet_leadbtagtight = outtreeVars.jet_BTagTight[bjet_lead_i];
     outtreeVars.dibjet_leadmvav2 = outtreeVars.jet_mvav2[bjet_lead_i];
     outtreeVars.dibjet_subleadPt = bjet_sublead.Pt();
     outtreeVars.dibjet_subleadEta = bjet_sublead.Eta();
     outtreeVars.dibjet_subleadPhi = bjet_sublead.Phi();
     outtreeVars.dibjet_subleadptoM = bjet_sublead.Pt() / (dibjet).M();
     outtreeVars.dibjet_subleadEnergy = bjet_sublead.E();
+    outtreeVars.dibjet_subleadbtagloose = outtreeVars.jet_BTagLoose[bjet_sublead_i];
     outtreeVars.dibjet_subleadbtagmedium = outtreeVars.jet_BTagMedium[bjet_sublead_i];
+    outtreeVars.dibjet_subleadbtagtight = outtreeVars.jet_BTagTight[bjet_sublead_i];
     outtreeVars.dibjet_subleadmvav2 = outtreeVars.jet_mvav2[bjet_sublead_i];
     outtreeVars.mtot = diHiggs.M() - outtreeVars.mjj - outtreeVars.mgg + 250.;
     outtreeVars.DRmin_pho_bjet = DeltaRmin_bjet_pho; 
@@ -542,9 +569,10 @@ int main(int argc, char* argv[])
     {
       //cout<<"HPC"<<endl;
       outtreeVars.cut_based_ct = 0;
+      int NbjetPrompt=0;
     }
     else if( ( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask)  && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) ||
-             ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) ) //must be after HPC!!!
+             ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) )
     {
       //cout<<"MPC"<<endl;
       outtreeVars.cut_based_ct = 1;
@@ -567,9 +595,27 @@ int main(int argc, char* argv[])
     }
     else
     {
+
       ++Nev_all_highMx;
       if(outtreeVars.cut_based_ct == -1) ++Nev_highMx_JCR;
-      if(outtreeVars.cut_based_ct ==  0) ++Nev_highMx_HPC;
+      if(outtreeVars.cut_based_ct ==  0)
+      {
+	++Nev_highMx_HPC;
+      if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 5) 	Nev_bjetpromptprompt++;
+      if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 4 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 4) 	Nev_cjetpromptprompt++;
+      if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 4 ||
+	  abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 4 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 5) 	Nev_bcjet++;
+      if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 5 && 
+	  abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 4 || 
+	  abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 5 && 
+	  abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 4) 	Nev_bjetpromptfake++;
+      if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 4 && 
+	  abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 4 || 
+	  abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 4 && 
+	  abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 4) 	Nev_cjetpromptfake++;
+      if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 4 &&
+	  abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 4) Nev_jetfakefake++;
+      }
       if(outtreeVars.cut_based_ct ==  1) ++Nev_highMx_MPC;
       outTree_all_highMx->Fill();
     }
@@ -591,20 +637,23 @@ int main(int argc, char* argv[])
   cout<<"\t\t\thigh mass jet control region acceptance = "<<Nev_highMx_JCR<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_JCR/NEventsMC<<endl;
   cout<<"\t\t\thigh mass medium purity cat. acceptance = "<<Nev_highMx_MPC<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_MPC/NEventsMC<<endl;
   cout<<"\t\t\thigh mass high purity cat. acceptance = "<<Nev_highMx_HPC<<" / "<<NEventsMC<<" = "<<1.*Nev_highMx_HPC/NEventsMC<<endl;
+  cout<<"\t\t\t\tbb = "<<Nev_bjetpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_bjetpromptprompt/NEventsMC<<endl;
+  cout<<"\t\t\t\tcc = "<<Nev_cjetpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_cjetpromptprompt/NEventsMC<<endl;
+  cout<<"\t\t\t\tbc = "<<Nev_bcjet<<" / "<<NEventsMC<<" = "<<1.*Nev_bcjet/NEventsMC<<endl;
+  cout<<"\t\t\t\tbj = "<<Nev_bjetpromptfake<<" / "<<NEventsMC<<" = "<<1.*Nev_bjetpromptfake/NEventsMC<<endl;
+  cout<<"\t\t\t\tcj = "<<Nev_cjetpromptfake<<" / "<<NEventsMC<<" = "<<1.*Nev_cjetpromptfake/NEventsMC<<endl;
+  cout<<"\t\t\t\tjj = "<<Nev_jetfakefake<<" / "<<NEventsMC<<" = "<<1.*Nev_jetfakefake/NEventsMC<<endl;
   cout<<"\t\t\t-----------------------------------------------------------------"<<endl;
   cout<<"\t\t\tlow mass jet control region acceptance = "<<Nev_lowMx_JCR<<" / "<<NEventsMC<<" = "<<1.*Nev_lowMx_JCR/NEventsMC<<endl;
   cout<<"\t\t\tlow mass medium purity cat. acceptance = "<<Nev_lowMx_MPC<<" / "<<NEventsMC<<" = "<<1.*Nev_lowMx_MPC/NEventsMC<<endl;
   cout<<"\t\t\tlow mass high purity cat. acceptance = "<<Nev_lowMx_HPC<<" / "<<NEventsMC<<" = "<<1.*Nev_lowMx_HPC/NEventsMC<<endl;
-  cout<<"\t\t\t\tdiphoton promptprompt = "<<Nev_Phpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_Phpromptprompt/NEventsMC<<endl;
+  /*  cout<<"\t\t\t\tdiphoton promptprompt = "<<Nev_Phpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_Phpromptprompt/NEventsMC<<endl;
   cout<<"\t\t\t\tdiphoton promptfake = "<<Nev_Phpromptfake<<" / "<<NEventsMC<<" = "<<1.*Nev_Phpromptfake/NEventsMC<<endl;
   cout<<"\t\t\t\tdiphoton fakefake = "<<Nev_Phfakefake<<" / "<<NEventsMC<<" = "<<1.*Nev_Phfakefake/NEventsMC<<endl;
-  cout<<"\t\t\t\tdibjet promptprompt = "<<Nev_bjetpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_bjetpromptprompt/NEventsMC<<endl;
-  cout<<"\t\t\t\tdibjet promptfake = "<<Nev_bjetpromptfake<<" / "<<NEventsMC<<" = "<<1.*Nev_bjetpromptfake/NEventsMC<<endl;
-  cout<<"\t\t\t\tdibjet fakefake = "<<Nev_bjetfakefake<<" / "<<NEventsMC<<" = "<<1.*Nev_bjetfakefake/NEventsMC<<endl;
   cout<<"\t\t\t\tdibquark promptprompt = "<<Nev_bquarkpromptprompt<<" / "<<NEventsMC<<" = "<<1.*Nev_bquarkpromptprompt/NEventsMC<<endl;
   cout<<"\t\t\t\tdibquark promptfake = "<<Nev_bquarkpromptfake<<" / "<<NEventsMC<<" = "<<1.*Nev_bquarkpromptfake/NEventsMC<<endl;
   cout<<"\t\t\t\tdibquark fakefake = "<<Nev_bquarkfakefake<<" / "<<NEventsMC<<" = "<<1.*Nev_bquarkfakefake/NEventsMC<<endl;
-
+  */
 
 
   cout<<"-----------------------------------------------------------------"<<endl;

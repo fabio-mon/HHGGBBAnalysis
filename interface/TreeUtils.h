@@ -59,14 +59,18 @@ struct TreeVars
   float dibjet_leadPhi;
   float dibjet_leadptoM;
   float dibjet_leadEnergy;
+  float dibjet_leadbtagloose;
   float dibjet_leadbtagmedium;
+  float dibjet_leadbtagtight;
   int dibjet_leadmvav2;
   float dibjet_subleadPt;
   float dibjet_subleadEta;
   float dibjet_subleadPhi;
   float dibjet_subleadptoM;
   float dibjet_subleadEnergy;
+  float dibjet_subleadbtagloose;
   float dibjet_subleadbtagmedium;
+  float dibjet_subleadbtagtight;
   int dibjet_subleadmvav2;
   
   float mtot;
@@ -81,7 +85,9 @@ struct TreeVars
   float jet_eta[200];
   float jet_phi[200];
   float jet_bdiscriminant[200];
+  float jet_BTagLoose[200];
   float jet_BTagMedium[200];
+  float jet_BTagTight[200];
   int jet_mvav2[200];
   float jet_mass[200];
   float jet_hadflav[200];
