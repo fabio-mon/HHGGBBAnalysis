@@ -62,6 +62,8 @@ struct TreeVars
   float dibjet_leadbtagloose;
   float dibjet_leadbtagmedium;
   float dibjet_leadbtagtight;
+       float   dibjet_leadbtaglevel;
+  float dibjet_leadgenflav;
   int dibjet_leadmvav2;
   float dibjet_subleadPt;
   float dibjet_subleadEta;
@@ -71,9 +73,13 @@ struct TreeVars
   float dibjet_subleadbtagloose;
   float dibjet_subleadbtagmedium;
   float dibjet_subleadbtagtight;
+       float   dibjet_subleadbtaglevel;
+  float dibjet_subleadgenflav;
   int dibjet_subleadmvav2;
   
   float mtot;
+  float mHH_gen;
+  float costhetaHH_gen;
   float DRmin_pho_bjet; 
   float DPhimin_met_bjet;
   float DPhimax_met_bjet;

@@ -33,11 +33,14 @@
 #include "TLatex.h"
 #include "TAxis.h"
 #include "TMath.h"
+#include "TRandom3.h"
 
 #include "RooMsgService.h"
 #include "RooRealVar.h"
 
 using namespace std;
+TRandom3 rndm;
+void generatenewBtag(RawTreeVars &treeVars, map<int,TH2F*> &eff_map_flav4, map<int,TH2F*> &eff_map_flav5);
 
 
 
@@ -49,6 +52,28 @@ int main(int argc, char* argv[])
     return -1;
   }
   
+  rndm.SetSeed(15);
+  
+  //----------------------
+  // load btag maps
+  map<int,TH2F*> eff_map_flav5;
+  map<int,TH2F*> eff_map_flav4;
+  TFile *effmapfile = new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap.root");
+  eff_map_flav5[4]=(TH2F*)effmapfile->Get("h2_loose_flavor5_conditioned");
+  eff_map_flav5[4]->SetDirectory(0);  
+  eff_map_flav5[5]=(TH2F*)effmapfile->Get("h2_medium_flavor5_conditioned");
+  eff_map_flav5[5]->SetDirectory(0);  
+  eff_map_flav5[6]=(TH2F*)effmapfile->Get("h2_tight_flavor5_conditioned");
+  eff_map_flav5[6]->SetDirectory(0);  
+  eff_map_flav4[4]=(TH2F*)effmapfile->Get("h2_loose_flavor4_conditioned");
+  eff_map_flav4[4]->SetDirectory(0);  
+  eff_map_flav4[5]=(TH2F*)effmapfile->Get("h2_medium_flavor4_conditioned");
+  eff_map_flav4[5]->SetDirectory(0);  
+  eff_map_flav4[6]=(TH2F*)effmapfile->Get("h2_tight_flavor4_conditioned");
+  eff_map_flav4[6]->SetDirectory(0);  
+  effmapfile->Close();
+
+
   
   //----------------------
   // parse the config file
@@ -72,9 +97,9 @@ int main(int argc, char* argv[])
   else
     cout<<"Option <Input.useMTD> not found --> Analysis by default on useMTD="<<useMTD<<endl;
   
-  float CrossSection = 1.;
+  float default_CrossSection = 1.;
   if(opts.OptExist("Input.CrossSection"))
-    CrossSection = opts.GetOpt<float> ("Input.CrossSection");
+    default_CrossSection = opts.GetOpt<float> ("Input.CrossSection");
   
   float NEventsMC = 1.;
   if(opts.OptExist("Input.NEventsMC"))
@@ -84,7 +109,28 @@ int main(int argc, char* argv[])
   int Nph_veto = -1;//discard events with N selected photon gen-matched > Nph_veto --> Useful to avoid double counting in GJet and QCD samples   
   if(opts.OptExist("Input.Nph_veto"))
     Nph_veto = opts.GetOpt<int> ("Input.Nph_veto");
-  
+
+  float klambda=1;
+  TH2F* reweightmap;
+  if(opts.OptExist("Input.klambda"))
+  {
+    klambda = opts.GetOpt<float> ("Input.klambda");
+    string reweight_filename = opts.GetOpt<string> ("Input.klambda_reweightfile");
+    TFile *reweight_file = new TFile(reweight_filename.c_str());
+    reweightmap = (TH2F*) reweight_file->Get("reweight_map");
+    if(!reweightmap)
+    {
+      cout<<"[ERROR]: klambda reweight map not found"<<endl;
+      return -1;
+    }
+    else
+    {
+      reweightmap->SetDirectory(0);  
+      reweight_file->Close();
+    }
+
+  }
+      
   
   //------------------
   // define histograms
@@ -246,7 +292,8 @@ int main(int argc, char* argv[])
   {
     tree -> GetEntry(i);
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
-    
+
+    float CrossSection = default_CrossSection;
     if(treeVars.N_SelectedPh<2) continue;
     
     ++Nev_preselected;
@@ -298,6 +345,9 @@ int main(int argc, char* argv[])
       BTagMedium_mask=0b000010;
     else
       BTagMedium_mask=0b010000;
+
+    //reparametrize the btag
+    generatenewBtag(treeVars,eff_map_flav4,eff_map_flav5);
     
     //PrintRecoJet(treeVars);
     outtreeVars.nJets=0;
@@ -319,63 +369,31 @@ int main(int argc, char* argv[])
       outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] = treeVars.Jet_mvav2[i];
       outtreeVars.jet_hadflav[int(outtreeVars.nJets)-1] = treeVars.Jet_hadflav[i];//gen level info! handle with care!
       
-      if(useMTD)
-      {        
-        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b001000)
-        {
-          outtreeVars.nJets_bTagLoose++;
-          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 1;
-        }
-        else
-          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 0;
-
-        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b010000)
-        {
-          outtreeVars.nJets_bTagMedium++;
-          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 1;
-        }
-        else
-          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
-
-        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b100000)
-        {
-          outtreeVars.nJets_bTagTight++;
-          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 1;
-        }
-        else
-          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 0;
+      if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] >= 4)
+      {
+	outtreeVars.nJets_bTagLoose++;
+	outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 1;
       }
       else
+	outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 0;
+
+      if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] >= 5)
       {
-        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000001)
-        {
-          outtreeVars.nJets_bTagLoose++;
-          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 1;
-        }
-        else
-          outtreeVars.jet_BTagLoose[int(outtreeVars.nJets)-1] = 0;
-
-        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000010)
-        {
-          outtreeVars.nJets_bTagMedium++;
-          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 1;
-        }
-        else
-          outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
-
-        if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] & 0b000100)
-        {
-          outtreeVars.nJets_bTagTight++;
-          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 1;
-        }
-        else
-          outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 0;
+	outtreeVars.nJets_bTagMedium++;
+	outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 1;
       }
+      else
+	outtreeVars.jet_BTagMedium[int(outtreeVars.nJets)-1] = 0;
+      
+      if(outtreeVars.jet_mvav2[int(outtreeVars.nJets)-1] == 6)
+      {
+	outtreeVars.nJets_bTagTight++;
+	outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 1;
+      }
+      else
+	outtreeVars.jet_BTagTight[int(outtreeVars.nJets)-1] = 1;
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //IncreasebtagEfficiency(outtreeVars,useMTD,0.01);
-    //ReducebtagEfficiency(outtreeVars,useMTD,0.01);
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     if(outtreeVars.nJets<2) continue;
     
     Nev_jet_kin_preselection++;
@@ -384,7 +402,7 @@ int main(int argc, char* argv[])
     //Select the two jets with the higher BTag level, if they have the same value select the harder one
     int bjet_lead_i;
     int bjet_sublead_i;
-    SelectBestScoreBJets2(outtreeVars,bjet_lead_i,bjet_sublead_i,useMTD);
+    SelectBestScoreBJets3(outtreeVars,bjet_lead_i,bjet_sublead_i);
     TLorentzVector bjet_lead,bjet_sublead;
     bjet_lead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_lead_i],outtreeVars.jet_eta[bjet_lead_i],outtreeVars.jet_phi[bjet_lead_i],outtreeVars.jet_mass[bjet_lead_i]);
     bjet_sublead.SetPtEtaPhiM(outtreeVars.jet_pt[bjet_sublead_i],outtreeVars.jet_eta[bjet_sublead_i],outtreeVars.jet_phi[bjet_sublead_i],outtreeVars.jet_mass[bjet_sublead_i]);
@@ -427,8 +445,17 @@ int main(int argc, char* argv[])
       outtreeVars.nMu += 1;
       outtreeVars.nLep += 1;
     }
-    
-    
+
+
+    //find mHH gen and costhetaHH* gen for klambda scan
+    if(klambda!=1)
+    {
+      if(!FindHHGen(treeVars,outtreeVars))
+	cout<<"[WARNING]:gen Higgs not found"<<endl;
+      //cout<<"reweight("<<outtreeVars.mHH_gen<<","<<outtreeVars.costhetaHH_gen<<"="<<reweightmap->GetBinContent( reweightmap->FindBin(outtreeVars.mHH_gen,outtreeVars.costhetaHH_gen) )<<endl;
+      CrossSection *= reweightmap->GetBinContent( reweightmap->FindBin(outtreeVars.mHH_gen,outtreeVars.costhetaHH_gen) );      
+    }
+
     //Find dR_min between selected gamma and jets
     vector<TLorentzVector> pho_selected;
     pho_selected.push_back(pho_lead);
@@ -497,6 +524,10 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_leadbtagmedium = outtreeVars.jet_BTagMedium[bjet_lead_i];
     outtreeVars.dibjet_leadbtagtight = outtreeVars.jet_BTagTight[bjet_lead_i];
     outtreeVars.dibjet_leadmvav2 = outtreeVars.jet_mvav2[bjet_lead_i];
+    outtreeVars.dibjet_leadbtaglevel = outtreeVars.dibjet_leadmvav2;
+
+    outtreeVars.dibjet_leadgenflav = outtreeVars.jet_hadflav[bjet_lead_i];
+
     outtreeVars.dibjet_subleadPt = bjet_sublead.Pt();
     outtreeVars.dibjet_subleadEta = bjet_sublead.Eta();
     outtreeVars.dibjet_subleadPhi = bjet_sublead.Phi();
@@ -506,6 +537,10 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_subleadbtagmedium = outtreeVars.jet_BTagMedium[bjet_sublead_i];
     outtreeVars.dibjet_subleadbtagtight = outtreeVars.jet_BTagTight[bjet_sublead_i];
     outtreeVars.dibjet_subleadmvav2 = outtreeVars.jet_mvav2[bjet_sublead_i];
+    outtreeVars.dibjet_subleadbtaglevel = outtreeVars.dibjet_subleadmvav2;
+
+    outtreeVars.dibjet_subleadgenflav = outtreeVars.jet_hadflav[bjet_sublead_i];
+
     outtreeVars.mtot = diHiggs.M() - outtreeVars.mjj - outtreeVars.mgg + 250.;
     outtreeVars.DRmin_pho_bjet = DeltaRmin_bjet_pho; 
     outtreeVars.DPhimin_met_bjet = DeltaPhimin_met_bjet;
@@ -565,19 +600,19 @@ int main(int argc, char* argv[])
     //MPC: exactly one jet with medium b-tag
     //HPC: at least two jets with medium b-tag
     
-    if( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )
+    if( outtreeVars.dibjet_leadmvav2>=5 && outtreeVars.dibjet_subleadmvav2 >=5 )
     {
       //cout<<"HPC"<<endl;
       outtreeVars.cut_based_ct = 0;
       int NbjetPrompt=0;
     }
-    else if( ( (outtreeVars.dibjet_leadmvav2 & BTagMedium_mask)  && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) ||
-             ( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) &&  (outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) ) )
+    else if(( outtreeVars.dibjet_leadmvav2>=5 && outtreeVars.dibjet_subleadmvav2<5  ) ||
+            ( outtreeVars.dibjet_leadmvav2<5  && outtreeVars.dibjet_subleadmvav2>=5 )    )
     {
       //cout<<"MPC"<<endl;
       outtreeVars.cut_based_ct = 1;
     }
-    else if( !(outtreeVars.dibjet_leadmvav2 & BTagMedium_mask) && !(outtreeVars.dibjet_subleadmvav2 & BTagMedium_mask) )
+    else if( outtreeVars.dibjet_leadmvav2<5 &&  outtreeVars.dibjet_subleadmvav2<5 )
     {
       //cout<<"JCR"<<endl;
       outtreeVars.cut_based_ct = -1;
@@ -601,6 +636,7 @@ int main(int argc, char* argv[])
       if(outtreeVars.cut_based_ct ==  0)
       {
 	++Nev_highMx_HPC;
+	/*
       if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 5) 	Nev_bjetpromptprompt++;
       if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 4 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 4) 	Nev_cjetpromptprompt++;
       if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) == 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) == 4 ||
@@ -615,8 +651,12 @@ int main(int argc, char* argv[])
 	  abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 4) 	Nev_cjetpromptfake++;
       if (abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_lead_i]) != 4 &&
 	  abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 5 && abs(outtreeVars.jet_hadflav[bjet_sublead_i]) != 4) Nev_jetfakefake++;
+	*/
       }
-      if(outtreeVars.cut_based_ct ==  1) ++Nev_highMx_MPC;
+      if(outtreeVars.cut_based_ct ==  1) 
+      {
+	++Nev_highMx_MPC;
+      }
       outTree_all_highMx->Fill();
     }
   }
@@ -657,7 +697,7 @@ int main(int argc, char* argv[])
 
 
   cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"N_preselected * XS /N_MC = "<< Nev_preselected*CrossSection/NEventsMC <<" fb"<<endl; 
+  cout<<"N_preselected * XS /N_MC = "<< Nev_preselected*default_CrossSection/NEventsMC <<" fb"<<endl; 
   cout<<"-----------------------------------------------------------------"<<endl;
   cout<<"-----------------------------------------------------------------\n"<<endl;
 
@@ -669,7 +709,83 @@ int main(int argc, char* argv[])
   // system(Form("mv *.png %s",outputPlotFolder.c_str()));
   // system(Form("mv *.pdf %s",outputPlotFolder.c_str()));
   
-  
+  for(auto h2 : eff_map_flav4)
+    delete h2.second;
+  for(auto h2 : eff_map_flav5)
+    delete h2.second;
   
   return 0;
+}
+
+void generatenewBtag(RawTreeVars &treeVars, map<int,TH2F*> &eff_map_flav4, map<int,TH2F*> &eff_map_flav5)
+{
+  float eta,pt,P;
+  for(int i=0;i<treeVars.N_Jet;i++)
+  {
+    eta=treeVars.Jet_eta[i];
+    pt=treeVars.Jet_pt[i];
+    if(pt<25 || fabs(eta)>3.5)
+    {
+      treeVars.Jet_mvav2[i]=0;
+      continue;
+    }
+
+    switch(abs(treeVars.Jet_hadflav[i]))
+    {
+      case 5:
+	P=eff_map_flav5[4]->GetBinContent(eff_map_flav5[4]->FindBin(pt,abs(eta)));
+	//cout<<"Ploose"<<P<<endl;
+	if(rndm.Uniform()<=P)//it's loose
+        {
+	  treeVars.Jet_mvav2[i]=4;
+	  P=eff_map_flav5[5]->GetBinContent(eff_map_flav5[5]->FindBin(pt,abs(eta)));
+	  //cout<<"Pmedium"<<P<<endl;
+	  if(rndm.Uniform()<=P)//it's medium
+	  {
+	    treeVars.Jet_mvav2[i]=5;
+	    P=eff_map_flav5[6]->GetBinContent(eff_map_flav5[6]->FindBin(pt,abs(eta)));
+	    //cout<<"Ptight"<<P<<endl;
+	    if(rndm.Uniform()<=P)//it's tight
+	      treeVars.Jet_mvav2[i]=6;
+	  }
+	}
+	else
+	  treeVars.Jet_mvav2[i]=0;
+	break;
+      case 4:
+	P=eff_map_flav4[4]->GetBinContent(eff_map_flav4[4]->FindBin(pt,abs(eta)));
+	//cout<<"eta="<<eta<<"\tppt="<<pt<<"\tPloose"<<P<<endl;
+	if(rndm.Uniform()<=P)//it's loose
+        {
+	  treeVars.Jet_mvav2[i]=4;
+	  P=eff_map_flav4[5]->GetBinContent(eff_map_flav4[5]->FindBin(pt,abs(eta)));
+	  if(rndm.Uniform()<=P)//it's medium
+	  {
+	    treeVars.Jet_mvav2[i]=5;
+	    P=eff_map_flav4[6]->GetBinContent(eff_map_flav4[6]->FindBin(pt,abs(eta)));
+	    if(rndm.Uniform()<=P)//it's tight
+	      treeVars.Jet_mvav2[i]=6;
+	  }
+	}
+	else
+	  treeVars.Jet_mvav2[i]=0;
+	break;
+      default:
+	P=0.1;
+	if(rndm.Uniform()<=P)//it's loose
+        {
+	  treeVars.Jet_mvav2[i]=4;
+	  P=0.1;
+	  if(rndm.Uniform()<=P)//it's medium
+	  {
+	    treeVars.Jet_mvav2[i]=5;
+	    P=0.1;
+	    if(rndm.Uniform()<=P)//it's tight
+	      treeVars.Jet_mvav2[i]=6;
+	  }
+	}
+	else
+	  treeVars.Jet_mvav2[i]=0;
+    }
+  }
 }

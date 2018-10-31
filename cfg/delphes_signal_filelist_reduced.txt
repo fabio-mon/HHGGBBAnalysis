@@ -1,0 +1,1 @@
+root://cmseos.fnal.gov//store/user/snowmass/noreplica/YR_Delphes_prod-luca-split/Delphes342pre14_split/GluGluToHHTo2B2G_node_SM_14TeV-madgraph_200PU/GluGluToHHTo2B2G_node_SM_14TeV-madgraph_1_0.root

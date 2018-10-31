@@ -94,16 +94,19 @@ int main(int argc, char** argv)
   varMap["dibjet_subleadptoM"] = &treeVars.dibjet_subleadptoM;
   varMap["dipho_leadptoM"] = &treeVars.dipho_leadptoM;
   varMap["dipho_subleadptoM"] = &treeVars.dipho_subleadptoM;
-  varMap["dibjet_leadbtagloose"] = &treeVars.dibjet_leadbtagloose;
-  varMap["dibjet_subleadbtagloose"] = &treeVars.dibjet_subleadbtagloose;
-  varMap["dibjet_leadbtagmedium"] = &treeVars.dibjet_leadbtagmedium;
-  varMap["dibjet_subleadbtagmedium"] = &treeVars.dibjet_subleadbtagmedium;
-  varMap["dibjet_leadbtagtight"] = &treeVars.dibjet_leadbtagtight;
-  varMap["dibjet_subleadbtagtight"] = &treeVars.dibjet_subleadbtagtight;
+  //varMap["dibjet_leadbtagloose"] = &treeVars.dibjet_leadbtagloose;
+  //varMap["dibjet_subleadbtagloose"] = &treeVars.dibjet_subleadbtagloose;
+  //varMap["dibjet_leadbtagmedium"] = &treeVars.dibjet_leadbtagmedium;
+  //varMap["dibjet_subleadbtagmedium"] = &treeVars.dibjet_subleadbtagmedium;
+  //varMap["dibjet_leadbtagtight"] = &treeVars.dibjet_leadbtagtight;
+  //varMap["dibjet_subleadbtagtight"] = &treeVars.dibjet_subleadbtagtight;
   varMap["dipho_lead_sigmaEoE"] = &treeVars.dipho_lead_sigmaEoE;
   varMap["dipho_sublead_sigmaEoE"] = &treeVars.dipho_sublead_sigmaEoE;
   varMap["dipho_leadEta"] = &treeVars.dipho_leadEta;
   varMap["dipho_subleadEta"] = &treeVars.dipho_subleadEta;
+  varMap["dibjet_leadbtaglevel"] = &treeVars.dibjet_leadbtaglevel;
+  varMap["dibjet_subleadbtaglevel"] = &treeVars. dibjet_subleadbtaglevel;
+    
 
   //---------------
   // clone the tree
@@ -174,6 +177,17 @@ int main(int argc, char** argv)
   std::cout << "first entry: " << firstEntry << std::endl;
   std::cout << " last entry: " << lastEntry << std::endl;
   int treenumber = 1;
+  /*
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  //template
+  int Nev_bjetpromptprompt=0;
+  int Nev_bjetpromptfake=0;
+  int Nev_cjetpromptprompt=0;
+  int Nev_cjetpromptfake=0;
+  int Nev_jetfakefake=0;
+  int Nev_bcjet=0;
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  */
   for(long int ii = firstEntry; ii < lastEntry; ++ii)
   {
     if( ii%1000 == 0 ) std::cout << ">>> Reading entry " << ii << " / " << nEntries << std::endl;
@@ -219,6 +233,32 @@ int main(int argc, char** argv)
       mva[MVA_label] = MVAReaders[MVA_label] -> EvaluateMVA(MVA_methods[MVA_label].c_str());
     }
     
+    /*
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    //template
+    cout<<varMap["dibjet_leadbtaglevel"]<<" "<<treeVars.dibjet_leadbtaglevel<<" "<<treeVars.dibjet_subleadbtaglevel<<" "<<mva["ttHTagger_v4"]<<" "<<mva["HHTagger_v17"]<<endl;
+    //if(treeVars.dibjet_leadbtaglevel>=4 && treeVars.dibjet_subleadbtaglevel>=4 && mva["ttHTagger_v4"]>-0.3 && mva["HHTagger_v17"]>0.93)
+    if(treeVars.dibjet_leadbtaglevel>=4 && treeVars.dibjet_subleadbtaglevel>=4 && mva["ttHTagger_v4"]>-0.3 && mva["HHTagger_v17"]>0.5 && mva["HHTagger_v17"]<0.93)
+    {
+      if (abs(treeVars.dibjet_leadgenflav) == 5 && abs(treeVars.dibjet_subleadgenflav) == 5) 	Nev_bjetpromptprompt++;
+      if (abs(treeVars.dibjet_leadgenflav) == 4 && abs(treeVars.dibjet_subleadgenflav) == 4) 	Nev_cjetpromptprompt++;
+      if (abs(treeVars.dibjet_leadgenflav) == 5 && abs(treeVars.dibjet_subleadgenflav) == 4 ||
+	  abs(treeVars.dibjet_leadgenflav) == 4 && abs(treeVars.dibjet_subleadgenflav) == 5) 	Nev_bcjet++;
+      if (abs(treeVars.dibjet_leadgenflav) == 5 && 
+	  abs(treeVars.dibjet_subleadgenflav) != 5 && abs(treeVars.dibjet_subleadgenflav) != 4 || 
+	  abs(treeVars.dibjet_subleadgenflav) == 5 && 
+	  abs(treeVars.dibjet_leadgenflav) != 5 && abs(treeVars.dibjet_leadgenflav) != 4) 	Nev_bjetpromptfake++;
+      if (abs(treeVars.dibjet_leadgenflav) == 4 && 
+	  abs(treeVars.dibjet_subleadgenflav) != 5 && abs(treeVars.dibjet_subleadgenflav) != 4 || 
+	  abs(treeVars.dibjet_subleadgenflav) == 4 && 
+	  abs(treeVars.dibjet_leadgenflav) != 5 && abs(treeVars.dibjet_leadgenflav) != 4) 	Nev_cjetpromptfake++;
+      if (abs(treeVars.dibjet_leadgenflav) != 5 && abs(treeVars.dibjet_leadgenflav) != 4 &&
+	  abs(treeVars.dibjet_subleadgenflav) != 5 && abs(treeVars.dibjet_subleadgenflav) != 4) Nev_jetfakefake++;
+
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    */
+
     if(cutMPC)
     {
       if(treeVars.cut_based_ct==-1)
@@ -239,7 +279,16 @@ int main(int argc, char** argv)
   
   newTree -> AutoSave();
   outputFile -> Close();
-  
-  
+  /*
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  //template
+  cout<<"\t\t\t\tbb = "<<Nev_bjetpromptprompt<<endl;
+  cout<<"\t\t\t\tcc = "<<Nev_cjetpromptprompt<<endl;
+  cout<<"\t\t\t\tbc = "<<Nev_bcjet<<endl;
+  cout<<"\t\t\t\tbj = "<<Nev_bjetpromptfake<<endl;
+  cout<<"\t\t\t\tcj = "<<Nev_cjetpromptfake<<endl;
+  cout<<"\t\t\t\tjj = "<<Nev_jetfakefake<<endl;
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  */
   return 0;
 }

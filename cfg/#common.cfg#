@@ -1,0 +1,11 @@
+<Input>
+treename ntuple/Event ntuple/Particle ntuple/GenPhoton ntuple/Vertex ntuple/ElectronTight ntuple/MuonTight ntuple/JetPUPPI ntuple/PuppiMissingET ntuple/PhotonLoose ntuple/PhotonTight
+Loose_Tight_Photon PhotonLoose
+useMTD 1
+Nph_veto -1
+</Input>
+
+<Output>
+outputFolder /afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/output/PhotonLoose_mbb_80-200_MTD_v6/
+#outputFolder /tmp/fmonti/
+</Output>

@@ -40,10 +40,12 @@ bool bquarkGenericGenMatch(const TLorentzVector &reco_jet , const RawTreeVars& t
 bool PhoGenMatch(const TLorentzVector &pho_lead , const TLorentzVector &pho_sublead , const RawTreeVars& treeVars , TreeVars &outtreeVars, float DeltaRmax=0.03);
 void ReducebtagEfficiency(TreeVars &outtreeVars, const bool &useMTD, const float &prob );
 void IncreasebtagEfficiency(TreeVars &outtreeVars, const bool &useMTD, const float &prob );
-bool SelectBestScoreBJets2(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i,const bool &useMTD);
+bool SelectBestScoreBJets2(TreeVars outtreeVars,int &bjet_lead_i,int &bjet_sublead_i, const bool &useMTD);
+bool SelectBestScoreBJets3(const TreeVars &outtreeVars,int &bjet_lead_i,int &bjet_sublead_i);
 float DeltaRmin_phoRECO_phoGEN(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);
 float DeltaRmin_phoRECO_jetRECO(const TLorentzVector &reco_pho , const RawTreeVars& treeVars);
 float DeltaRmin(const vector<TLorentzVector> &coll1 , const vector<TLorentzVector> &coll2);
 void PrintRecoPhoton(const RawTreeVars& treeVars);
 void PrintRecoJet(const RawTreeVars& treeVars);
+bool FindHHGen(const RawTreeVars &treeVars, TreeVars &outtreeVars);
 #endif

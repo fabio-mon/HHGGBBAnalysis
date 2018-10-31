@@ -1,0 +1,8 @@
+importCfg /afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/common.cfg
+
+<Input>
+filelist /afs/cern.ch/user/a/abenagli/public/HHGGBBAnalysis/fileList_gg.txt
+label gg
+CrossSection 94610. #in fb-1
+NEventsMC 19437723
+</Input>
