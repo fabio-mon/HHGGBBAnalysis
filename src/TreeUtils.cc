@@ -78,6 +78,12 @@ void InitTreeVars(TChain* chain, TreeVars& treeVars)
   //chain -> SetBranchAddress("dibjet_subleadbtagmedium",         &treeVars.dibjet_subleadbtagmedium);
   //chain -> SetBranchAddress("dibjet_subleadbtagtight",          &treeVars.dibjet_subleadbtagtight);  
 
+  chain -> SetBranchAddress("diHiggs_Eta",                      &treeVars.diHiggs_Eta);
+  chain -> SetBranchAddress("diHiggs_Pt",                       &treeVars.diHiggs_Pt);
+  chain -> SetBranchAddress("diHiggs_Energy",                   &treeVars.diHiggs_Energy);
+  chain -> SetBranchAddress("diHiggs_Rapidity",                 &treeVars.diHiggs_Rapidity);
+
+
   chain -> SetBranchAddress("mtot",                             &treeVars.mtot);
   chain -> SetBranchAddress("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 
   chain -> SetBranchAddress("DPhimin_met_bjet",                 &treeVars.DPhimin_met_bjet); 
@@ -157,6 +163,15 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   tree -> Branch("dibjet_leadEnergy",                &treeVars.dibjet_leadEnergy);
   tree -> Branch("dibjet_leadbtaglevel",             &treeVars.dibjet_leadbtaglevel);
   tree -> Branch("dibjet_leadgenflav",               &treeVars.dibjet_leadgenflav);
+  tree -> Branch("bquark_eta1",                      &treeVars.bquark_eta1);
+  tree -> Branch("bquark_phi1",                      &treeVars.bquark_phi1);
+  tree -> Branch("bquark_E1",                        &treeVars.bquark_E1);
+  tree -> Branch("bquark_pt1",                       &treeVars.bquark_pt1);
+  tree -> Branch("bquark_eta2",                      &treeVars.bquark_eta2);
+  tree -> Branch("bquark_phi2",                      &treeVars.bquark_phi2);
+  tree -> Branch("bquark_E2",                        &treeVars.bquark_E2);
+  tree -> Branch("bquark_pt2",                       &treeVars.bquark_pt2);
+
   //tree -> Branch("dibjet_leadbtagleveloose",             &treeVars.dibjet_leadbtagloose);
   //tree -> Branch("dibjet_leadbtagmedium",            &treeVars.dibjet_leadbtagmedium);
   //tree -> Branch("dibjet_leadbtagtight",             &treeVars.dibjet_leadbtagtight);  
@@ -171,6 +186,11 @@ void InitOutTreeVars(TTree* tree, TreeVars& treeVars)
   //tree -> Branch("dibjet_subleadbtagloose",          &treeVars.dibjet_subleadbtagloose);
   //tree -> Branch("dibjet_subleadbtagmedium",         &treeVars.dibjet_subleadbtagmedium);
   //tree -> Branch("dibjet_subleadbtagtight",          &treeVars.dibjet_subleadbtagtight);  
+
+  tree -> Branch("diHiggs_Eta",                      &treeVars.diHiggs_Eta);
+  tree -> Branch("diHiggs_Pt",                       &treeVars.diHiggs_Pt);
+  tree -> Branch("diHiggs_Energy",                   &treeVars.diHiggs_Energy);
+  tree -> Branch("diHiggs_Rapidity",                 &treeVars.diHiggs_Rapidity);
   
   tree -> Branch("mtot",                             &treeVars.mtot);
   tree -> Branch("DRmin_pho_bjet",                   &treeVars.DRmin_pho_bjet); 

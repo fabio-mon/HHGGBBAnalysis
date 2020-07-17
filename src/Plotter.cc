@@ -192,6 +192,7 @@ PlotTH1F::PlotTH1F(const std::string& varName,
     h_sum -> Scale(1./h_sum->Integral());
   }
   
+
   if( hs->GetMaximum() > yMax ) yMax = hs->GetMaximum();
   hs_histos = hs->GetHists();
   next = hs_histos;
@@ -247,9 +248,9 @@ PlotTH1F::PlotTH1F(const std::string& varName,
     pad1->cd(); 
   }
   
-  TH1F* hPad = (TH1F*)( gPad->DrawFrame(xMin-(xMax-xMin)/nBinsX,0.,xMax+(xMax-xMin)/nBinsX,1.25*yMax) );
-  if( normalization == "area" ) hPad -> SetTitle(Form(";%s %s;event fraction / %.1e %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,unitString.c_str()));
-  if( normalization == "lumi" || normalization == "lumiScaled") hPad -> SetTitle(Form(";%s %s;events / %.1e %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,unitString.c_str()));
+  TH1F* hPad = (TH1F*)( gPad->DrawFrame(xMin-(xMax-xMin)/nBinsX,0.,xMax+(xMax-xMin)/nBinsX,1.5*yMax) );
+  if( normalization == "area" ) hPad -> SetTitle(Form(";%s %s;event fraction / %.2f %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,unitString.c_str()));
+  if( normalization == "lumi" || normalization == "lumiScaled") hPad -> SetTitle(Form(";%s %s;events / %.2f %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,(TString(unitString)).ReplaceAll("(","").ReplaceAll(")","").Data()));
   hPad->GetXaxis()->SetTitleFont(43);
   hPad->GetYaxis()->SetTitleFont(43);
   hPad->GetXaxis()->SetTitleSize(25);
@@ -332,18 +333,22 @@ PlotTH1F::PlotTH1F(const std::string& varName,
     f_line1 -> Draw("same");
   }
   
+  std::string ExtraText = "";
+  if(opts_.OptExist(Form("%s.ExtraText",varName_.c_str())))
+    ExtraText = opts_.GetOpt<std::string>(Form("%s.ExtraText",varName_.c_str()));
+
   if( opts_.GetOpt<int>(Form("%s.drawRatioPlot",varName_.c_str())) == 1 )
   {
     pad1 -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(pad1,5,10);
+      CMS_lumi(pad1,5,10,ExtraText);
     legend -> Draw("same");
   }
   else
   {
     c_ -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(c_,5,10);
+      CMS_lumi(c_,5,10,ExtraText);
     legend -> Draw("same");
   }
   
@@ -358,10 +363,15 @@ PlotTH1F::PlotTH1F(const std::string& varName,
     pad1->Draw();             // Draw the upper pad: pad1
     pad1->cd();
   }
-  
-  TH1F* hPadLog = (TH1F*)( gPad->DrawFrame(xMin-(xMax-xMin)/nBinsX,yMin/5.,xMax+(xMax-xMin)/nBinsX,5.*yMax) );
-  if( normalization == "area" ) hPadLog -> SetTitle(Form(";%s %s;event fraction / %.1e %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,unitString.c_str()));
-  if( normalization == "lumi" || normalization == "lumiScaled" ) hPadLog -> SetTitle(Form(";%s %s;events / %.1e %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,unitString.c_str()));
+
+  TH1F* hPadLog = (TH1F*)( gPad->DrawFrame(xMin-(xMax-xMin)/nBinsX,yMin/5.,xMax+(xMax-xMin)/nBinsX,25.*yMax) );
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  //temporary
+  //TH1F* hPadLog = (TH1F*)( gPad->DrawFrame(xMin,yMin/5.,xMax,5.*yMax) );
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+  if( normalization == "area" ) hPadLog -> SetTitle(Form(";%s %s;event fraction / %.2f %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,unitString.c_str()));
+  if( normalization == "lumi" || normalization == "lumiScaled" ) hPadLog -> SetTitle(Form(";%s %s;events / %.2f %s",title.c_str(),unitString.c_str(),(xMax-xMin)/nBinsX,(TString(unitString)).ReplaceAll("(","").ReplaceAll(")","").Data()));
   hPadLog->GetXaxis()->SetTitleFont(43);
   hPadLog->GetYaxis()->SetTitleFont(43);
   hPadLog->GetXaxis()->SetTitleSize(25);
@@ -374,6 +384,10 @@ PlotTH1F::PlotTH1F(const std::string& varName,
   hPadLog->GetYaxis()->SetLabelSize(17);
   hPadLog -> Draw();
   gPad -> SetLogy();
+  ///////////////////////////////////////////////////////////
+  //temporary
+  //hPadLog->GetYaxis()->SetRangeUser(1.e-4,1.e+8);
+  ///////////////////////////////////////////////////////////
   
   hs -> Draw("hist,same");
   
@@ -414,14 +428,14 @@ PlotTH1F::PlotTH1F(const std::string& varName,
   {
     pad1 -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(pad1,5,10);
+      CMS_lumi(pad1,5,10,ExtraText);
     legend -> Draw("same");
   }
   else
   {
     clog_ -> cd();
     if( normalization == "lumi" || normalization == "lumiScaled" )
-      CMS_lumi(clog_,5,10);
+      CMS_lumi(clog_,5,10,ExtraText);
     legend -> Draw("same");
   }
 }

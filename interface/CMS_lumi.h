@@ -42,7 +42,7 @@ extern TString lumi_sqrtS;
 
 extern bool drawLogo;
 
-void CMS_lumi(TPad* pad, int iPeriod=3, int iPosX=10);
+void CMS_lumi(TPad* pad, int iPeriod=3, int iPosX=10, std::string ExtraText2="" );
 
 
 

@@ -76,6 +76,14 @@ struct TreeVars
        float   dibjet_subleadbtaglevel;
   float dibjet_subleadgenflav;
   int dibjet_subleadmvav2;
+  float bquark_eta1;
+  float bquark_phi1;
+  float bquark_E1;
+  float bquark_pt1;
+  float bquark_eta2;
+  float bquark_phi2;
+  float bquark_E2;
+  float bquark_pt2;
   
   float mtot;
   float mHH_gen;
@@ -86,6 +94,11 @@ struct TreeVars
   float costheta_HH; 
   float costheta_gg; 
   float costheta_bb; 
+
+  float diHiggs_Eta;
+  float diHiggs_Pt;
+  float diHiggs_Energy;
+  float diHiggs_Rapidity;
 
   float jet_pt[200];
   float jet_eta[200];

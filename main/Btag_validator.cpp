@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
   // load btag maps
   map<int,TH2F*> eff_map_flav5;
   map<int,TH2F*> eff_map_flav4;
-  TFile *effmapfile = new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap.root");
+  TFile *effmapfile = new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap_NOMTD.root");
+  //  TFile *effmapfile = new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap.root");
   eff_map_flav5[4]=(TH2F*)effmapfile->Get("h2_loose_flavor5_conditioned");
   eff_map_flav5[4]->SetDirectory(0);  
   eff_map_flav5[5]=(TH2F*)effmapfile->Get("h2_medium_flavor5_conditioned");
@@ -208,9 +209,13 @@ int main(int argc, char* argv[])
       continue;
     */
     //Jets selections
-    int BTagLoose_mask  = 0b001000;
-    int BTagMedium_mask = 0b010000;
-    int BTagTight_mask  = 0b100000;
+    //int BTagLoose_mask  = 0b001000;
+    //int BTagMedium_mask = 0b010000;
+    //int BTagTight_mask  = 0b100000;
+    //Jets selections
+    int BTagLoose_mask  = 0b000001;
+    int BTagMedium_mask = 0b000010;
+    int BTagTight_mask  = 0b000100;
 
     generatenewBtag(treeVars,eff_map_flav4,eff_map_flav5);
 
@@ -474,9 +479,11 @@ void generatenewBtag(RawTreeVars &treeVars, map<int,TH2F*> &eff_map_flav4, map<i
   {
     eta=treeVars.Jet_eta[i];
     pt=treeVars.Jet_pt[i];
-    if(pt<25)         continue;
-    if(fabs(eta)>3.5) continue;
-    treeVars.Jet_mvav2[i]=0;
+    if(pt<25 || fabs(eta)>3.5)
+    {
+      treeVars.Jet_mvav2[i]=0;
+      continue;
+    }
 
     switch(abs(treeVars.Jet_hadflav[i]))
     {

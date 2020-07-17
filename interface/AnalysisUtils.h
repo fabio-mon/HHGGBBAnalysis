@@ -12,6 +12,7 @@
 #include "TH1F.h"
 #include "TCanvas.h"
 #include "TLegend.h"
+#include "TH2F.h"
 
 #define MZ 91.187
 #define PI 3.14159265359
@@ -48,4 +49,8 @@ float DeltaRmin(const vector<TLorentzVector> &coll1 , const vector<TLorentzVecto
 void PrintRecoPhoton(const RawTreeVars& treeVars);
 void PrintRecoJet(const RawTreeVars& treeVars);
 bool FindHHGen(const RawTreeVars &treeVars, TreeVars &outtreeVars);
+void btagReweight(TreeVars &outtreeVars, float &weightMC,
+		  TH2F* btaglooseeff_reweightmap, TH2F* btagmediumeff_reweightmap, TH2F* btagtighteff_reweightmap,
+		  TH2F* btagloosefake_reweightmap,TH2F* btagmediumfake_reweightmap,TH2F* btagtightfake_reweightmap);
+
 #endif

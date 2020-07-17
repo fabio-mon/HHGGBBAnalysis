@@ -85,7 +85,7 @@ bool DiPhotonSelection(const TLorentzVector &pho_lead ,const TLorentzVector &pho
   if(mgg<100. || mgg>180.) return false;
   if(lead_pt/mgg<0.33) return false;
   if(sublead_pt/mgg<0.25) return false;
-  
+  //if(lead_pt<32 || sublead_pt<20) return false;
   return true;
 }
 
@@ -403,10 +403,10 @@ bool Findbquark_Hdaug(RawTreeVars &treeVars)
   }
   if(nflag!=2)
   {
-    cout<<"n bquark h daug="<<nflag<<" --->skip event"<<endl;
-    for(int i=0;i<treeVars.N_GenPart;i++)
-      if(fabs(treeVars.GenPart_pid[i])==5)
-	cout<<"status="<<treeVars.GenPart_st[i]<<"\tpt="<<treeVars.GenPart_pt[i]<<"\teta="<<treeVars.GenPart_eta[i]<<"\tphi="<<treeVars.GenPart_phi[i]<<endl;
+    //cout<<"n bquark h daug="<<nflag<<" --->skip event"<<endl;
+    //for(int i=0;i<treeVars.N_GenPart;i++)
+      //if(fabs(treeVars.GenPart_pid[i])==5)
+	//cout<<"status="<<treeVars.GenPart_st[i]<<"\tpt="<<treeVars.GenPart_pt[i]<<"\teta="<<treeVars.GenPart_eta[i]<<"\tphi="<<treeVars.GenPart_phi[i]<<endl;
     return false;
   }
   return true;
@@ -877,7 +877,8 @@ bool FindHHGen(const RawTreeVars &treeVars, TreeVars &outtreeVars)
     {
       //gen_eta=treeVars.GenPart_eta[i];
       //gen_phi=treeVars.GenPart_phi[i];
-      gen_E=sqrt(treeVars.GenPart_pt[i]*treeVars.GenPart_pt[i] + treeVars.GenPart_pz[i]*treeVars.GenPart_pz[i]);
+      gen_E=sqrt(treeVars.GenPart_pt[i]*treeVars.GenPart_pt[i] + treeVars.GenPart_pz[i]*treeVars.GenPart_pz[i]+125.*125);
+      //cout<<"genE1="<<treeVars.GenPart_E[i]<<"\tgenE2="<<gen_E<<endl;
       //printf("(eta,phi)gen=(%.2f,%.2f)\tpt=%.2f\tE=%.2f\tStatus=%i\n",gen_eta,gen_phi,treeVars.GenPart_pt[i],gen_E,treeVars.GenPart_st[i]);
       if(treeVars.GenPart_st[i]==22)
       {
@@ -906,4 +907,137 @@ bool FindHHGen(const RawTreeVars &treeVars, TreeVars &outtreeVars)
   //cout<<"mHH="<<outtreeVars.mHH_gen<<"\tcostheta_HH="<<outtreeVars.costhetaHH_gen<<endl;
 
   return true;
+}
+
+void btagReweight(TreeVars &outtreeVars, float &weightMC,
+		  TH2F* btaglooseeff_reweightmap, TH2F* btagmediumeff_reweightmap, TH2F* btagtighteff_reweightmap,
+		  TH2F* btagloosefake_reweightmap,TH2F* btagmediumfake_reweightmap,TH2F* btagtightfake_reweightmap)
+{
+  float Ptmax_btag_reweightmap=-1;
+  if(btaglooseeff_reweightmap)
+    Ptmax_btag_reweightmap = btaglooseeff_reweightmap->GetXaxis()->GetXmax();
+
+  /*cout<<"LEAD JET\n\tPt="<< outtreeVars.dibjet_leadPt 
+      <<"\tEta="<< outtreeVars.dibjet_leadEta 
+      <<"\tflavour="<< outtreeVars.dibjet_leadgenflav
+      <<"\tbtag_level="<< outtreeVars.dibjet_leadbtaglevel <<endl;*/
+    
+  if(outtreeVars.dibjet_leadgenflav==5)
+  {
+    if(btaglooseeff_reweightmap && btagmediumeff_reweightmap && btagtighteff_reweightmap)
+    {
+      double pt_jet = std::min(Ptmax_btag_reweightmap-1,outtreeVars.dibjet_leadPt);
+      switch((int)(outtreeVars.dibjet_leadbtaglevel))
+      {
+        case 4:
+	{
+	  weightMC *= btaglooseeff_reweightmap->GetBinContent( btaglooseeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)));
+	  //cout<<"\tSF="<<btaglooseeff_reweightmap->GetBinContent( btaglooseeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)))<<endl;
+	  break;
+	}
+        case 5:
+	{
+	  weightMC *= btagmediumeff_reweightmap->GetBinContent( btagmediumeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)));
+	  //cout<<"\tSF="<<btagmediumeff_reweightmap->GetBinContent( btagmediumeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)))<<endl;
+	  break;
+	}
+        case 6:
+	{
+	  weightMC *= btagtighteff_reweightmap->GetBinContent( btagtighteff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)));
+          //cout<<"\tSF="<<btagtighteff_reweightmap->GetBinContent( btagtighteff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)))<<endl;
+	  break;
+	}
+      }
+    }
+  }
+  else
+  {
+    if(btagloosefake_reweightmap && btagmediumfake_reweightmap && btagtightfake_reweightmap)
+    {
+      double pt_jet = std::min(Ptmax_btag_reweightmap-1,outtreeVars.dibjet_leadPt);
+      switch((int)(outtreeVars.dibjet_leadbtaglevel))
+      {
+        case 4:
+	{
+	  weightMC *= btagloosefake_reweightmap->GetBinContent( btagloosefake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)));
+          //cout<<"\tSF="<<btagloosefake_reweightmap->GetBinContent( btagloosefake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)))<<endl;
+	  break;
+	}
+        case 5:
+	{
+	  weightMC *= btagmediumfake_reweightmap->GetBinContent( btagmediumfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)));
+          //cout<<"\tSF="<<btagmediumfake_reweightmap->GetBinContent( btagmediumfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)))<<endl;
+	  break;
+	}
+        case 6:
+	{
+	  weightMC *= btagtightfake_reweightmap->GetBinContent( btagtightfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)));
+          //cout<<"\tSF="<<btagtightfake_reweightmap->GetBinContent( btagtightfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_leadEta)))<<endl;
+	  break;
+	}
+      }
+    }
+  }
+ 
+  /*cout<<"SUBLEAD JET\n\tPt="<< outtreeVars.dibjet_subleadPt 
+      <<"\tEta="<< outtreeVars.dibjet_subleadEta 
+      <<"\tflavour="<< outtreeVars.dibjet_subleadgenflav
+      <<"\tbtag_level="<< outtreeVars.dibjet_subleadbtaglevel<<endl;*/
+  if(outtreeVars.dibjet_subleadgenflav==5)
+  {
+    if(btaglooseeff_reweightmap && btagmediumeff_reweightmap && btagtighteff_reweightmap)
+    {
+      double pt_jet = std::min(Ptmax_btag_reweightmap-1,outtreeVars.dibjet_subleadPt);
+      switch((int)(outtreeVars.dibjet_subleadbtaglevel))
+      {
+        case 4:
+	{
+	  weightMC *= btaglooseeff_reweightmap->GetBinContent( btaglooseeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)));
+          //cout<<"\tSF="<<btaglooseeff_reweightmap->GetBinContent( btaglooseeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)))<<endl;
+	  break;
+	}
+        case 5:
+	{
+	  weightMC *= btagmediumeff_reweightmap->GetBinContent( btagmediumeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)));
+          //cout<<"\tSF="<<btagmediumeff_reweightmap->GetBinContent( btagmediumeff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)))<<endl;
+	  break;
+	}
+        case 6:
+	{
+	  weightMC *= btagtighteff_reweightmap->GetBinContent( btagtighteff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)));
+          //cout<<"\tSF="<<btagtighteff_reweightmap->GetBinContent( btagtighteff_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)))<<endl;
+	  break;
+	}
+      }
+    }
+  }
+  else
+  {
+    if(btagloosefake_reweightmap && btagmediumfake_reweightmap && btagtightfake_reweightmap)
+    {
+      double pt_jet = std::min(Ptmax_btag_reweightmap-1,outtreeVars.dibjet_subleadPt);
+      switch((int)(outtreeVars.dibjet_subleadbtaglevel))
+      {
+        case 4:
+	{
+	  weightMC *= btagloosefake_reweightmap->GetBinContent( btagloosefake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)));
+          //cout<<"\tSF="<<btagloosefake_reweightmap->GetBinContent( btagloosefake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)))<<endl;
+	  break;
+	}
+        case 5:
+	{
+	  weightMC *= btagmediumfake_reweightmap->GetBinContent( btagmediumfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)));
+          //cout<<"\tSF="<<btagmediumfake_reweightmap->GetBinContent( btagmediumfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)))<<endl;
+	  break;
+	}
+        case 6:
+	{
+	  weightMC *= btagtightfake_reweightmap->GetBinContent( btagtightfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)));
+          //cout<<"\tSF="<<btagtightfake_reweightmap->GetBinContent( btagtightfake_reweightmap->FindBin(pt_jet,fabs(outtreeVars.dibjet_subleadEta)))<<endl;
+	  break;
+	}
+      }
+    }
+  }
+ 
 }

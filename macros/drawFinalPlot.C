@@ -105,95 +105,110 @@ void drawFinalPlot(std::string folder,std::string plotfolder,float effSigma=-1)
   
   TFile* inFile;
   
-  inFile = TFile::Open(Form("%s/plotTree_HHggbb_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_HHggbb_withMVA_LT.root",folder.c_str()),"READ");
   trees["LT_sig"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_HHggbb_withMVA.root",folder.c_str()),"READ");
   trees["HT_sig"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_ggH_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ggH_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_res_ggH"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ggH_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_res_ggH"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_qqH_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_qqH_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_res_qqH"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_qqH_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_res_qqH"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_VH_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_VH_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_res_VH"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_VH_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_res_VH"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_ttH_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ttH_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_res_ttH"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ttH_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_res_ttH"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_bbH_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_bbH_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_res_bbH"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_bbH_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_res_bbH"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_gg_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_gg_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_gg"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_gg_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_gg"] = (TTree*)( inFile->Get("all_highMx") );
   
-  inFile = TFile::Open(Form("%s/plotTree_tt_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_tt_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_tt"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_tt_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_tt"] = (TTree*)( inFile->Get("all_highMx") );
 
-  inFile = TFile::Open(Form("%s/plotTree_ttgg_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ttgg_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_ttgg"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ttgg_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_ttgg"] = (TTree*)( inFile->Get("all_highMx") );
 
-  inFile = TFile::Open(Form("%s/plotTree_ttghad_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ttghad_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_ttghad"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ttghad_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_ttghad"] = (TTree*)( inFile->Get("all_highMx") );
 
-  inFile = TFile::Open(Form("%s/plotTree_ttglep_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ttglep_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_ttglep"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ttglep_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_ttglep"] = (TTree*)( inFile->Get("all_highMx") );
 
-  inFile = TFile::Open(Form("%s/plotTree_ttgsemilepfromt_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ttgsemilepfromt_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_ttgsemilepfromt"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ttgsemilepfromt_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_ttgsemilepfromt"] = (TTree*)( inFile->Get("all_highMx") );
 
-  inFile = TFile::Open(Form("%s/plotTree_ttgsemilepfromtbar_withMVA.root",folder.c_str()),"READ");
+  inFile = TFile::Open(Form("%s/plotTree_ttgsemilepfromtbar_LT_withMVA.root",folder.c_str()),"READ");
   trees["LT_bkg_nonres_ttgsemilepfromtbar"] = (TTree*)( inFile->Get("all_lowMx") );
+  inFile = TFile::Open(Form("%s/plotTree_ttgsemilepfromtbar_withMVA.root",folder.c_str()),"READ");
   trees["HT_bkg_nonres_ttgsemilepfromtbar"] = (TTree*)( inFile->Get("all_highMx") );
   
-  // inFile = TFile::Open(Form("%s/plotTree_gjet_withMVA.root",folder.c_str()),"READ");
+  // inFile = TFile::Open(Form("%s/plotTree_gjet_LT_withMVA.root",folder.c_str()),"READ");
   // trees["LT_bkg_nonres_gjet"] = (TTree*)( inFile->Get("all_lowMx") );
   // trees["HT_bkg_nonres_gjet"] = (TTree*)( inFile->Get("all_highMx") );
   
-  // inFile = TFile::Open(Form("%s/plotTree_qcd_withMVA.root",folder.c_str()),"READ");
+  // inFile = TFile::Open(Form("%s/plotTree_qcd.root",folder.c_str()),"READ");
   // trees["LT_bkg_nonres_qcd"] = (TTree*)( inFile->Get("all_lowMx") );
   // trees["HT_bkg_nonres_qcd"] = (TTree*)( inFile->Get("all_highMx") );
   
   
   std::vector<std::string> labels;
   labels.push_back("HT");
-  labels.push_back("LT");
+  //labels.push_back("LT");
   
   std::vector<std::string> cats;
   //high purity
-  cats.push_back("*2.* (cut_based_ct >= 0 && event\%2==0 && mjj<150 && mva_ttHTagger_v1>-0.1 && mva_dipho_v7>=0.97)");
+  //cats.push_back("*2.* (cut_based_ct >= 0 && event%2==0 && mjj<190 && ttHTagger>-0.5 && HHTagger>=0.9)");
   //medium purity
-  cats.push_back("*2.* (cut_based_ct >= 0 && event\%2==0 && mjj<150 && mva_ttHTagger_v1>-0.1 && mva_dipho_v7>0.91 && mva_dipho_v7<0.97)");
-  
+  //cats.push_back("*2.* (cut_based_ct >= 0 && event%2==0 && mjj<190 && ttHTagger>-0.5 && HHTagger>0.5 && HHTagger<0.9)");
+  //high purity
+  cats.push_back("*2.* (event%2==0 && dibjet_leadbtaglevel>=4 && dibjet_subleadbtaglevel>=4 && abs(dibjet_subleadEta)<=2.4 && abs(dibjet_leadEta)<=2.4 && ttHTagger_v4>-0.3 && HHTagger_v18>0.93 && mjj>90 && mjj<190 && mtot>350 && mtot<480)");
+  cats.push_back("*2.* (event%2==0 && dibjet_leadbtaglevel>=4 && dibjet_subleadbtaglevel>=4 && abs(dibjet_subleadEta)<=2.4 && abs(dibjet_leadEta)<=2.4 && ttHTagger_v4>-0.3 && HHTagger_v18>0.65 && HHTagger_v18<0.93 && mjj>90 && mjj<190 && mtot>350 && mtot<480)");
   
   for(auto label : labels)
   {
     int catIt = 0;
     for(auto cat : cats)
     {
-      TH1F* h1_bkg_all_mgg      = new TH1F(Form("h1_bkg_all_mgg__%s_%d",label.c_str(),catIt),    "",  30,100.,180.);
-      TH1F* h1_bkg_all_fit_mgg  = new TH1F(Form("h1_bkg_all_fit_mgg__%s_%d",label.c_str(),catIt),"",  30,100.,180.);
-      TH1F* h1_bkg_nonres_mgg   = new TH1F(Form("h1_bkg_nonres_mgg__%s_%d",label.c_str(),catIt), "",  30,100.,180.);
-      TH1F* h1_bkg_res_mgg      = new TH1F(Form("h1_bkg_res_mgg__%s_%d",label.c_str(),catIt),    "",  30,100.,180.);
-      TH1F* h1_sig_mgg          = new TH1F(Form("h1_sig_mgg__%s_%d",label.c_str(),catIt),        "",  30,100.,180.);
+      TH1F* h1_bkg_all_mgg      = new TH1F(Form("h1_bkg_all_mgg__%s_%d",label.c_str(),catIt),    "",  40,100.,180.);
+      TH1F* h1_bkg_all_fit_mgg  = new TH1F(Form("h1_bkg_all_fit_mgg__%s_%d",label.c_str(),catIt),"",  40,100.,180.);
+      TH1F* h1_bkg_nonres_mgg   = new TH1F(Form("h1_bkg_nonres_mgg__%s_%d",label.c_str(),catIt), "",  40,100.,180.);
+      TH1F* h1_bkg_res_mgg      = new TH1F(Form("h1_bkg_res_mgg__%s_%d",label.c_str(),catIt),    "",  40,100.,180.);
+      TH1F* h1_sig_mgg          = new TH1F(Form("h1_sig_mgg__%s_%d",label.c_str(),catIt),        "",  40,100.,180.);
       TH1F* h1_sig_mgg_fine     = new TH1F(Form("h1_sig_mgg_fine__%s_%d",label.c_str(),catIt),   "", 250,100.,150.);
       
       for(auto tree : trees)
       {
         std::size_t found_label = (tree.first).find(label);
         if( found_label == std::string::npos ) continue;
-        
+	cout<<tree.first<<endl;
         std::size_t found_sig = (tree.first).find("sig");
         if( found_sig != std::string::npos )
         {
@@ -257,7 +272,7 @@ void drawFinalPlot(std::string folder,std::string plotfolder,float effSigma=-1)
 
       TCanvas *cc = new TCanvas();
       h1_bkg_nonres_mgg -> SetLineColor(kGreen);
-      h1_bkg_nonres_mgg -> Draw();
+      //h1_bkg_nonres_mgg -> Draw();
 
       TCanvas* c1 = new TCanvas(Form("%s_cat%d",label.c_str(),catIt),Form("%s_cat%d",label.c_str(),catIt));      
       TH1F* hPad = (TH1F*)( gPad->DrawFrame(100.,0.,150.,h1_bkg_all_mgg->GetMaximum()*2.));
@@ -273,7 +288,7 @@ void drawFinalPlot(std::string folder,std::string plotfolder,float effSigma=-1)
       h1_sig_mgg -> SetLineWidth(2);
       h1_sig_mgg -> Draw("hist,same");
 
-      TF1* fit_bkg_nonres_mgg = new TF1(Form("fit_bkg_nonres_mgg__%s_%d",label.c_str(),catIt),"[0]*exp(-[1]*x)",100.,150.);
+      TF1* fit_bkg_nonres_mgg = new TF1(Form("fit_bkg_nonres_mgg__%s_%d",label.c_str(),catIt),"[0]*exp(-[1]*x)",105.,145.);
       fit_bkg_nonres_mgg->SetParameters( 7.91464e+02,2.09758e-02);
       h1_bkg_nonres_mgg -> Fit(fit_bkg_nonres_mgg,"LQNRS+");
       fit_bkg_nonres_mgg -> SetLineColor(kBlack);
@@ -297,7 +312,7 @@ void drawFinalPlot(std::string folder,std::string plotfolder,float effSigma=-1)
       std::cout << ">>>>>> bkg_res:      " << std::fixed << std::setprecision(1) << std::setw(6) << n_bkg_res                      << " ev."       << std::endl;
       std::cout << ">>>>>> sig:          " << std::fixed << std::setprecision(1) << std::setw(6) << n_sig                          << " ev."       << std::endl;
       std::cout << ">>>>>> effSigma:     " << std::fixed << std::setprecision(2) << std::setw(6) << sigma                          << " GeV"       << std::endl;
-      std::cout << ">>>>>> significance: " << std::fixed << std::setprecision(2) << std::setw(6) << significance                                   << std::endl;
+      std::cout << ">>>>>> significance: " << std::fixed << std::setprecision(3) << std::setw(6) << significance                                   << std::endl;
       gPad -> Update();
       
       ++catIt;

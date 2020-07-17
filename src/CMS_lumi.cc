@@ -2,11 +2,11 @@
 
 using namespace std;
 
-TString cmsText     = "CMS";
+TString cmsText     = "CMS Phase-2";
 float cmsTextFont   = 61;  // default is helvetic-bold
 
 bool writeExtraText = true;
-TString extraText   = "Preliminary";
+TString extraText   = "#splitline{Simulation Preliminary}{#splitline{#font[42]{HH #rightarrow bb#gamma#gamma}}{#font[42]{Before MVA categorization}}}";
 float extraTextFont = 52;  // default is helvetica-italics
 
 // text sizes and text offsets with respect to the top frame
@@ -18,6 +18,7 @@ float cmsTextOffset    = 0.1;  // only used in outOfFrame version
 
 float relPosX    = 0.045;
 float relPosY    = 0.035;
+//float relPosY    = 0.0;
 float relExtraDY = 1.2;
 
 // ratio of "CMS" and extra text size
@@ -33,8 +34,10 @@ bool drawLogo      = false;
 
 
 void 
-CMS_lumi( TPad* pad, int iPeriod, int iPosX )
+CMS_lumi( TPad* pad, int iPeriod, int iPosX, std::string ExtraText2 )
 {            
+  if(ExtraText2!="")
+    extraText = "#splitline{Simulation Preliminary}{#splitline{#font[42]{HH #rightarrow bb#gamma#gamma}}{#font[42]{"+ExtraText2+"}}}";
   bool outOfFrame    = false;
   if( iPosX/10==0 ) 
     {

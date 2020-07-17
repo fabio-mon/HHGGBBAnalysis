@@ -5,6 +5,7 @@
 #include "interface/TreeUtils.h"
 #include "interface/AnalysisUtils.h"
 #include "interface/RooFitUtils.h"
+#include "interface/HH_reweight_components.h"
 
 #include <iostream>
 #include <iomanip>
@@ -53,27 +54,7 @@ int main(int argc, char* argv[])
   }
   
   rndm.SetSeed(15);
-  
-  //----------------------
-  // load btag maps
-  map<int,TH2F*> eff_map_flav5;
-  map<int,TH2F*> eff_map_flav4;
-  TFile *effmapfile = new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap.root");
-  eff_map_flav5[4]=(TH2F*)effmapfile->Get("h2_loose_flavor5_conditioned");
-  eff_map_flav5[4]->SetDirectory(0);  
-  eff_map_flav5[5]=(TH2F*)effmapfile->Get("h2_medium_flavor5_conditioned");
-  eff_map_flav5[5]->SetDirectory(0);  
-  eff_map_flav5[6]=(TH2F*)effmapfile->Get("h2_tight_flavor5_conditioned");
-  eff_map_flav5[6]->SetDirectory(0);  
-  eff_map_flav4[4]=(TH2F*)effmapfile->Get("h2_loose_flavor4_conditioned");
-  eff_map_flav4[4]->SetDirectory(0);  
-  eff_map_flav4[5]=(TH2F*)effmapfile->Get("h2_medium_flavor4_conditioned");
-  eff_map_flav4[5]->SetDirectory(0);  
-  eff_map_flav4[6]=(TH2F*)effmapfile->Get("h2_tight_flavor4_conditioned");
-  eff_map_flav4[6]->SetDirectory(0);  
-  effmapfile->Close();
-
-
+  //rndm.SetSeed();
   
   //----------------------
   // parse the config file
@@ -96,7 +77,7 @@ int main(int argc, char* argv[])
     useMTD = opts.GetOpt<bool> ("Input.useMTD");
   else
     cout<<"Option <Input.useMTD> not found --> Analysis by default on useMTD="<<useMTD<<endl;
-  
+
   float default_CrossSection = 1.;
   if(opts.OptExist("Input.CrossSection"))
     default_CrossSection = opts.GetOpt<float> ("Input.CrossSection");
@@ -104,33 +85,142 @@ int main(int argc, char* argv[])
   float NEventsMC = 1.;
   if(opts.OptExist("Input.NEventsMC"))
     NEventsMC = opts.GetOpt<float> ("Input.NEventsMC");
-  float weightMC = 1./NEventsMC;
   
   int Nph_veto = -1;//discard events with N selected photon gen-matched > Nph_veto --> Useful to avoid double counting in GJet and QCD samples   
   if(opts.OptExist("Input.Nph_veto"))
     Nph_veto = opts.GetOpt<int> ("Input.Nph_veto");
 
+  bool do_klambda_reweight = false;
+  HH_reweight_components* HHrew = NULL;
   float klambda=1;
-  TH2F* reweightmap;
+  float BSM_CrossSection=1.;
+  float weight_sum=1.;
   if(opts.OptExist("Input.klambda"))
   {
+    do_klambda_reweight = true;
     klambda = opts.GetOpt<float> ("Input.klambda");
     string reweight_filename = opts.GetOpt<string> ("Input.klambda_reweightfile");
-    TFile *reweight_file = new TFile(reweight_filename.c_str());
-    reweightmap = (TH2F*) reweight_file->Get("reweight_map");
-    if(!reweightmap)
+    HHrew = new HH_reweight_components(reweight_filename.c_str());
+    BSM_CrossSection = opts.GetOpt<float> ("Input.BSM_CrossSection");
+    weight_sum = opts.GetOpt<float> ("Input.weight_sum");
+  }
+
+  //----------------------
+  // load btag maps
+  map<int,TH2F*> eff_map_flav5;
+  map<int,TH2F*> eff_map_flav4;
+  TFile *effmapfile=0;
+
+  if(useMTD)
+  {
+    cout<<"loading bTag map from file /afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap.root"<<endl;
+    effmapfile= new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap.root","READ");
+  }
+  else
+  {
+    cout<<"loading bTag map from file /afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap_NOMTD.root"<<endl;
+    effmapfile= new TFile("/afs/cern.ch/user/f/fmonti/public/HHGGBBAnalysis/neweffmap_NOMTD.root","READ");
+  }
+
+  eff_map_flav5[4]=(TH2F*)effmapfile->Get("h2_loose_flavor5_conditioned");
+  eff_map_flav5[4]->SetDirectory(0);  
+  eff_map_flav5[5]=(TH2F*)effmapfile->Get("h2_medium_flavor5_conditioned");
+  eff_map_flav5[5]->SetDirectory(0);  
+  eff_map_flav5[6]=(TH2F*)effmapfile->Get("h2_tight_flavor5_conditioned");
+  eff_map_flav5[6]->SetDirectory(0);  
+  eff_map_flav4[4]=(TH2F*)effmapfile->Get("h2_loose_flavor4_conditioned");
+  eff_map_flav4[4]->SetDirectory(0);  
+  eff_map_flav4[5]=(TH2F*)effmapfile->Get("h2_medium_flavor4_conditioned");
+  eff_map_flav4[5]->SetDirectory(0);  
+  eff_map_flav4[6]=(TH2F*)effmapfile->Get("h2_tight_flavor4_conditioned");
+  eff_map_flav4[6]->SetDirectory(0);  
+  effmapfile->Close();
+
+
+  //Reweight for new photonID efficiency                                                                                                                    
+  TH2F* photonIDeff_reweightmap = 0;
+  float Ptmax_eff_reweightmap = 0;
+  if(opts.OptExist("Input.photonIDeff_reweightfile"))
+  {
+    string photonIDeff_reweight_filename = opts.GetOpt<string> ("Input.photonIDeff_reweightfile");
+    TFile *photonIDeff_reweight_file = new TFile(photonIDeff_reweight_filename.c_str());
+    cout<<"loading photonIDeff reweight map from file "<<photonIDeff_reweight_filename<<endl;
+    photonIDeff_reweightmap = (TH2F*) photonIDeff_reweight_file->Get("eff_PhotonIsoSF");
+    if(!photonIDeff_reweightmap)
     {
-      cout<<"[ERROR]: klambda reweight map not found"<<endl;
+      cout<<"[ERROR]: photonIDeff reweight map not found"<<endl;
       return -1;
     }
     else
     {
-      reweightmap->SetDirectory(0);  
-      reweight_file->Close();
+      photonIDeff_reweightmap->SetDirectory(0);
+      photonIDeff_reweight_file->Close();
+      Ptmax_eff_reweightmap = photonIDeff_reweightmap->GetXaxis()->GetXmax();
     }
-
   }
-      
+
+  //Reweight for new photonID fake rate                                                                            
+  TH2F* photonIDfake_reweightmap = 0;
+  float Ptmax_fake_reweightmap = 0;
+  if(opts.OptExist("Input.photonIDfake_reweightfile"))
+  {
+    string photonIDfake_reweight_filename = opts.GetOpt<string> ("Input.photonIDfake_reweightfile");
+    TFile *photonIDfake_reweight_file = new TFile(photonIDfake_reweight_filename.c_str());
+    cout<<"loading photonIDfake reweight map from file "<<photonIDfake_reweight_filename<<endl;
+    photonIDfake_reweightmap = (TH2F*) photonIDfake_reweight_file->Get("frate_PhotonIsoSF");
+    if(!photonIDfake_reweightmap)
+    {
+      cout<<"[ERROR]: photonIDfake reweight map not found"<<endl;
+      return -1;
+    }
+    else
+    {
+      photonIDfake_reweightmap->SetDirectory(0);
+      photonIDfake_reweight_file->Close();
+      Ptmax_fake_reweightmap = photonIDfake_reweightmap->GetXaxis()->GetXmax();
+    }
+  }
+
+  //Reweight for new btag efficiencies                                                                            
+  TH2F* btaglooseeff_reweightmap = 0;
+  TH2F* btagmediumeff_reweightmap = 0;
+  TH2F* btagtighteff_reweightmap = 0;
+  TH2F* btagloosefake_reweightmap = 0;
+  TH2F* btagmediumfake_reweightmap = 0;
+  TH2F* btagtightfake_reweightmap = 0;
+  if(opts.OptExist("Input.btag_reweightfile"))
+  {
+    string btag_reweight_filename = opts.GetOpt<string> ("Input.btag_reweightfile");
+    TFile *btag_reweight_file = new TFile(btag_reweight_filename.c_str());
+    cout<<"loading btag reweight map from file "<<btag_reweight_filename<<endl;
+    btaglooseeff_reweightmap = (TH2F*) btag_reweight_file->Get("eff_BTagSFLoose");
+    btagmediumeff_reweightmap = (TH2F*) btag_reweight_file->Get("eff_BTagSFMedium");
+    btagtighteff_reweightmap = (TH2F*) btag_reweight_file->Get("eff_BTagSFTight");
+    btagloosefake_reweightmap = (TH2F*) btag_reweight_file->Get("frate_BTagSFLoose");
+    btagmediumfake_reweightmap = (TH2F*) btag_reweight_file->Get("frate_BTagSFMedium");
+    btagtightfake_reweightmap = (TH2F*) btag_reweight_file->Get("frate_BTagSFTight");
+    if(!btaglooseeff_reweightmap   || 
+       !btagmediumeff_reweightmap  || 
+       !btagtighteff_reweightmap   || 
+       !btagloosefake_reweightmap  || 
+       !btagmediumfake_reweightmap || 
+       !btagtightfake_reweightmap    )
+    {
+      cout<<"[ERROR]: some btag efficiency or fake rate reweight map not found"<<endl;
+      return -1;
+    }
+    else
+    {
+      btaglooseeff_reweightmap->SetDirectory(0);
+      btagmediumeff_reweightmap->SetDirectory(0);  
+      btagtighteff_reweightmap->SetDirectory(0);   
+      btagloosefake_reweightmap->SetDirectory(0);  
+      btagmediumfake_reweightmap->SetDirectory(0); 
+      btagtightfake_reweightmap->SetDirectory(0);    
+      btag_reweight_file->Close();
+    }
+  }
+    
   
   //------------------
   // define histograms
@@ -268,6 +358,9 @@ int main(int argc, char* argv[])
   int Nev_lowMx_HPC=0;
   int Nev_all_lowMx=0;
   int Nev_all_highMx=0;
+
+  int Nbadph=0;
+  int Nfakeph=0;
   
   int Nev_preselected=0;
   int Nev_phselection=0;
@@ -285,7 +378,10 @@ int main(int argc, char* argv[])
   int Nev_bquarkpromptprompt=0;
   int Nev_bquarkpromptfake=0;
   int Nev_bquarkfakefake=0;
-  
+
+  int Nev_withbquarkHdaugh=0;
+  int bquarkmatch=0;
+
   int nEntries = tree->GetEntries();
   std::cout << "Total entries = " << nEntries << std::endl;
   for(int i=0; i<nEntries; i++)
@@ -294,11 +390,14 @@ int main(int argc, char* argv[])
     if( i%1000==0 ) std::cout << "Processing entry "<< i << "\r" << std::flush;
 
     float CrossSection = default_CrossSection;
+    float weightMC = 1./NEventsMC;
+
     if(treeVars.N_SelectedPh<2) continue;
     
     ++Nev_preselected;
     //find higgs daugher gen-photons and flag their .isHdaug
-    // if( ! FindGenPh_Hdaug(treeVars) ) continue;
+    if(do_klambda_reweight)    
+      if( ! FindGenPh_Hdaug(treeVars) ) continue;
     
     
     //find lead & sublead reco photons    
@@ -317,22 +416,62 @@ int main(int argc, char* argv[])
     
     //Cuts on photons
     if(!DiPhotonSelection(pho_lead,pho_sublead)) continue;
-    
-    ++Nev_phselection;
-    
-    if(Nph_veto>=0)
+
+    //Reweight gen-matched photons for MTD efficiency and reweight NOT-gen-matched photons for MTD fake-rate                                      
+    int Nph_gen_match=0;
+    TLorentzVector gen_pho_match;
+
+    //cout<<"LEAD PHOTON\n\tPt="<< pho_lead.Pt()<<"\tEta="<< pho_lead.Eta();
+    if (PhoGenericGenMatch(pho_lead,treeVars,gen_pho_match,0.1)) 
     {
-      //cout<<"veto loop"<<endl;
-      TLorentzVector gen_pho_match;
-      int Nph_gen_match=0;
-      if (PhoGenericGenMatch(pho_lead,treeVars,gen_pho_match,0.1)) Nph_gen_match++;
-      if(Nph_gen_match>Nph_veto) continue;
-      if (PhoGenericGenMatch(pho_sublead,treeVars,gen_pho_match,0.1)) Nph_gen_match++;
-      if(Nph_gen_match>Nph_veto) continue;
-      //cout<<"passed veto loop"<<endl;
+      Nph_gen_match++;
+      //cout<<"\tphoton GEN-MATCH "<<endl;
+      //cout<<"\teta"<<pho_lead.Eta()-gen_pho_match.Eta()<<"\tphi"<<pho_lead.Phi()-gen_pho_match.Phi()<<"\tPt"<<pho_lead.Pt()-gen_pho_match.Pt()<<endl;
+      if(photonIDeff_reweightmap)
+      {
+	float pho_pt = std::min((float)pho_lead.Pt(),Ptmax_eff_reweightmap-1);
+	weightMC *= photonIDeff_reweightmap->GetBinContent( photonIDeff_reweightmap->FindBin(pho_pt,fabs(pho_lead.Eta())));
+	//cout<<"\tSF="<<photonIDeff_reweightmap->GetBinContent( photonIDeff_reweightmap->FindBin(pho_pt,fabs(pho_lead.Eta())))<<endl;
+      }
     }
-    
-    
+    else
+    {
+      //cout<<"\tNOT photon GEN-MATCH"<<endl;
+      if(photonIDfake_reweightmap)
+      {
+	float pho_pt = std::min((float)pho_lead.Pt(),Ptmax_fake_reweightmap-1);
+	weightMC *= photonIDfake_reweightmap->GetBinContent( photonIDfake_reweightmap->FindBin(pho_pt,fabs(pho_lead.Eta())));
+	//cout<<"\tSF="<<photonIDfake_reweightmap->GetBinContent( photonIDfake_reweightmap->FindBin(pho_pt,fabs(pho_lead.Eta())))<<endl;
+      }
+    }
+
+    //cout<<"SUBLEAD PHOTON\n\tPt="<< pho_sublead.Pt()<<"\tEta="<< pho_sublead.Eta();
+    if (PhoGenericGenMatch(pho_sublead,treeVars,gen_pho_match,0.1)) 
+    {
+      Nph_gen_match++;
+      //cout<<"\tphoton GEN-MATCH "<<endl;
+      //cout<<"\teta"<<pho_sublead.Eta()-gen_pho_match.Eta()<<"\tphi"<<pho_sublead.Phi()-gen_pho_match.Phi()<<"\tPt"<<pho_sublead.Pt()-gen_pho_match.Pt()<<endl;
+      if(photonIDeff_reweightmap)
+      {
+	float pho_pt = std::min((float)pho_sublead.Pt(),Ptmax_eff_reweightmap-1);
+	weightMC *= photonIDeff_reweightmap->GetBinContent( photonIDeff_reweightmap->FindBin(pho_pt,fabs(pho_sublead.Eta())));
+        //cout<<"\tSF="<<photonIDeff_reweightmap->GetBinContent( photonIDeff_reweightmap->FindBin(pho_pt,fabs(pho_sublead.Eta())))<<endl;
+      }
+    }
+    else
+    {
+      //cout<<"\tNOT photon GEN-MATCH"<<endl;
+      if(photonIDfake_reweightmap)
+      {
+	float pho_pt = std::min((float)pho_sublead.Pt(),Ptmax_fake_reweightmap-1);
+	weightMC *= photonIDfake_reweightmap->GetBinContent( photonIDfake_reweightmap->FindBin(pho_pt,fabs(pho_sublead.Eta())));
+        //cout<<"\tSF="<<photonIDfake_reweightmap->GetBinContent( photonIDfake_reweightmap->FindBin(pho_pt,fabs(pho_sublead.Eta())))<<endl;
+      }
+    }
+
+
+    if(Nph_veto>=0 && Nph_gen_match>Nph_veto) continue;
+
     //Clean jet collection (to do? maybe required for bkg study...)
     //Tag good jets with a bool, requirements are:
     // 1. Not matching with any reco photon or any reco electron
@@ -358,6 +497,8 @@ int main(int argc, char* argv[])
     {
       if(treeVars.Jet_pt[i]<25) continue;
       if(fabs(treeVars.Jet_eta[i])>2.4) continue;
+      //if(treeVars.Jet_pt[i]<20) continue;
+      //if(fabs(treeVars.Jet_eta[i])>3) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_lead.Eta(),pho_lead.Phi()) < 0.4 ) continue;
       if( DeltaR(treeVars.Jet_eta[i],treeVars.Jet_phi[i],pho_sublead.Eta(),pho_sublead.Phi()) < 0.4 ) continue;
       
@@ -415,7 +556,22 @@ int main(int argc, char* argv[])
     
     ++Nev_jetselection;
     
-    
+    //reweight for MTD btag efficiencies
+    outtreeVars.dibjet_leadPt = bjet_lead.Pt();
+    outtreeVars.dibjet_leadEta = bjet_lead.Eta();
+    outtreeVars.dibjet_leadmvav2 = outtreeVars.jet_mvav2[bjet_lead_i];
+    outtreeVars.dibjet_leadbtaglevel = outtreeVars.dibjet_leadmvav2;
+    outtreeVars.dibjet_leadgenflav = outtreeVars.jet_hadflav[bjet_lead_i];
+    outtreeVars.dibjet_subleadPt = bjet_sublead.Pt();
+    outtreeVars.dibjet_subleadEta = bjet_sublead.Eta();
+    outtreeVars.dibjet_subleadmvav2 = outtreeVars.jet_mvav2[bjet_sublead_i];
+    outtreeVars.dibjet_subleadbtaglevel = outtreeVars.dibjet_subleadmvav2;
+    outtreeVars.dibjet_subleadgenflav = outtreeVars.jet_hadflav[bjet_sublead_i];
+
+    btagReweight(outtreeVars,weightMC,
+		 btaglooseeff_reweightmap, btagmediumeff_reweightmap, btagtighteff_reweightmap,
+		 btagloosefake_reweightmap,btagmediumfake_reweightmap,btagtightfake_reweightmap);
+
     // count leptons
     outtreeVars.nEle = 0;
     outtreeVars.nMu  = 0;
@@ -446,14 +602,17 @@ int main(int argc, char* argv[])
       outtreeVars.nLep += 1;
     }
 
-
     //find mHH gen and costhetaHH* gen for klambda scan
-    if(klambda!=1)
+    if(do_klambda_reweight)
     {
       if(!FindHHGen(treeVars,outtreeVars))
 	cout<<"[WARNING]:gen Higgs not found"<<endl;
-      //cout<<"reweight("<<outtreeVars.mHH_gen<<","<<outtreeVars.costhetaHH_gen<<"="<<reweightmap->GetBinContent( reweightmap->FindBin(outtreeVars.mHH_gen,outtreeVars.costhetaHH_gen) )<<endl;
-      CrossSection *= reweightmap->GetBinContent( reweightmap->FindBin(outtreeVars.mHH_gen,outtreeVars.costhetaHH_gen) );      
+      //cout<<"reweight("<<outtreeVars.mHH_gen<<","<<outtreeVars.costhetaHH_gen<<")="<<HHrew->get_weight(klambda, outtreeVars.mHH_gen, outtreeVars.costhetaHH_gen)<<endl;
+      //cout<<"weightSUM="<< weight_sum<<endl;
+      //cout<<"BSM/SM XS = "<<BSM_CrossSection<<endl;
+      CrossSection *= HHrew->get_weight(klambda, outtreeVars.mHH_gen, outtreeVars.costhetaHH_gen) / (weight_sum/nEntries) * BSM_CrossSection;
+      //cout<<"CrossSection="<<CrossSection<<endl;
+      //cout<<"--------------"<<endl;
     }
 
     //Find dR_min between selected gamma and jets
@@ -485,6 +644,8 @@ int main(int argc, char* argv[])
     
     
     //Fill outtree and histos
+    //cout<<"SF_tot="<<weightMC*NEventsMC<<endl;
+    //getchar();
     outtreeVars.evWeight = CrossSection*weightMC;
     outtreeVars.cross_sec = CrossSection;
     outtreeVars.event = treeVars.event;
@@ -515,18 +676,12 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_sumpt = (dibjet).Pt();
     outtreeVars.dibjet_deltaeta = DeltaEta( bjet_lead.Eta() , bjet_sublead.Eta() );
     outtreeVars.dibjet_deltaphi = DeltaPhi( bjet_lead.Phi() , bjet_sublead.Phi() );
-    outtreeVars.dibjet_leadPt = bjet_lead.Pt();
-    outtreeVars.dibjet_leadEta = bjet_lead.Eta();
     outtreeVars.dibjet_leadPhi = bjet_lead.Phi();
     outtreeVars.dibjet_leadptoM = bjet_lead.Pt() / (dibjet).M();
     outtreeVars.dibjet_leadEnergy = bjet_lead.E();
     outtreeVars.dibjet_leadbtagloose = outtreeVars.jet_BTagLoose[bjet_lead_i];
     outtreeVars.dibjet_leadbtagmedium = outtreeVars.jet_BTagMedium[bjet_lead_i];
     outtreeVars.dibjet_leadbtagtight = outtreeVars.jet_BTagTight[bjet_lead_i];
-    outtreeVars.dibjet_leadmvav2 = outtreeVars.jet_mvav2[bjet_lead_i];
-    outtreeVars.dibjet_leadbtaglevel = outtreeVars.dibjet_leadmvav2;
-
-    outtreeVars.dibjet_leadgenflav = outtreeVars.jet_hadflav[bjet_lead_i];
 
     outtreeVars.dibjet_subleadPt = bjet_sublead.Pt();
     outtreeVars.dibjet_subleadEta = bjet_sublead.Eta();
@@ -536,10 +691,11 @@ int main(int argc, char* argv[])
     outtreeVars.dibjet_subleadbtagloose = outtreeVars.jet_BTagLoose[bjet_sublead_i];
     outtreeVars.dibjet_subleadbtagmedium = outtreeVars.jet_BTagMedium[bjet_sublead_i];
     outtreeVars.dibjet_subleadbtagtight = outtreeVars.jet_BTagTight[bjet_sublead_i];
-    outtreeVars.dibjet_subleadmvav2 = outtreeVars.jet_mvav2[bjet_sublead_i];
-    outtreeVars.dibjet_subleadbtaglevel = outtreeVars.dibjet_subleadmvav2;
 
-    outtreeVars.dibjet_subleadgenflav = outtreeVars.jet_hadflav[bjet_sublead_i];
+    outtreeVars.diHiggs_Eta      = diHiggs.Eta();  
+    outtreeVars.diHiggs_Pt       = diHiggs.Pt();
+    outtreeVars.diHiggs_Energy   = diHiggs.Energy();
+    outtreeVars.diHiggs_Rapidity = diHiggs.Rapidity();
 
     outtreeVars.mtot = diHiggs.M() - outtreeVars.mjj - outtreeVars.mgg + 250.;
     outtreeVars.DRmin_pho_bjet = DeltaRmin_bjet_pho; 
@@ -595,6 +751,45 @@ int main(int argc, char* argv[])
     h["costhetastar_bb"] -> Fill(outtreeVars.costheta_bb); 
     h["MET"] -> Fill(outtreeVars.MetPt); 
     h["MET_phi"] -> Fill(outtreeVars.MetPhi); 
+
+    /*
+    /////////////////////////////////////////////////////////////////////////
+    //temporary for bjet selection efficiency
+    if( ! Findbquark_Hdaug(treeVars) ) continue;
+    Nev_withbquarkHdaugh++;
+    //store b-quarks higgs daugher
+    vector<TLorentzVector> bquark_gen;
+    for(int i=0;i<treeVars.N_GenPart;i++)
+      if(treeVars.GenPart_isHdaug[i]==true && fabs(treeVars.GenPart_pid[i])==5)
+      {
+	float gen_E=sqrt(treeVars.GenPart_pt[i]*treeVars.GenPart_pt[i] + treeVars.GenPart_pz[i]*treeVars.GenPart_pz[i]+125.*125);    
+	TLorentzVector bquark_gen_aux;
+	bquark_gen_aux.SetPtEtaPhiE(treeVars.GenPart_pt[i],treeVars.GenPart_eta[i],treeVars.GenPart_phi[i],gen_E);
+	bquark_gen.push_back(bquark_gen_aux);
+      }
+    outtreeVars.bquark_eta1=bquark_gen.at(0).Eta();
+    outtreeVars.bquark_phi1=bquark_gen.at(0).Phi();
+    outtreeVars.bquark_E1=bquark_gen.at(0).E();
+    outtreeVars.bquark_pt1=bquark_gen.at(0).Pt();
+    outtreeVars.bquark_eta2=bquark_gen.at(1).Eta();
+    outtreeVars.bquark_phi2=bquark_gen.at(1).Phi();
+    outtreeVars.bquark_E2=bquark_gen.at(1).E();
+    outtreeVars.bquark_pt2=bquark_gen.at(1).Pt();
+
+    //try to match b quarks with the selected recojets
+    if( DeltaR( bquark_gen.at(0).Eta() , bquark_gen.at(0).Phi() , bjet_lead.Eta()    , bjet_lead.Phi()    ) < 0.4 && 
+	DeltaR( bquark_gen.at(1).Eta() , bquark_gen.at(1).Phi() , bjet_sublead.Eta() , bjet_sublead.Phi() ) < 0.4 )
+      bquarkmatch++;
+    else
+      if( DeltaR( bquark_gen.at(1).Eta() , bquark_gen.at(1).Phi() , bjet_lead.Eta()    , bjet_lead.Phi()    ) < 0.4 && 
+	  DeltaR( bquark_gen.at(0).Eta() , bquark_gen.at(0).Phi() , bjet_sublead.Eta() , bjet_sublead.Phi() ) < 0.4 )
+	bquarkmatch++;
+    /////////////////////////////////////////////////////////////////////////
+    */
+
+    
+    
+
     
     //JCR(jet control region): less than one jet with medium b-tag  
     //MPC: exactly one jet with medium b-tag
@@ -618,6 +813,17 @@ int main(int argc, char* argv[])
       outtreeVars.cut_based_ct = -1;
     }
     
+    /////////////////////////////////////////////////////////////////////////
+    //temporary for fake photons study
+    if(outtreeVars.cut_based_ct>=0)
+      if(!PhoGenMatch(pho_lead , pho_sublead , treeVars , outtreeVars, 0.07) )
+      {
+	Nbadph++;
+	TLorentzVector aux;
+	if(RecoJetGenericMatch (pho_lead , treeVars , aux, 0.07) || RecoJetGenericMatch (pho_sublead , treeVars , aux, 0.07) )
+	  Nfakeph++;
+      }
+    /////////////////////////////////////////////////////////////////////////
     
     //fill low mass and high mass categories
     if(outtreeVars.mtot<=350)
@@ -630,7 +836,6 @@ int main(int argc, char* argv[])
     }
     else
     {
-
       ++Nev_all_highMx;
       if(outtreeVars.cut_based_ct == -1) ++Nev_highMx_JCR;
       if(outtreeVars.cut_based_ct ==  0)
@@ -663,6 +868,9 @@ int main(int argc, char* argv[])
 
   std::cout << std::endl;
 
+  cout<<"Nbadph="<<Nbadph<<endl;
+  cout<<"Nfakeph="<<Nfakeph<<endl;
+  cout<<"Njetgoodmatched/Nev="<<bquarkmatch<<"/"<<Nev_withbquarkHdaugh<<"="<<1.*bquarkmatch/Nev_withbquarkHdaugh<<endl;
   cout<<"\n-----------------------------------------------------------------"<<endl;
   cout<<"-----------------------------------------------------------------"<<endl;
   cout<<"MC events = "<<NEventsMC<<endl;
@@ -700,7 +908,7 @@ int main(int argc, char* argv[])
   cout<<"N_preselected * XS /N_MC = "<< Nev_preselected*default_CrossSection/NEventsMC <<" fb"<<endl; 
   cout<<"-----------------------------------------------------------------"<<endl;
   cout<<"-----------------------------------------------------------------\n"<<endl;
-
+  cout<<"WANRNING!!!: remember to re-adjust the photon pt and jet pt,eta selection!!!!"<<endl;
   outTree_all_lowMx -> AutoSave();
   outTree_all_highMx -> AutoSave();
   outFile -> Close();

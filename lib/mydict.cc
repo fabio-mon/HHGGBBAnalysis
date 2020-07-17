@@ -42,6 +42,7 @@ namespace std {} using namespace std;
 #include "./interface/CMS_lumi.h"
 #include "./interface/SetTDRStyle.h"
 #include "./interface/Plotter.h"
+#include "./interface/HH_reweight_components.h"
 #include "./interface/ParticleNames.h"
 #include "./interface/TreeUtils.h"
 
@@ -433,6 +434,7 @@ namespace {
 "./interface/CMS_lumi.h",
 "./interface/SetTDRStyle.h",
 "./interface/Plotter.h",
+"./interface/HH_reweight_components.h",
 "./interface/ParticleNames.h",
 "./interface/TreeUtils.h",
 0
@@ -466,6 +468,7 @@ namespace std{template <typename _Tp> class __attribute__((annotate("$clingAutol
 #include "./interface/CMS_lumi.h"
 #include "./interface/SetTDRStyle.h"
 #include "./interface/Plotter.h"
+#include "./interface/HH_reweight_components.h"
 #include "./interface/ParticleNames.h"
 #include "./interface/TreeUtils.h"
 
