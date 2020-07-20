@@ -7,8 +7,8 @@ cd $WORKDIR
 source scripts/original_setup.sh
 
 #labels=("gg" "HHggbb" "ggH" "qqH" "VH" "ttH" "bbH" "ttgg" "ttghad" "ttgsemilepfromt" "ttgsemilepfromtbar" "ttglep" "tt" "qcd" "qcd30-40")
-#labels=("gjet" "gg" "HHggbb" "ggH" "qqH" "VH" "ttH" "bbH" "ttgg" "ttghad" "ttgsemilepfromt" "ttgsemilepfromtbar" "ttglep" "tt" "qcd" "qcd30-40")
-labels=("ttglep" "tt" "qcd" "qcd30-40")
+labels=("gjet" "gg" "HHggbb" "ggH" "qqH" "VH" "ttH" "bbH" "ttgg" "ttghad" "ttgsemilepfromt" "ttgsemilepfromtbar" "ttglep" "tt" "qcd" "qcd30-40")
+#labels=("ttglep" "tt" "qcd" "qcd30-40")
 
 for var in "${labels[@]}"
 do
